@@ -1409,7 +1409,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #e96bde;
+  background: #3c63ff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2734,20 +2734,5 @@ header.header {
   }
   .sidebar-active .footer-fixed {
     left: 320px;
-  }
-}
-@media screen and (max-width: 767px) {
-  .post-block {
-    margin: 0 0.5rem !important;
-  }
-  .post-body {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-  pre,
-  code {
-    white-space: pre;
-    overflow-wrap: break-word;
-    overflow-x: auto;
   }
 }
