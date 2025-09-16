@@ -28,7 +28,7 @@
 <meta property="og:description" content="pro考试也会考系统设计类题，且考频也相当高。这类题不考难算法，而是考察把“业务规则”映射为可维护的数据结构组合，并用不变量保证正确性与效率。总结一下，会发现它们的内核都是相似的。  基础原语在本节中，我们将拆解一些在系统设计类算法问题中反复出现的基本技巧。每一种原语都针对特定需求，例如对数据进行分组、在更新过程中保持有序、有效地处理全局调整、模拟时间推进，或者对动态集合执行查询。掌握这些构建块">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-09-15T13:54:14.000Z">
-<meta property="article:modified_time" content="2025-09-15T17:05:30.258Z">
+<meta property="article:modified_time" content="2025-09-16T12:33:46.784Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="数据结构">
 <meta name="twitter:card" content="summary">
@@ -327,7 +327,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2025-09-16 01:05:30" itemprop="dateModified" datetime="2025-09-16T01:05:30+08:00">2025-09-16</time>
+      <time title="Modified: 2025-09-16 20:33:46" itemprop="dateModified" datetime="2025-09-16T20:33:46+08:00">2025-09-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -907,7 +907,7 @@ mjx-container[display="true"] + br {
 </ul>
 <p><strong>常见陷阱</strong>：  </p>
 <ul>
-<li>常见错误之一是未在查询或新车辆进入时，处理所有应当被拖走的车辆。如果不先清理过期车辆，就可能导致将车分配到一个实际上早已腾出的车位。<strong>因此必须在分配或查询前调用过期处理逻辑</strong>。  </li>
+<li>常见错误之一是未在查询或新车辆进入时，处理所有应当被拖走的车辆。如果不先清理过期车辆，就可能导致无法将车分配到一个实际上早已腾出的车位。<strong>因此必须在分配或查询前调用过期处理逻辑</strong>。  </li>
 <li>另一个陷阱是区域选择的顺序错误（未正确处理并列情况）。如果使用集合存储区域 <code>(freeCount, zoneName)</code>，在车位数发生变化时必须小心：需要先移除旧值再插入新值。  </li>
 <li>编码时，若忘记在车辆离开时将车位从该区域的 <code>set</code> 中移除，或者未在拖车后清理活跃记录，可能会导致“重复占位”或把已占用的车位再次分配。  </li>
 <li>对于车牌后缀搜索，若扫描所有车辆效率太低，必须采用“后缀桶”或维护基于车牌子串的索引。</li>
@@ -919,8 +919,8 @@ mjx-container[display="true"] + br {
 <p>在决定新用户应进入哪台服务器时，需要一个<strong>优先队列结构</strong>（最小堆或平衡树），按队列长度进行排序。当有用户离开或登录时，相应服务器的队列长度会减少，此时要更新该结构。</p>
 <p><strong>使用的模式</strong>：</p>
 <ul>
-<li><strong>桶套桶结构（bucket of buckets）</strong>：每台服务器对应一个桶（即队列），新用户进入队列长度最小的桶。  </li>
-<li><strong>排名查询（rank queries）</strong>：通过 BIT 计算删除后的等待号。  </li>
+<li><strong>桶套桶结构</strong>：每台服务器对应一个桶（即队列），新用户进入队列长度最小的桶。  </li>
+<li><strong>排名查询</strong>：通过 BIT 计算删除后的等待号。  </li>
 <li><strong>链表结构</strong>：用于在服务器宕机时快速整体移动队列。由于双向链表可以在 O(1) 时间内拼接子链表，若掌握首尾指针就能轻松完成重排。在 oj 解法中，通常做法是将宕机服务器的队列从全局链表中删除，再整体插入到全局队列的尾部。</li>
 </ul>
 <p>这种结构的组合确保了每种操作的效率。</p>
@@ -969,13 +969,13 @@ mjx-container[display="true"] + br {
 <li><strong>单调时间事件</strong>：检查操作按时间顺序进行，逐步清理到当前时间点之前的过期车辆。</li>
 </ul>
 <p><strong>常见陷阱</strong>：  </p>
-<ol>
-<li><strong>促销更新 O(n)</strong>：错误做法是遇到促销就更新所有车辆过期时间，导致事件复杂度 O(n)，在大规模场景下会超时。偏移量法能把这步降为 O(1)。  </li>
-<li><strong>车辆提前离开未清理</strong>：如果车辆离场却仍留在过期堆里，可能在检查时被误拖。需要惰性删除或指针显式移除。  </li>
-<li><strong>超期时间计算</strong>：要注意偏移量的影响。正确做法是用 <code>(当前时间 - 实际到期时间)</code> 计算超期，且确保统一标准。  </li>
-<li><strong>边界条件</strong>：若当前时间正好等于到期时间，是否算过期需严格按题意处理。通常约定 <code>now &gt;= expiry</code> 判定为过期。  </li>
+<ul>
+<li><strong>促销更新 O(n)</strong>：错误做法是遇到促销就更新所有车辆过期时间，导致事件复杂度 O(n)，在大规模场景下会超时。偏移量法能把这步降为 O(1)。</li>
+<li><strong>车辆提前离开未清理</strong>：如果车辆离场却仍留在过期堆里，可能在检查时被误拖。需要惰性删除或指针显式移除。</li>
+<li><strong>超期时间计算</strong>：要注意偏移量的影响。正确做法是用 <code>(当前时间 - 实际到期时间)</code> 计算超期，且确保统一标准。</li>
+<li><strong>边界条件</strong>：若当前时间正好等于到期时间，是否算过期需严格按题意处理。通常约定 <code>now &gt;= expiry</code> 判定为过期。</li>
 <li><strong>容量释放</strong>：车辆离开或被拖走时必须释放车位，否则会导致系统错误地拒绝新车入场。</li>
-</ol>
+</ul>
 <p><strong>替代方案</strong>：<br>有人可能考虑使用一个全局结构统一管理所有公司的到期时间。但由于检查是分公司进行的，这会使问题更复杂：促销只作用于某一家公司，导致全局排序难以统一更新。因此更好的做法是：<strong>每家公司独立维护一个堆和偏移量</strong>，这样既简化逻辑，又能保持操作高效。若强行用全局排序结构，促销就会变成非均匀偏移，操作难度和复杂度都大大增加。</p>
 <h3 id="在线商店目录（类别-厂商索引-折扣-Top-K）"><a href="#在线商店目录（类别-厂商索引-折扣-Top-K）" class="headerlink" title="在线商店目录（类别-厂商索引 + 折扣 + Top-K）"></a>在线商店目录（类别-厂商索引 + 折扣 + Top-K）</h3><p><strong>问题场景</strong>：一家线上商店的商品由类别（category）和生产厂商（company）共同标识。系统需要支持以下操作：  </p>
 <ul>
@@ -999,12 +999,12 @@ mjx-container[display="true"] + br {
 <li><strong>惰性删除</strong>：折扣可能使部分价格降至 0 或以下，此时在折扣操作过程中不断弹出桶中这些商品，将其移除。</li>
 </ul>
 <p><strong>常见陷阱</strong>：  </p>
-<ol>
-<li><strong>没有使用惰性偏移</strong>：如果每次打折都要移除并重新插入所有商品，复杂度为 O(n)，在 1 万商品、1 万次打折的极端情况中将达到 1 亿级操作，性能不可接受。  </li>
-<li><strong>打折后未及时清理无效商品</strong>：折扣可能导致商品价格 ≤ 0，若不删除，会残留“幽灵商品”，在查询时错误地显示为最便宜项。正确做法是在折扣时不断检查桶中最小值，若实际价格 ≤ 0 就弹出。  </li>
-<li><strong>集合比较器设计不当</strong>：如果用价格和 ID 作为比较条件，删除时必须确保同步更新。常见做法是仅按价格存储，或存储指向包含 ID 和基础价格的结构体，再以 ID 作为平局项来保证唯一性。  </li>
+<ul>
+<li><strong>没有使用惰性偏移</strong>：如果每次打折都要移除并重新插入所有商品，复杂度为 O(n)，在 1 万商品、1 万次打折的极端情况中将达到 1 亿级操作，性能不可接受。</li>
+<li><strong>打折后未及时清理无效商品</strong>：折扣可能导致商品价格 ≤ 0，若不删除，会残留“幽灵商品”，在查询时错误地显示为最便宜项。正确做法是在折扣时不断检查桶中最小值，若实际价格 ≤ 0 就弹出。</li>
+<li><strong>集合比较器设计不当</strong>：如果用价格和 ID 作为比较条件，删除时必须确保同步更新。常见做法是存储指向包含 ID 和基础价格的结构体，再以 ID 作为平局项来保证唯一性。</li>
 <li><strong>错误的全局合并策略</strong>：有些实现会将所有桶的商品合并后再求最小值，这是不必要的；也有尝试维护一个全局有序集合，但全局折扣更新会触及成千上万条数据，若无惰性机制效率极差。正确做法是保持分桶结构，并结合惰性 offset。</li>
-</ol>
+</ul>
 <p><strong>总结</strong>：通过 <strong>分桶结构 + 惰性偏移 + 局部合并</strong>，能够在支持动态添加、删除、打折的同时，高效回答“最便宜 Top-5 商品”的查询，避免了全局复杂更新或冗余合并带来的性能问题。</p>
 <h3 id="文件分发网络（树路径-并行下载）"><a href="#文件分发网络（树路径-并行下载）" class="headerlink" title="文件分发网络（树路径 + 并行下载）"></a>文件分发网络（树路径 + 并行下载）</h3><p><strong>问题描述</strong>：我们有 N 台计算机，它们通过一棵树形网络连接（共 N-1 条链路），链路权值较小。部分计算机拥有某个文件，另一台计算机希望下载该文件，并且可以从多个源计算机并行下载，但仅限于总路径长度 ≤ 5 的情况。我们还可以移除链路（这会切断部分路径），因此在链路被移除后，下载任务可能需要重新计算可用的路径数量。系统需要支持启动下载、跟踪下载进度，以及处理链路移除等事件。查询可能包括：在某一时刻文件已下载了多少，或某台计算机是否已经完成下载。</p>
 <p><strong>关键结构</strong>：核心查询是统计目标计算机在半径 5 以内的源计算机数量。实现方法是从目标点执行一次限定范围的 BFS（或 DFS，因半径较小），在下载开始或网络变化时进行。BFS 遍历在距离 &gt; 5 时终止，大幅限制了计算范围。随后统计找到的源节点数量（或列出它们）。假设找到的源数量为 p，则下载速率为 <code>9 * p</code>。实际下载过程通过一个时间变量来模拟：对每个正在进行的下载，存储其当前进度和可用源数量。时间向前推进到下一个事件发生的时刻（如链路移除或文件完成）。链路移除属于计划事件；当链路被移除时，我们需重新计算相关下载任务的源数量（再次执行限定范围的 BFS）。为了确定下一个事件（完成或移除）发生的先后，可以使用按完成时间排序的优先队列来管理下载任务。</p>
@@ -1017,13 +1017,13 @@ mjx-container[display="true"] + br {
 </ul>
 <p><strong>常见陷阱</strong>：网络与时间结合的问题往往复杂。常见错误包括：  </p>
 <ul>
-<li>试图逐秒模拟下载过程 —— 在可能达到千万秒的情况下，这是不可行的。正确做法是事件驱动，跳跃到下一个事件点。  </li>
-<li>未能及时更新下载速率 —— 当链路移除切断部分源时，下载速率必须在该时间点立即下降。如果提前或延后更改速率，都会导致下载进度计算错误。  </li>
-<li>忽略并发管理 —— 如果题目允许同时存在多个下载任务，需要分别跟踪。很多题目中每个查询对应一次下载，可以简化为独立处理。  </li>
-<li>BFS 使用范围有限时是可行的。如果有人尝试用 Floyd-Warshall 之类的全局预处理，那在动态移除链路的约束下是完全不必要且低效的。  </li>
-<li>忘记在链路移除时正确处理<strong>部分进度</strong> —— 正确做法是先用旧速率推进到移除时刻，再调整速率。如果过早或过晚修改速率，会导致进度计算偏差。</li>
+<li><strong>试图逐秒模拟下载过程</strong>：在可能达到千万秒的情况下，这是不可行的。正确做法是事件驱动，跳跃到下一个事件点。  </li>
+<li><strong>未能及时更新下载速率</strong>：当链路移除切断部分源时，下载速率必须在该时间点立即下降。如果提前或延后更改速率，都会导致下载进度计算错误。  </li>
+<li><strong>忽略并发管理</strong>：如果题目允许同时存在多个下载任务，需要分别跟踪。很多题目中每个查询对应一次下载，可以简化为独立处理。  </li>
+<li><strong>算法选择错误</strong>：BFS 使用范围有限时是可行的。如果有人尝试用 Floyd-Warshall 之类的全局预处理，那在动态移除链路的约束下是完全不必要且低效的。  </li>
+<li><strong>忘记在链路移除时正确处理部分进度</strong>：正确做法是先用旧速率推进到移除时刻，再调整速率。如果过早或过晚修改速率，会导致进度计算偏差。</li>
 </ul>
-<p><strong>替代方法</strong>：若图不是树或半径不小，可能需要更复杂的路径算法或维护距离矩阵。但在这里，题目条件（树结构且半径 ≤ 5）明显指向简单的 BFS。作者还利用了链路权值较小（1..3）的特性，但即便权值在 1..100 之间，BFS 在深度 5 的情况下仍然可行。使用“epoch 标记”来处理链路移除是一种巧妙技巧：无需实际删除边，只需在遍历时跳过被标记的边。这比动态维护最短路径树要简洁得多。</p>
+<p><strong>替代方法</strong>：若图不是树或半径不小，可能需要更复杂的路径算法或维护距离矩阵。但在这里，题目条件（树结构且半径 ≤ 5）明显指向简单的 BFS。题解还利用了链路权值较小（1..3）的特性，但即便权值在 1..100 之间，BFS 在深度 5 的情况下仍然可行。使用“epoch 标记”来处理链路移除是一种巧妙技巧：无需实际删除边，只需在遍历时跳过被标记的边。这比动态维护最短路径树要简洁得多。</p>
 <h2 id="为什么、何时以及如何：选择与使用数据结构"><a href="#为什么、何时以及如何：选择与使用数据结构" class="headerlink" title="为什么、何时以及如何：选择与使用数据结构"></a>为什么、何时以及如何：选择与使用数据结构</h2><p>在这一部分以 <strong>问答形式</strong> 总结如何在系统设计类问题中选择合适的思路和数据结构：</p>
 <p><strong>Q:</strong> “查询或更新会一次性影响很多元素（例如‘所有属于类别 Y 的 X 都执行 Z’）——我需要逐个循环处理吗？”<br><strong>A:</strong> 不需要 —— 这正是 <strong>惰性统一更新</strong> 的场景。可以使用偏移量或全局计数器来在逻辑上应用更新效果，只有当个别元素真正被访问（例如变成极值或被查询时）才做具体调整。这样可以避免每次操作都 O(n) 的开销。只有当这种操作极少发生，或者 n 很小的时候，简单循环才可能勉强可行。</p>
 <p><strong>Q:</strong> “需要在动态更新下频繁取最小值或最大值 —— 我可以每次都排序吗？”<br><strong>A:</strong> 每次查询都排序（O(n log n)）在大量查询时太慢。应使用 <strong>堆</strong> 或 <strong>平衡二叉搜索树（如 C++ <code>std::set</code>）</strong> 来维护顺序。插入、删除操作是 O(log n)，查询极值只需 O(1)（堆顶或 set 的首尾迭代器）。只有当更新极其稀少或数据集极小，才考虑每次整体排序。</p>
@@ -1065,17 +1065,17 @@ mjx-container[display="true"] + br {
 
 <p>在这种方案下，每当我们更新某个元素的键值，就调用 <code>pushItem(id, newKey)</code>。旧的条目依然保留在优先队列中，但它的版本号已经落后于 <code>currentVer</code> 记录的最新版本。在调用 <code>topItem()</code> 时，算法会不断丢弃这些过期的条目，直到找到一个最新的条目。如果某个元素被“删除”，则可以将其 <code>currentVer[id]</code> 设置为一个特殊标记，并且不再插入新条目，这样它的旧条目最终都会被跳过，从而从有效集合中消失。</p>
 <p><strong>使用示例：</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">pushItem</span>(<span class="number">5</span>, <span class="number">100</span>);</span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">200</span>);</span><br><span class="line">Node n = <span class="built_in">topItem</span>(); <span class="comment">// should be id=3, key=200</span></span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">50</span>);    <span class="comment">// update id=3 to key=50</span></span><br><span class="line">n = <span class="built_in">topItem</span>();     <span class="comment">// re-evaluate top, should now be id=3 with key=50</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">pushItem</span>(<span class="number">5</span>, <span class="number">100</span>);</span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">200</span>);</span><br><span class="line">Node n = <span class="built_in">topItem</span>(); <span class="comment">// should be id=3, key=200</span></span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">150</span>);    <span class="comment">// update id=3 to key=150</span></span><br><span class="line">n = <span class="built_in">topItem</span>();     <span class="comment">// re-evaluate top, should now be id=3 with key=150</span></span><br></pre></td></tr></table></figure>
 
 <p>在该示例中：  </p>
 <ul>
 <li><code>pushItem(5, 100)</code> 插入元素 5，权值为 100。  </li>
 <li><code>pushItem(3, 200)</code> 插入元素 3，权值为 200。  </li>
 <li>调用 <code>topItem()</code> 时，返回的应是 <code>id=3, key=200</code>。  </li>
-<li>之后，执行 <code>pushItem(3, 50)</code> 将元素 3 更新为新权值 50。  </li>
-<li>再次调用 <code>topItem()</code>，返回的应是 <code>id=3, key=50</code>。</li>
+<li>之后，执行 <code>pushItem(3, 50)</code> 将元素 3 更新为新权值 150。  </li>
+<li>再次调用 <code>topItem()</code>，返回的应是 <code>id=3, key=150</code>。</li>
 </ul>
-<p>此时，旧的 <code>Node(3,200)</code> 依然存在于堆中，但因为版本号已过期，所以会被跳过，不再影响结果。</p>
+<p>旧的 <code>Node(3,200)</code> 在第二次 <code>topItem()</code> 调用时，因为版本号已过期会被弹出，不再影响结果。</p>
 <p>更一般化的扩展思路：  </p>
 <ul>
 <li><code>currentVer</code> 不一定是整数递增版本号，也可以是布尔类型的“是否有效”标记。  </li>
@@ -1157,7 +1157,7 @@ mjx-container[display="true"] + br {
 </li>
 <li><p><strong>比较器未提供严格弱序</strong>：<br>在比较器中忘记处理平局情况，会导致两个不同元素被认为等价。在 <code>set</code> 中，其中一个元素将无法插入（容器认为已存在），数据等于被丢弃。即便使用 <code>multiset</code> 或排序函数，如果比较器不具备传递性，也可能导致未定义行为（某些排序算法甚至会崩溃或陷入死循环）。<br><strong>要点</strong>：确保当 <code>comp(a,b) == false</code> 且 <code>comp(b,a) == false</code> 时，<code>a</code> 与 <code>b</code> 在逻辑上确实是相同的。</p>
 </li>
-<li><p><strong>没有及时推进时间或处理事件</strong>：<br>在模拟问题中，如果不清理过期条目或不按顺序处理事件，数据结构就会与实际情况脱节。<br>例如：忘记在分配新车位前移除已过期的车辆，会导致分配到本应更早空出来的车位；又或者没有在下载源丢失时更新速度，结果会高估进度。<br><strong>修复方法</strong>：在每次操作开始时（或在合适的时机），调用时间处理例程，确保状态始终一致。</p>
+<li><p><strong>没有及时推进时间或处理事件</strong>：<br>在模拟问题中，如果不清理过期条目或不按顺序处理事件，数据结构就会与实际情况脱节。<br>例如：忘记在分配新车位前移除已过期的车辆，会导致无法分配到本应空出来的车位；又或者没有在下载源丢失时更新速度，结果会高估进度。<br><strong>修复方法</strong>：在每次操作开始时（或在合适的时机），调用时间处理例程，确保状态始终一致。</p>
 </li>
 <li><p><strong>每次查询或更新都遍历大数据集</strong>：<br>常见的反模式是嵌套循环，其中某一维规模很大。<br>例如：每次新停车时都扫描所有 M 个车位。如果 M 很大（比如 10000），且操作 50000 次，那就是 5 亿次检查（几乎必然超时）。<br>应替换为对数级或常数级的数据结构查找（如用 <code>set</code> 维护空闲车位）。<br>另一个例子：查找某个饮品的订单时不应遍历所有订单，而是应为每种饮品维护一个队列。</p>
 </li>
