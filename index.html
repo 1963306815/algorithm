@@ -309,6 +309,20 @@
 <noscript>
   <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
 </noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.0/canvas-nest.umd.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 在 body 背后挂一个画布
+    new CanvasNest(document.body, {
+      color: '120,160,255', // 线颜色（RGB）
+      opacity: 1,         // 透明度 0~1
+      zIndex: -1,           // 置于背景
+      count: 150,             // 点数量
+      dist: 4000,   // 连线距离加大
+      radius: 120,  // 鼠标作用范围扩大
+    })
+  })
+</script>
 
 </body>
 </html>
