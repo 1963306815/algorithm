@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/algorithm/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/algorithm/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/algorithm/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/algorithm/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/algorithm/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"1963306815.github.io","root":"/algorithm/","images":"/algorithm/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/algorithm/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/algorithm/js/config.js" defer></script>
+
+    <meta name="description" content="候选生成：把“可能连边的一小撮元素”高效列出来。手段是分桶&#x2F;倒排&#x2F;签名&#x2F;树等。校验：对候选逐一做“真条件”判定（距离阈值&#x2F;重叠&#x2F;相似度≥K…）。合并：用并查集把通过校验的点对连起来，并维护分量聚合量&#x2F;稳定代表。小而准地产生候选，快而狠地校验，轻而灵地合并。  在oj中经常会遇到动态连通性问题：一系列元素随着操作逐渐连接成组，我们需要快速判断连通关系或统计连通分量的属性。并查集（Disjoint">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并查集的Candidate-Verify-Union范式：高效处理动态增量连通性">
+<meta property="og:url" content="https://1963306815.github.io/2025/09/21/%E5%B9%B6%E6%9F%A5%E9%9B%86%E7%9A%84Candidate-Verify-Union%E8%8C%83%E5%BC%8F%EF%BC%9A%E9%AB%98%E6%95%88%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E5%A2%9E%E9%87%8F%E8%BF%9E%E9%80%9A%E6%80%A7/index.html">
+<meta property="og:site_name" content="勿忘羊心">
+<meta property="og:description" content="候选生成：把“可能连边的一小撮元素”高效列出来。手段是分桶&#x2F;倒排&#x2F;签名&#x2F;树等。校验：对候选逐一做“真条件”判定（距离阈值&#x2F;重叠&#x2F;相似度≥K…）。合并：用并查集把通过校验的点对连起来，并维护分量聚合量&#x2F;稳定代表。小而准地产生候选，快而狠地校验，轻而灵地合并。  在oj中经常会遇到动态连通性问题：一系列元素随着操作逐渐连接成组，我们需要快速判断连通关系或统计连通分量的属性。并查集（Disjoint">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-20T16:20:01.000Z">
+<meta property="article:modified_time" content="2025-09-20T16:54:12.188Z">
+<meta property="article:author" content="Ziyoeng Zoeng">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://1963306815.github.io/2025/09/21/%E5%B9%B6%E6%9F%A5%E9%9B%86%E7%9A%84Candidate-Verify-Union%E8%8C%83%E5%BC%8F%EF%BC%9A%E9%AB%98%E6%95%88%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E5%A2%9E%E9%87%8F%E8%BF%9E%E9%80%9A%E6%80%A7/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://1963306815.github.io/2025/09/21/%E5%B9%B6%E6%9F%A5%E9%9B%86%E7%9A%84Candidate-Verify-Union%E8%8C%83%E5%BC%8F%EF%BC%9A%E9%AB%98%E6%95%88%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E5%A2%9E%E9%87%8F%E8%BF%9E%E9%80%9A%E6%80%A7/","path":"2025/09/21/并查集的Candidate-Verify-Union范式：高效处理动态增量连通性/","title":"并查集的Candidate-Verify-Union范式：高效处理动态增量连通性"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>并查集的Candidate-Verify-Union范式：高效处理动态增量连通性 | 勿忘羊心</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/algorithm/js/utils.js" defer></script><script src="/algorithm/js/motion.js" defer></script><script src="/algorithm/js/sidebar.js" defer></script><script src="/algorithm/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/algorithm/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/algorithm/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/algorithm/css/noscript.css">
+  </noscript>
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="stylesheet" href="/algorithm/css/prism-vs.css" type="text/css">
+<link rel="stylesheet" href="/algorithm/css/prism-line-numbers.css" type="text/css"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/algorithm/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">勿忘羊心</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/algorithm/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/algorithm/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E8%AF%86%E5%88%AB%E4%B8%8E%E5%86%B3%E7%AD%96%EF%BC%9A%E8%BF%99%E9%A2%98%E7%94%A8%E5%B9%B6%E6%9F%A5%E9%9B%86%E5%90%97%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">快速识别与决策：这题用并查集吗？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%86%B3%E7%AD%96%E6%A0%91"><span class="nav-number">1.1.</span> <span class="nav-text">快速决策树</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E6%9F%A5%E9%9B%86%E5%9F%BA%E7%A1%80%E5%9B%9E%E9%A1%BE"><span class="nav-number">2.</span> <span class="nav-text">并查集基础回顾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E5%B9%B6%E6%9F%A5%E9%9B%86%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">模板一：基础并查集代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E4%BA%8C%EF%BC%9A%E5%B8%A6%E8%81%9A%E5%90%88%E9%87%8F%E7%9A%84%E5%B9%B6%E6%9F%A5%E9%9B%86"><span class="nav-number">4.</span> <span class="nav-text">模板二：带聚合量的并查集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E4%B8%89%EF%BC%9A%E5%AE%9A%E5%88%B6%E7%A8%B3%E5%AE%9A%E4%BB%A3%E8%A1%A8%E7%9A%84%E5%B9%B6%E6%9F%A5%E9%9B%86"><span class="nav-number">5.</span> <span class="nav-text">模板三：定制稳定代表的并查集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E6%80%A7%E7%9A%84%E2%80%9C%E7%B4%A2%E5%BC%95%E4%B8%8E%E5%BB%BA%E8%BE%B9%E2%80%9D%E7%AD%96%E7%95%A5"><span class="nav-number">6.</span> <span class="nav-text">动态连通性的“索引与建边”策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E5%88%86%E6%A1%B6"><span class="nav-number">6.1.</span> <span class="nav-text">空间分桶</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2-%E7%89%B9%E5%BE%81%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><span class="nav-number">6.2.</span> <span class="nav-text">字符串&#x2F;特征哈希索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E4%B8%8E%E9%87%8D%E5%BB%BA%E7%AD%96%E7%95%A5"><span class="nav-number">6.3.</span> <span class="nav-text">滑动窗口与重建策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E5%88%86%E6%B2%BB"><span class="nav-number">6.4.</span> <span class="nav-text">事件分治</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E9%A2%98%E5%9E%8B%E5%89%96%E6%9E%90%E4%B8%8E%E5%85%B1%E6%80%A7"><span class="nav-number">7.</span> <span class="nav-text">典型题型剖析与共性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E8%BF%9E%E9%80%9A%EF%BC%9A%E6%9B%BC%E5%93%88%E9%A1%BF%E8%B7%9D%E7%A6%BB%E9%98%88%E5%80%BC%E8%81%9A%E7%B1%BB"><span class="nav-number">7.1.</span> <span class="nav-text">几何连通：曼哈顿距离阈值聚类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E8%BF%9E%E9%80%9A%EF%BC%9A%E7%9F%A9%E5%BD%A2-%E7%BA%BF%E6%AE%B5%E9%87%8D%E5%8F%A0%E6%88%90%E7%BB%84"><span class="nav-number">7.2.</span> <span class="nav-text">几何连通：矩形&#x2F;线段重叠成组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2-%E7%89%B9%E5%BE%81%E8%BF%9E%E9%80%9A%EF%BC%9A%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%B9%B6%E7%BB%84"><span class="nav-number">7.3.</span> <span class="nav-text">字符串&#x2F;特征连通：相似度并组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E6%80%A7%EF%BC%88%E5%8A%A0%E5%88%A0%E8%BE%B9%EF%BC%89%E7%9A%84%E7%A6%BB%E7%BA%BF%E5%A4%84%E7%90%86"><span class="nav-number">7.4.</span> <span class="nav-text">动态连通性（加删边）的离线处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%B8%8D%E7%94%A8%E5%B9%B6%E6%9F%A5%E9%9B%86%EF%BC%9F"><span class="nav-number">8.</span> <span class="nav-text">什么时候不用并查集？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98"><span class="nav-number">9.</span> <span class="nav-text">工程化与性能调优</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E8%AE%BE%E8%AE%A1%E5%AF%B9%E6%AF%94"><span class="nav-number">10.</span> <span class="nav-text">常见错误设计对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%E4%B8%8E%E8%87%AA%E6%B5%8B%E9%A2%98%E7%9B%AE"><span class="nav-number">11.</span> <span class="nav-text">练习与自测题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A%E5%B9%B6%E6%9F%A5%E9%9B%86%E5%8A%A8%E6%80%81%E8%BF%9E%E9%80%9A%E4%B8%80%E9%A1%B5%E9%80%9A%E8%A7%88"><span class="nav-number">12.</span> <span class="nav-text">总结：并查集动态连通一页通览</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ziyoeng Zoeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/algorithm/archives/">
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/algorithm/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/algorithm/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://1963306815.github.io/2025/09/21/%E5%B9%B6%E6%9F%A5%E9%9B%86%E7%9A%84Candidate-Verify-Union%E8%8C%83%E5%BC%8F%EF%BC%9A%E9%AB%98%E6%95%88%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E5%A2%9E%E9%87%8F%E8%BF%9E%E9%80%9A%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/algorithm/images/avatar.gif">
+      <meta itemprop="name" content="Ziyoeng Zoeng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="并查集的Candidate-Verify-Union范式：高效处理动态增量连通性 | 勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并查集的Candidate-Verify-Union范式：高效处理动态增量连通性
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-09-21 00:20:01 / 修改时间：00:54:12" itemprop="dateCreated datePublished" datetime="2025-09-21T00:20:01+08:00">2025-09-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/algorithm/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">数据结构</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>15k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>55 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p><strong>候选生成</strong>：把“可能连边的一小撮元素”高效列出来。手段是<strong>分桶/倒排/签名/树</strong>等。<br><strong>校验</strong>：对候选逐一做“真条件”判定（距离阈值/重叠/相似度≥K…）。<br><strong>合并</strong>：用并查集把通过校验的点对连起来，并维护分量聚合量/稳定代表。<br><strong>小而准</strong>地产生候选，<strong>快而狠</strong>地校验，<strong>轻而灵</strong>地合并。</p>
+</blockquote>
+<p>在oj中经常会遇到<strong>动态连通性</strong>问题：一系列元素随着操作逐渐连接成组，我们需要快速判断连通关系或统计连通分量的属性。<strong>并查集（Disjoint Set Union, DSU）</strong> 是一种高效解决此类问题的数据结构。本文将从基础到进阶，系统梳理并查集动态连通性题型的<strong>识别套路、常用数据结构与设计思路</strong>，并辅以<strong>高质量C++模板代码和典型题目分析</strong>。阅读完本文后，读者应能在30秒内判断一道题是否适合用并查集建模，并迅速联想到相应的优化策略，写出高效正确的实现。</p>
+<h2 id="快速识别与决策：这题用并查集吗？"><a href="#快速识别与决策：这题用并查集吗？" class="headerlink" title="快速识别与决策：这题用并查集吗？"></a>快速识别与决策：这题用并查集吗？</h2><p>在拿到一道新题时，可以通过以下检查清单快速判断它是否属于并查集动态连通性类型，并决定解法方向：</p>
+<ul>
+<li><strong>是否涉及连通/组的概念？</strong> 题目是否在询问“元素之间是否连通？”、“有多少组？”、“某组内元素的某种聚合属性？”等。如果问题本质上在考察元素根据某种关系形成的等价类（连通分量），很可能需要并查集。</li>
+<li><strong>连通关系是否具有传递性？</strong> 并查集模型要求连通关系满足自反、对称和传递。例如，“A与B直接相连，B与C相连，那么A与C也视为连通”。如果题目给出的关系或条件可以传递地把元素分组，符合并查集的应用场景。</li>
+<li><strong>操作是动态添加连接而不删除吗？</strong> 并查集擅长处理<strong>在线连边</strong>（Union）操作和查询。如果题目不断增加元素或增加关系，并需要查询当前的连通情况，DSU非常适用。反之，如果频繁要求删除连接，纯并查集较难直接支持（可考虑离线处理或高级结构，详见后述）。</li>
+<li><strong>查询关注的是分量级别的信息吗？</strong> 并查集只能直接提供连通性及分量的聚合信息。查询如果只是问“两元素是否在同一组”“当前有多少组”“每组的统计值”等，DSU胜任。如果需要求解具体的路径、最短距离或最大流等，则不适合用DSU。</li>
+<li><strong>连通判定是否局部可判断？</strong> 很多题构造图的边时，每个元素只与“某些有限邻近”元素相连，这常用<strong>索引</strong>技巧优化。例如二维平面中距离阈值、人名字符串相似1个字符等，连接满足局部特征。若能将候选邻居限制在少数范围，则并查集高效。</li>
+</ul>
+<h3 id="快速决策树"><a href="#快速决策树" class="headerlink" title="快速决策树"></a>快速决策树</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    A["问题: 询问元素连通/分组?"] --&gt;|否| Z["另选算法 (如图搜索/Dijkstra等)"]</span><br><span class="line">    A --&gt;|是| B["连通关系传递?"]</span><br><span class="line">    B --&gt;|否| Z</span><br><span class="line">    B --&gt;|是| C["只增不删? (可离线忽略删)"]</span><br><span class="line">    C --&gt;|否| D["删边动态? 可用离线DSU或动态树"] </span><br><span class="line">    C --&gt;|是| E["查询只需组信息?"]</span><br><span class="line">    E --&gt;|否| Z</span><br><span class="line">    E --&gt;|是| F["**并查集**适用"]</span><br></pre></td></tr></table></figure>
+
+<p>反例提示：</p>
+<ul>
+<li>若题目需要计算最短路径长度、最小生成树权重、网络流量等最优路径值，则通常要用BFS/DFS、Dijkstra、Kruskal等算法，而不是DSU。</li>
+<li>如果图的变化包括<strong>删除边</strong>且要求实时连通查询，那么需要更复杂的数据结构（如动态树、Rollback DSU等），普通DSU无法直接支持在线删边。</li>
+</ul>
+<p>识别出题型后，我们就可以考虑使用并查集解决，并进入下一步：快速联想<strong>如何建模</strong>以及<strong>如何优化</strong>。</p>
+<h2 id="并查集基础回顾"><a href="#并查集基础回顾" class="headerlink" title="并查集基础回顾"></a>并查集基础回顾</h2><p><strong>并查集</strong>是一种维护元素分组的数据结构，支持两种核心操作：<strong>Find</strong>（查找元素所属组的代表）和 <strong>Union</strong>（合并两个组）。经典并查集结构包含：</p>
+<ul>
+<li>parent[x]：记录元素x所在树的父节点。根节点的父指向自身，它充当该组的代表元。</li>
+<li>rank[x]或size[x]：用于按秩合并（union by rank）或按大小合并（union by size），减少树高，提高操作效率。</li>
+</ul>
+<p>操作性质：</p>
+<ul>
+<li><strong>Find(x)</strong>：沿父指针链追溯到根，找到代表元。通常伴随<strong>路径压缩</strong>优化，将访问路径上所有节点直接挂到根上，从而摊还降低后续查询成本。</li>
+<li><strong>Union(x, y)</strong>：先Find找到两元素的根rx和ry，若不同则根据rank/size将较矮或较小树的根指向另一根，合并成一棵树。若大小/秩相等，可任选一方为新根并增加其rank。</li>
+</ul>
+<p><strong>复杂度</strong>：并查集的操作在均摊意义上非常高效，近似 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。严格来说，Find/Union的时间复杂度为<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.704ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3847 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D6FC" d="M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z"></path></g><g data-mml-node="mo" transform="translate(1792,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(2181,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(3069,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g><g data-mml-node="mo" transform="translate(3458,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，其中<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.448ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 640 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D6FC" d="M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z"></path></g></g></g></svg></mjx-container>是反阿克曼函数，增长极其缓慢，对任何可行输入规模可视为常数。</p>
+<p><strong>典型应用</strong>：判断图的连通性、检测图中环路（如Kruskal算法判环）、网络/社交关系分组、动态聚合统计等。</p>
+<p><strong>维护聚合信息</strong>：在并查集基础上，可在代表元存储该组的一些汇总数据（如组大小、权值和等），以便快速回答组属性查询。后续章节详述。</p>
+<p><strong>代表元的作用</strong>：每个连通分量选一元素作为代表。Find(x)得到的即为x所在组的代表元ID。通常并查集默认的代表元可能没有实际含义，但我们可以自定义<strong>代表选择策略</strong>，使代表元满足某种稳定性质（如编号最小、字典序最小等），以方便查询需要。</p>
+<p><strong>易错点</strong>：务必注意初始化时每个元素父指向自身；Union前要Find以找到真正根；路径压缩和按秩合并可显著优化性能，几乎所有竞赛/工程应用都应包含这两点，否则在最坏情况下（近似链状合并）操作退化为线性，可能超时。</p>
+<h2 id="模板一：基础并查集代码"><a href="#模板一：基础并查集代码" class="headerlink" title="模板一：基础并查集代码"></a>模板一：基础并查集代码</h2><p>下面给出一个基础并查集的C++17实现模板，适用于最基本的连通性判断：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MAXN = <span class="number">100000</span>;  <span class="comment">// 元素数量上限，根据题目调整</span></span><br><span class="line"><span class="type">int</span> parent[MAXN<span class="number">+5</span>];</span><br><span class="line"><span class="type">int</span> compSize[MAXN<span class="number">+5</span>];  <span class="comment">// 可选：维护每个根的分量大小</span></span><br><span class="line"><span class="comment">// 初始化：每个元素自成一组</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">initDSU</span><span class="params">(<span class="type">int</span> n)</span> </span>{</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; ++i) {</span><br><span class="line">        parent[i] = i;</span><br><span class="line">        compSize[i] = <span class="number">1</span>; <span class="comment">// 初始每组大小为1</span></span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"><span class="comment">// 路径压缩查找：返回x的根</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">findSet</span><span class="params">(<span class="type">int</span> x)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span>(parent[x] != x) {</span><br><span class="line">        parent[x] = <span class="built_in">findSet</span>(parent[x]);</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> parent[x];</span><br><span class="line">}</span><br><span class="line"><span class="comment">// 合并两集合：返回新根（可选）</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">unionSet</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>{</span><br><span class="line">    <span class="type">int</span> ra = <span class="built_in">findSet</span>(a), rb = <span class="built_in">findSet</span>(b);</span><br><span class="line">    <span class="keyword">if</span>(ra == rb) <span class="keyword">return</span> ra;  <span class="comment">// 已在同一组，无需合并</span></span><br><span class="line">    <span class="comment">// 按大小合并：确保较大树作为父</span></span><br><span class="line">    <span class="keyword">if</span>(compSize[ra] &lt; compSize[rb]) <span class="built_in">swap</span>(ra, rb);</span><br><span class="line">    parent[rb] = ra;</span><br><span class="line">    compSize[ra] += compSize[rb];</span><br><span class="line">    <span class="keyword">return</span> ra;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用说明</strong>：</p>
+<ul>
+<li>调用initDSU(n)初始化1..n编号的元素。</li>
+<li>每次连边/连接操作调用unionSet(x,y)将x和y所在组合并。</li>
+<li>查询连通性用findSet(x) == findSet(y)判断根是否相同。</li>
+<li>compSize[root]可得到以root为代表的组大小（只有根节点的compSize是准确的）。</li>
+</ul>
+<p><strong>复杂度</strong>：初始化O(n)，后续每次Find或Union摊还<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.692ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2074 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><path data-c="4F" d="M308 428Q289 428 289 438Q289 457 318 508T378 593Q417 638 475 671T599 705Q688 705 732 643T777 483Q777 380 733 285T620 123T464 18T293 -22Q188 -22 123 51T58 245Q58 327 87 403T159 533T249 626T333 685T388 705Q404 705 404 693Q404 674 363 649Q333 632 304 606T239 537T181 429T158 290Q158 179 214 114T364 48Q489 48 583 165T677 438Q677 473 670 505T648 568T601 617T528 636Q518 636 513 635Q486 629 460 600T419 544T392 490Q383 470 372 459Q341 430 308 428Z"></path></g></g><g data-mml-node="mo" transform="translate(796,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1185,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1685,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。该模板已经包含路径压缩和按大小合并，适用于绝大多数场景。</p>
+<p><strong>注意</strong>：MAXN要设置为可能出现的最大元素编号。若元素编号不连续或非常大，需要先做<strong>坐标压缩</strong>或用哈希映射ID到0..N-1范围，以便用数组存储（见后述性能提示）。</p>
+<h2 id="模板二：带聚合量的并查集"><a href="#模板二：带聚合量的并查集" class="headerlink" title="模板二：带聚合量的并查集"></a>模板二：带聚合量的并查集</h2><p>许多题目不仅要求判断连通，还需要统计每个连通分量的某些属性，例如：分量内元素个数、权值总和、最小坐标等。我们可以拓展并查集，在代表元处维护聚合信息，在Union时更新。</p>
+<p><strong>设计要点</strong>：</p>
+<ul>
+<li>为每个节点增加一个存储字段，如compSum（组内权值和）、minVal（组内最小值）等。</li>
+<li>只有代表元的这些字段是准确的，其他节点的值可忽略或未定义。</li>
+<li>合并两组时，将被并入组的聚合值累加或比较合并到新根上。</li>
+<li>路径压缩Find不会破坏聚合值，因为我们始终让信息跟随代表元。</li>
+</ul>
+<p><strong>模板示例</strong>：维护连通分量的大小和元素值之和（假设每个元素有初始权值 val[i]）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> MAXN = <span class="number">100000</span>;</span><br><span class="line"><span class="type">int</span> parent[MAXN<span class="number">+5</span>];</span><br><span class="line"><span class="type">int</span> compSize[MAXN<span class="number">+5</span>];</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> compSum[MAXN<span class="number">+5</span>];  <span class="comment">// 组内权值和</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">initDSU</span><span class="params">(<span class="type">int</span> n, <span class="type">const</span> vector&lt;<span class="type">long</span> <span class="type">long</span>&gt;&amp; val)</span> </span>{</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; ++i) {</span><br><span class="line">        parent[i] = i;</span><br><span class="line">        compSize[i] = <span class="number">1</span>;</span><br><span class="line">        compSum[i] = val[i];  <span class="comment">// 初始化组和为自身权值</span></span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">findSet</span><span class="params">(<span class="type">int</span> x)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span>(parent[x] != x) {</span><br><span class="line">        parent[x] = <span class="built_in">findSet</span>(parent[x]);</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> parent[x];</span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">unionSet</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>{</span><br><span class="line">    <span class="type">int</span> ra = <span class="built_in">findSet</span>(a), rb = <span class="built_in">findSet</span>(b);</span><br><span class="line">    <span class="keyword">if</span>(ra == rb) <span class="keyword">return</span> ra;</span><br><span class="line">    <span class="comment">// 按大小合并</span></span><br><span class="line">    <span class="keyword">if</span>(compSize[ra] &lt; compSize[rb]) <span class="built_in">swap</span>(ra, rb);</span><br><span class="line">    parent[rb] = ra;</span><br><span class="line">    <span class="comment">// 更新聚合信息：ra为新根</span></span><br><span class="line">    compSize[ra] += compSize[rb];</span><br><span class="line">    compSum[ra]  += compSum[rb];</span><br><span class="line">    <span class="keyword">return</span> ra;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>应用实例</strong>：</p>
+<ul>
+<li><strong>组大小</strong>：如判断社交网络里一个圈子的人数，可通过compSize[findSet(x)]直接获得x所在组的人数。</li>
+<li><strong>组权值和</strong>：在资源收集、连接岛屿等题中，组的总资源量/面积等可累加。在动态添加元素的场景，通过Union维护最新总和，而不必每次查询都遍历组内元素。</li>
+<li><strong>组内最值</strong>：也可维护compMin、compMax等，在合并时取两组的更小/更大值赋给新根。</li>
+</ul>
+<p><strong>注意</strong>：只有代表元（根）的聚合值有效。如果需要获取x所在组的值，必须使用findSet(x)先拿到根，然后查相应聚合数组。例如，上例中组和应通过compSum[ findSet(x) ]访问。</p>
+<p><strong>复杂度</strong>：维护聚合信息不会改变并查集的操作复杂度，每次Union只是多了常数项的聚合更新。</p>
+<h2 id="模板三：定制稳定代表的并查集"><a href="#模板三：定制稳定代表的并查集" class="headerlink" title="模板三：定制稳定代表的并查集"></a>模板三：定制稳定代表的并查集</h2><p>在某些题目中，我们需要每个连通组有一个特定“代表”满足某种比较规则，如<strong>字典序最小的元素</strong>、<strong>数值最小的节点</strong>等。默认的Union-Find无法保证根有特殊含义，我们可以在合并时通过<strong>自定义比较</strong>确保特定元素始终作为代表元。</p>
+<p><strong>典型需求</strong>：</p>
+<ul>
+<li>字典序/数值最小或最大者作为组代表。</li>
+<li>复合规则：如优先按一个键最小，再按另一键次之。这在竞赛题中经常出现（例如“选出满足条件的组中代表值最小的组”）。</li>
+</ul>
+<p><strong>实现办法</strong>：</p>
+<ul>
+<li>引入一个数组或结构，保存每个元素的<strong>关键字（key）</strong>，用于比较。</li>
+<li>Find操作不变。Union时，根据两个组代表的key大小，选择“更优”的代表为新根，将另一根挂接过来。</li>
+<li>为确保路径压缩不会破坏这一规则，我们始终在Union时正确设置父关系，Find只是一如既往指向最终根。</li>
+</ul>
+<p><strong>示例</strong>：在元素有两个属性 (attr1, attr2) 时，让每组代表为 (attr1最小，若相等则attr2最小) 的元素。可定义比较函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">NodeAttr</span> { <span class="type">int</span> attr1, attr2; } node[MAXN<span class="number">+5</span>];</span><br><span class="line"><span class="type">int</span> parent[MAXN<span class="number">+5</span>];</span><br><span class="line"><span class="comment">// 比较规则：attr1小者优先；若相等attr2小者优先</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">better</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span>(node[x].attr1 != node[y].attr1) </span><br><span class="line">        <span class="keyword">return</span> node[x].attr1 &lt; node[y].attr1;</span><br><span class="line">    <span class="keyword">return</span> node[x].attr2 &lt; node[y].attr2;</span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">findSet</span><span class="params">(<span class="type">int</span> x)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span>(parent[x] != x) {</span><br><span class="line">        parent[x] = <span class="built_in">findSet</span>(parent[x]);</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> parent[x];</span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">unionSet</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>{</span><br><span class="line">    <span class="type">int</span> ra = <span class="built_in">findSet</span>(a), rb = <span class="built_in">findSet</span>(b);</span><br><span class="line">    <span class="keyword">if</span>(ra == rb) <span class="keyword">return</span> ra;</span><br><span class="line">    <span class="comment">// 选“更优代表”为新根</span></span><br><span class="line">    <span class="type">int</span> newRoot = <span class="built_in">better</span>(ra, rb) ? ra : rb;</span><br><span class="line">    <span class="type">int</span> child   = (newRoot == ra ? rb : ra);</span><br><span class="line">    parent[child] = newRoot;</span><br><span class="line">    <span class="comment">// 可选：如果需要维护聚合信息，在此更新 newRoot 的统计值</span></span><br><span class="line">    <span class="keyword">return</span> newRoot;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>使用上述Union逻辑，合并后新Root一定是在比较规则下“更优”的代表。这样findSet(x)得到的根就是整个组的最佳代表，可直接用于答案。例如：</p>
+<ul>
+<li><strong>矿物采集</strong>题（后述）要求选择“矿量最小的基地”为代表，当总矿量≥K时输出其ID。他们在合并基地营并查集时，就用类似逻辑使矿量小、坐标小者做根。</li>
+<li><strong>热门关键词</strong>题中，要求按组热度排序并按代表词字典序输出代表词，他们也可在Union时让“出现频次更高或字典序更小”的词作为组代表。</li>
+</ul>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>只有当比较标准固定且元素加入后属性不变时，此方法才有效。例如比较元素初始值、坐标等。若关键属性会变化（如热点关键词中词频会随时间改变），则需要在属性变化后调整代表，这较复杂。通常这类题选择每次查询重新计算或重新构建DSU来确保正确性，而不会在属性动态变化中强行维护稳定代表。</li>
+<li>路径压缩Find无需修改，它只负责指向目前选定的新Root，不影响比较标准。</li>
+<li>如果也在维护聚合量，要注意先选择代表，再合并聚合值到代表上。</li>
+</ul>
+<h2 id="动态连通性的“索引与建边”策略"><a href="#动态连通性的“索引与建边”策略" class="headerlink" title="动态连通性的“索引与建边”策略"></a>动态连通性的“索引与建边”策略</h2><p>当问题涉及大量元素逐渐加入并形成连接，如果每次新加入都暴力检查与所有已有元素的关系，往往会超时（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>级别）。<strong>设计巧妙的索引</strong>以局部化潜在连接、降低比较次数，是AC关键。下面总结常见的<strong>邻接判定优化</strong>技巧：</p>
+<h3 id="空间分桶"><a href="#空间分桶" class="headerlink" title="空间分桶"></a>空间分桶</h3><p><strong>应用场景</strong>：二维或三维空间中，以<strong>距离阈值</strong>或<strong>区域重叠</strong>判定连边。典型例子：</p>
+<ul>
+<li>平面上的点，距离≤L算直接连通（曼哈顿或欧氏距离等）。</li>
+<li>平面上的矩形/直线，只要有重叠格子就连接。</li>
+</ul>
+<p><strong>思路</strong>：将空间按指定步长划分为网格“桶”，使得若两元素满足连通条件，则它们必定位于<strong>相邻的不超过k个桶</strong>内。这样，新元素加入时，只需检查<strong>其所在桶及附近少数桶</strong>中的已有元素，而不用全局扫描。</p>
+<ul>
+<li>对于<strong>曼哈顿距离 ≤ L</strong>：以L为步长划分平面。例如坐标取整除：bucket_r = row / L, bucket_c = col / L。两个点曼哈顿距离≤L，必然满足桶坐标差不超过1【原因：如果在行或列方向桶坐标差 &gt;=2，则行或列距离至少≥2L，曼哈顿距离不可能≤L】。因此检查该点所在桶的九宫格邻域 (本桶 + 8邻桶) 即可覆盖所有可能连接点。</li>
+<li>对于<strong>矩形/线段重叠</strong>：以最大边长L划分。若矩形最大边长为L，则一个矩形跨越的桶不会超过2格宽度（长度L可落在两个相邻桶内）。若两个矩形重叠，它们的桶区域一定有交集。因此，只需检查新矩形覆盖到的所有桶里的矩形即可。如果某旧矩形完全在邻桶且不与新矩形桶区域接触，则肯定无重叠。这个策略极大减少比较次数。</li>
+</ul>
+<p><strong>注意</strong>：桶大小通常取相关阈值L或其常数倍。划分过粗或过细都会影响判断正确性和效率。使用桶时，还需考虑<strong>边界情况</strong>：</p>
+<ul>
+<li>元素在桶边缘位置，其邻接元素可能在相邻桶，需要确保邻桶也遍历（如曼哈顿九宫格）。</li>
+<li>当N不是阈值L的整倍数时，最后一部分桶可能较小，但按照整除取整的桶坐标计算仍正确，注意处理桶索引不越界。</li>
+<li>将元素加入桶数组后，<strong>必须</strong>在连接判定后才能加入，否则会把自己跟自己比较。一般流程是：对新元素检查邻桶旧元素 -&gt; 合并必要的边 -&gt; 最后把新元素记录进所属桶。</li>
+</ul>
+<p><strong>复杂度分析</strong>：如果每个元素只需比较附近常数范围的邻居，则总体复杂度近似<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.844ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2141 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1752,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>或<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="9.847ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4352.3 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(1918.7,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(3196.7,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(3363.3,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(3963.3,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。相对于<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>的全局暴力显著优化。例如20,000个点全局比较是<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="7.147ex" height="2.005ex" role="img" focusable="false" viewBox="0 -864 3159 886"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="34" d="M462 0Q444 3 333 3Q217 3 199 0H190V46H221Q241 46 248 46T265 48T279 53T286 61Q287 63 287 115V165H28V211L179 442Q332 674 334 675Q336 677 355 677H373L379 671V211H471V165H379V114Q379 73 379 66T385 54Q393 47 442 46H471V0H462ZM293 211V545L74 212L183 211H293Z"></path></g><g data-mml-node="mo" transform="translate(722.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="msup" transform="translate(1722.4,0)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="38" d="M70 417T70 494T124 618T248 666Q319 666 374 624T429 515Q429 485 418 459T392 417T361 389T335 371T324 363L338 354Q352 344 366 334T382 323Q457 264 457 174Q457 95 399 37T249 -22Q159 -22 101 29T43 155Q43 263 172 335L154 348Q133 361 127 368Q70 417 70 494ZM286 386L292 390Q298 394 301 396T311 403T323 413T334 425T345 438T355 454T364 471T369 491T371 513Q371 556 342 586T275 624Q268 625 242 625Q201 625 165 599T128 534Q128 511 141 492T167 463T217 431Q224 426 228 424L286 386ZM250 21Q308 21 350 55T392 137Q392 154 387 169T375 194T353 216T330 234T301 253T274 270Q260 279 244 289T218 306L210 311Q204 311 181 294T133 239T107 157Q107 98 150 60T250 21Z"></path></g></g></g></g></svg></mjx-container>次，而用九宫格桶平均每次比较几十个，降至<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.09ex;" xmlns="http://www.w3.org/2000/svg" width="5.639ex" height="2.045ex" role="img" focusable="false" viewBox="0 -864 2492.3 904"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="3C" d="M694 -11T694 -19T688 -33T678 -40Q671 -40 524 29T234 166L90 235Q83 240 83 250Q83 261 91 266Q664 540 678 540Q681 540 687 534T694 519T687 505Q686 504 417 376L151 250L417 124Q686 -4 687 -5Q694 -11 694 -19Z"></path></g><g data-mml-node="msup" transform="translate(1055.8,0)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="36" d="M42 313Q42 476 123 571T303 666Q372 666 402 630T432 550Q432 525 418 510T379 495Q356 495 341 509T326 548Q326 592 373 601Q351 623 311 626Q240 626 194 566Q147 500 147 364L148 360Q153 366 156 373Q197 433 263 433H267Q313 433 348 414Q372 400 396 374T435 317Q456 268 456 210V192Q456 169 451 149Q440 90 387 34T253 -22Q225 -22 199 -14T143 16T92 75T56 172T42 313ZM257 397Q227 397 205 380T171 335T154 278T148 216Q148 133 160 97T198 39Q222 21 251 21Q302 21 329 59Q342 77 347 104T352 209Q352 289 347 316T329 361Q302 397 257 397Z"></path></g></g></g></g></svg></mjx-container>级别，可轻松通过。</p>
+<h3 id="字符串-特征哈希索引"><a href="#字符串-特征哈希索引" class="headerlink" title="字符串/特征哈希索引"></a>字符串/特征哈希索引</h3><p><strong>应用场景</strong>：元素有离散特征，如字符串、数字序列等，通过某种相似度（如汉明距离1、差一个字符、相同模式等）定义连边。</p>
+<p><strong>思路</strong>：利用<strong>哈希表或字典</strong>将特征映射到可能连通的候选集。例如：</p>
+<ul>
+<li><p><strong>汉明距离=1</strong>：对于给定字符串，可以生成所有可能的“相邻模式”，如将每个位置的字符替换成通配符形成模式键。将这些模式作为哈希表键，值为出现过符合该模式的字符串列表。新字符串加入时，生成其所有模式（长度=字符串长度，模式数量=字符数），查询哈希表找匹配，再Union这些字符串。</p>
+<p>  例如字符串 “abcd”，长度4，可生成模式 “<em>bcd”, “a</em>cd”, “ab<em>d”, “abc</em>“，插入哈希表。当另一字符串 “abce” 来时，它生成模式 “abc*”, 会匹配上已有模式键，从而知道 “abcd” 与 “abce” 只差一字符，应连通。</p>
+</li>
+<li><p><strong>其他离散关系</strong>：如数字的某种等价条件，可预先将可能形成关系的一组元素散列到同一桶中，加快查找。如以元素值/模数分组等。</p>
+</li>
+</ul>
+<p><strong>实现要点</strong>：</p>
+<ul>
+<li>如果字符串长度或特征长度较大，要注意<strong>模式数量</strong> = 长度 * 每位置可能变化数。如果简单生成所有变种可能会很多，应优化。例如汉明距1，只替换一位为通配符，而不是替换为任意字母，后者会爆炸式增长。</li>
+<li>用unordered_map或unordered_set存储模式到ID集合。对于每个新元素，枚举其可能连通的模式键，查询表以获得已有元素，再Union。</li>
+<li>注意<strong>去重</strong>：避免同一对重复连边。比如两字符串会在两处模式都匹配，应确保只Union一次。这可通过在Union后将其中一方标记，或在构建索引时小心处理。</li>
+<li>如果元素会失效（如滑动窗口过期），需要从索引结构中删除或标记无效，但这可能复杂。简化策略是在查询时忽略无效元素（仍Union但因已无效对结果无影响），或在每次查询重建索引结构（如果输入规模不大，离线重建也是可行的）。</li>
+</ul>
+<p><strong>复杂度</strong>：与特征长度和可选范围相关。比如长度10的字符串，生成10个模式键进行查找，每次查找和Union摊还几乎<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，总操作数约<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="5.757ex" height="1.557ex" role="img" focusable="false" viewBox="0 -666 2544.4 688"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mo" transform="translate(1222.2,0)"><path data-c="2217" d="M229 286Q216 420 216 436Q216 454 240 464Q241 464 245 464T251 465Q263 464 273 456T283 436Q283 419 277 356T270 286L328 328Q384 369 389 372T399 375Q412 375 423 365T435 338Q435 325 425 315Q420 312 357 282T289 250L355 219L425 184Q434 175 434 161Q434 146 425 136T401 125Q393 125 383 131T328 171L270 213Q283 79 283 63Q283 53 276 44T250 35Q231 35 224 44T216 63Q216 80 222 143T229 213L171 171Q115 130 110 127Q106 124 100 124Q87 124 76 134T64 161Q64 166 64 169T67 175T72 181T81 188T94 195T113 204T138 215T170 230T210 250L74 315Q65 324 65 338Q65 353 74 363T98 374Q106 374 116 368T171 328L229 286Z"></path></g><g data-mml-node="mi" transform="translate(1944.4,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>，对<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.186ex;" xmlns="http://www.w3.org/2000/svg" width="10.031ex" height="1.692ex" role="img" focusable="false" viewBox="0 -666 4433.6 748"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(877.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(1933.6,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(2000,0)"></path></g></g></g></svg></mjx-container>也只有10万级。相比暴力比较每对字符串(<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.996ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 3092.3 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2248" d="M55 319Q55 360 72 393T114 444T163 472T205 482Q207 482 213 482T223 483Q262 483 296 468T393 413L443 381Q502 346 553 346Q609 346 649 375T694 454Q694 465 698 474T708 483Q722 483 722 452Q722 386 675 338T555 289Q514 289 468 310T388 357T308 404T224 426Q164 426 125 393T83 318Q81 289 69 289Q55 289 55 319ZM55 85Q55 126 72 159T114 210T163 238T205 248Q207 248 213 248T223 249Q262 249 296 234T393 179L443 147Q502 112 553 112Q609 112 649 141T694 220Q694 249 708 249T722 217Q722 153 675 104T555 55Q514 55 468 76T388 123T308 170T224 192Q164 192 125 159T83 84Q80 55 69 55Q55 55 55 85Z"></path></g><g data-mml-node="msup" transform="translate(1055.8,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(2092.3,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mn" transform="translate(2592.3,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></svg></mjx-container>对)的开销巨大优势明显。</p>
+<h3 id="滑动窗口与重建策略"><a href="#滑动窗口与重建策略" class="headerlink" title="滑动窗口与重建策略"></a>滑动窗口与重建策略</h3><p><strong>应用场景</strong>：一些问题限制只考虑“最近N个”元素，因此有元素过期、离开的情况。这时在线维护DSU变复杂，因为<strong>删除</strong>可能拆分连通分量，DSU无法直接undo合并。但由于窗口长度固定，可用<strong>重建</strong>或<strong>增量维护</strong>应对：</p>
+<ul>
+<li><strong>每次查询重建DSU</strong>：当窗口不大且查询次数有限，可以在每次查询时遍历当前窗口元素，用并查集重新建立当前的连通关系。这适用于窗口N较小（如≤500），查询Q也不大（如≤100）。例如“热门关键词”问题中，每次top5查询就对窗口内词汇构图Union，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.606ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2919.8 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mn" transform="translate(975.3,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2530.8,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>=250k级操作，Q=100，总计2.5e7比较，可接受。</li>
+<li><strong>增量+惰性处理</strong>：当加入一个元素时Union相关边，而移出元素时不立即拆分；查询时Union-Find仍包含过期元素但可忽略其影响。这要求我们能识别并忽略已离开的元素（比如用一个标志或频次计数判断当前窗口是否存在）。查询阶段构造连通分量时跳过失效节点即可。虽然过期节点可能仍保留在结构里，但只要不计入结果，就不影响正确性。实现时可给每元素维护计数或“活跃标志”，Union过程中跳过非活跃项。这种方法要小心内存和效率（过期节点太多可能影响Union效率，但如果窗口固定，其上限也固定）。</li>
+<li><strong>DSU Rollback</strong>：更复杂的工程方法是实现一个支持undo操作的并查集（下文扩展部分提及），可以在滑窗移动时撤销最早元素的union影响。不过这种实现较难，且在窗口场景往往没必要这么复杂。</li>
+</ul>
+<p><strong>注意</strong>：滑动窗口问题往往因为有“删除”而无法简单在线Union，因此常转化为离线每个窗口状态分别计算或如上忽略过期的技巧。题解选择要依据窗口和操作规模：</p>
+<ul>
+<li>窗口小、查询不多：每次重建并查集简单直接。</li>
+<li>窗口较大、查询频繁：考虑增量维护，但要权衡实现复杂度。</li>
+<li>也可以考虑双端队列等数据结构维护窗口信息，但对于连通性问题，这不容易维护子结构，要么维护完整连通信息（几乎相当于重建）。</li>
+</ul>
+<h3 id="事件分治"><a href="#事件分治" class="headerlink" title="事件分治"></a>事件分治</h3><p><strong>应用场景</strong>：需要支持动态添加和删除边的连通性查询，且无法简单限制窗口或邻域。这通常出现在复杂交互场景中，如一系列操作中插入边、移除边、询问当前两点是否连通。</p>
+<p><strong>思路</strong>：将操作序列转换为一个<strong>静态问题</strong>，然后用DSU处理。常用两种方法：</p>
+<ul>
+<li><strong>Mo算法</strong>：对时间维度排序，让删和加操作在序列中通过调整窗口实现，但对于连通性效果不佳，因为重新计算连通性代价大。</li>
+<li><strong>分治+DSU</strong>：递归地将查询区间一分为二，利用DSU维护中间状态。具体做法是：建立一个递归树，对每个节点代表一个时间区间，传递一个DSU状态。进入子区间时，把区间新增的边union进DSU，递归解子问题；返回时rollback撤销那些边，保证DSU状态能回溯。这需要<strong>可回滚的并查集</strong>支持（记录栈保存每次union更改的parent和size，方便撤销）。</li>
+<li><strong>Segment Tree of edges</strong>：另一种实现是用线段树，将每条边的存活时间段挂在对应的区间节点上。然后DFS遍历线段树：到一个节点时，把该区间有效的边全部Union加入DSU，再处理查询；离开节点时移除那些边（rollback DSU）。这和分治法本质相同，只是不同的组织方式。</li>
+</ul>
+<p><strong>优缺点</strong>：这种方法可处理动态图连通性在近似<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="14.976ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 6619.4 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mo" transform="translate(1152,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1541,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(2363.2,0)"><path data-c="2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path></g><g data-mml-node="mi" transform="translate(3363.4,0)"><path data-c="1D45E" d="M33 157Q33 258 109 349T280 441Q340 441 372 389Q373 390 377 395T388 406T404 418Q438 442 450 442Q454 442 457 439T460 434Q460 425 391 149Q320 -135 320 -139Q320 -147 365 -148H390Q396 -156 396 -157T393 -175Q389 -188 383 -194H370Q339 -192 262 -192Q234 -192 211 -192T174 -192T157 -193Q143 -193 143 -185Q143 -182 145 -170Q149 -154 152 -151T172 -148Q220 -148 230 -141Q238 -136 258 -53T279 32Q279 33 272 29Q224 -10 172 -10Q117 -10 75 30T33 157ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mo" transform="translate(3823.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g><g data-mml-node="mi" transform="translate(4212.4,0)"><path data-c="1D6FC" d="M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z"></path></g><g data-mml-node="mo" transform="translate(4852.4,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(5241.4,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(5841.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g><g data-mml-node="mo" transform="translate(6230.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，其中<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.357ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 600 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>是边操作数，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.041ex" height="1.439ex" role="img" focusable="false" viewBox="0 -442 460 636"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45E" d="M33 157Q33 258 109 349T280 441Q340 441 372 389Q373 390 377 395T388 406T404 418Q438 442 450 442Q454 442 457 439T460 434Q460 425 391 149Q320 -135 320 -139Q320 -147 365 -148H390Q396 -156 396 -157T393 -175Q389 -188 383 -194H370Q339 -192 262 -192Q234 -192 211 -192T174 -192T157 -193Q143 -193 143 -185Q143 -182 145 -170Q149 -154 152 -151T172 -148Q220 -148 230 -141Q238 -136 258 -53T279 32Q279 33 272 29Q224 -10 172 -10Q117 -10 75 30T33 157ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g></g></g></svg></mjx-container>是查询数。但实现非常复杂，需要写可撤销DSU，稍不慎会出现错误或效率问题。此方案多见于OI难题，工程上则通常避免实时删边问题或用全量重新计算等简单方法。</p>
+<h2 id="典型题型剖析与共性"><a href="#典型题型剖析与共性" class="headerlink" title="典型题型剖析与共性"></a>典型题型剖析与共性</h2><p>下面结合典型题目案例，分析它们的模型抽象、使用的数据结构、考点，并指出常见的错误思路。通过这些实例，可以看出并查集动态连通问题的一些<strong>共性特征</strong>和<strong>套路</strong>。</p>
+<h3 id="几何连通：曼哈顿距离阈值聚类"><a href="#几何连通：曼哈顿距离阈值聚类" class="headerlink" title="几何连通：曼哈顿距离阈值聚类"></a>几何连通：曼哈顿距离阈值聚类</h3><p><strong>题型摘要</strong>：在二维平面上，有若干点（或基地、传感器等），当两点的曼哈顿距离 ≤ L 时视为直接连通。加入“每到一个连通点可以再次满电/补给”的设定，使这种“跳跃”可以传递，从而整个满足距离传递可达性的点集构成一个连通分量。常见问法：</p>
+<ul>
+<li>动态添加点，询问某点所在分量的属性（大小、权值和等）。</li>
+<li>或给一个阈值K，问当前是否存在某个分量满足某条件（如总权值≥K），若有输出该分量中特定代表点的信息。</li>
+</ul>
+<p><strong>建模</strong>：将每个点视作图中的节点。如果两点距离 ≤ L，则在它们之间建一条无向边。由于题目描述实际上隐含<strong>可通过中继点多跳</strong>（传递性），这个图的连通分量就是题目所说的“可达区域”或“基地营组”等。求某点所在组的信息，就是求对应连通分量的信息。DSU正适合维护不断增加的边和连通分量。</p>
+<p><strong>数据结构</strong>：</p>
+<ul>
+<li><strong>DSU</strong>：维护点的连通情况和可能的聚合信息（如总资源量compSum，组大小等）。</li>
+<li><strong>空间分桶</strong>：用网格桶加速距离判定。桶大小通常取L（或稍大，保证覆盖阈值）。对每个新增点，只检查周围3x3=9个桶的已有点，计算真实曼哈顿距离，若≤L则Union。</li>
+<li><strong>点属性存储</strong>：如每个点的资源量、坐标等，供聚合和比较用。</li>
+<li><strong>稳定代表</strong>（可选）：如果查询需要按某个点的属性排序输出，比如找“满足条件的分量中矿量最小的基地”，可以在Union时以矿量和坐标作为比较，让合并后根为矿量更小、坐标更小者。这样每组的代表就是所需输出的基地。</li>
+</ul>
+<p><strong>考察重点</strong>：</p>
+<ul>
+<li><strong>Union-Find维护连通</strong>：是否正确合并和路径压缩。</li>
+<li><strong>空间索引</strong>：能否想到用<strong>桶优化</strong>代替暴力距离计算。</li>
+<li><strong>聚合与代表</strong>：计算分量属性（如资源总和）和找到满足条件的正确代表。</li>
+<li><strong>复杂度控制</strong>：<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.357ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 600 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>可较大（几千至几万），暴力<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>检查距离不现实，必须空间分桶降低比较次数。</li>
+</ul>
+<p><strong>常见错误思路</strong>：</p>
+<ul>
+<li><p>错误方案： 每次新点插入时，与所有已有点计算距离检查。Worst case比较<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.781ex;" xmlns="http://www.w3.org/2000/svg" width="6.204ex" height="3.15ex" role="img" focusable="false" viewBox="0 -1047.1 2742.3 1392.1"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="mrow" transform="translate(220,516.8) scale(0.707)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(600,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(989,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1589,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mn" transform="translate(2367,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(2867,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g><g data-mml-node="mn" transform="translate(1194.4,-345) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g><rect width="2502.3" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container>次，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.186ex;" xmlns="http://www.w3.org/2000/svg" width="10.031ex" height="1.692ex" role="img" focusable="false" viewBox="0 -666 4433.6 748"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(877.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(1933.6,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(2000,0)"></path></g></g></g></svg></mjx-container>时达<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="7.147ex" height="2.005ex" role="img" focusable="false" viewBox="0 -864 3159 886"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g><g data-mml-node="mo" transform="translate(722.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="msup" transform="translate(1722.4,0)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="38" d="M70 417T70 494T124 618T248 666Q319 666 374 624T429 515Q429 485 418 459T392 417T361 389T335 371T324 363L338 354Q352 344 366 334T382 323Q457 264 457 174Q457 95 399 37T249 -22Q159 -22 101 29T43 155Q43 263 172 335L154 348Q133 361 127 368Q70 417 70 494ZM286 386L292 390Q298 394 301 396T311 403T323 413T334 425T345 438T355 454T364 471T369 491T371 513Q371 556 342 586T275 624Q268 625 242 625Q201 625 165 599T128 534Q128 511 141 492T167 463T217 431Q224 426 228 424L286 386ZM250 21Q308 21 350 55T392 137Q392 154 387 169T375 194T353 216T330 234T301 253T274 270Q260 279 244 289T218 306L210 311Q204 311 181 294T133 239T107 157Q107 98 150 60T250 21Z"></path></g></g></g></g></svg></mjx-container>，在C++中非常危险接近超时边缘。如果距离计算本身稍复杂或常数大，就更慢。</p>
+<p>  改进： 用桶减少比较，如上文所述检查9邻桶。遗漏邻桶会漏掉可连通情况；范围取过大则浪费比较，正确范围需要根据曼哈顿距离传递性设计。</p>
+</li>
+<li><p>错误方案： 对每次查询从某起点做BFS/DFS找连通区域再统计。这对动态添加来说开销巨大（每次查询O(n + e)）。DSU增量维护显然更高效，Find操作即可实时查询连通分量代表/标识，提前聚合信息可<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>获取组统计。</p>
+</li>
+</ul>
+<p><strong>案例</strong>：矿物采集</p>
+<p>题意：N×N岛屿上有基地营，车辆从一个基地出发可在曼哈顿距离L内跳到其他基地，每到一基地就充电续航L继续走，问以哪个基地为空投起点能采集至少K矿且自身矿量最小。新增基地时返回以它为起点的最大可采矿。</p>
+<ul>
+<li><strong>模型</strong>：基地为点，曼哈顿≤L连边，联通块总矿量=可采矿总和。</li>
+<li><strong>数据结构</strong>：并查集 + 3×3桶优化连接 + compSum维护分量矿量 + 自定义比较（矿量, 行, 列）决定代表。</li>
+<li><strong>复杂度</strong>：每基地合并检查最多9桶元素；N≤30L保证桶数≈31×31=961，单桶元素有限（平均≈总点数/桶数）。</li>
+<li><strong>考点</strong>：空间分桶、DSU合并、代表选择、按要求输出。</li>
+</ul>
+<p>这类题解法具备良好的<strong>可迁移性</strong>：凡是 <strong>“距离传递可达”</strong> 模型，通常都可采用“分桶 + 并查集 + 聚合统计”的组合设计。</p>
+<h3 id="几何连通：矩形-线段重叠成组"><a href="#几何连通：矩形-线段重叠成组" class="headerlink" title="几何连通：矩形/线段重叠成组"></a>几何连通：矩形/线段重叠成组</h3><p><strong>题型摘要</strong>：平面绘制多个矩形或放置道路（直线段）。如果两个形状有<strong>至少一个格子</strong>重叠，则视为直接连接，可通过重叠传递将多个矩形并入同一组。问：</p>
+<ul>
+<li>每次添加一个矩形/道路后，当前有多少组？新形状所在组大小？</li>
+<li>任意给出两个点（或两个形状ID），判断是否连通（属于同一组）？</li>
+</ul>
+<p><strong>建模</strong>：将每个矩形/道路作为图的节点。定义无向边：两个节点（形状）有重叠部分则连边。传递闭包下，重叠关系的连通分量就是“矩形组”或“道路网”。判定两个点是否可通行，就是看它们所属形状节点是否在同一连通分量。</p>
+<p><strong>数据结构</strong>：</p>
+<ul>
+<li><strong>DSU</strong>：维护形状间连通性。可以维护组大小供查询，或组数量等。</li>
+<li><strong>空间分桶</strong>：按坐标将大平面分成格网，以<strong>最大形状尺寸L</strong>为桶长。如N ≤ 50L，可取桶大小=L，划分最多50×50区域。每个矩形映射为平面上的一个轴对齐矩形，可计算其覆盖的桶范围。只需检查这些桶内的其他矩形是否重叠，若重叠则Union。</li>
+<li><strong>形状表示</strong>：存储每个矩形的左上角(x1,y1)和右下角(x2,y2)坐标用于重叠判断。判断两个矩形重叠的条件是：在x方向和y方向都不分离（即!(A.x1 &gt; B.x2 || A.x2 &lt; B.x1 || A.y1 &gt; B.y2 || A.y2 &lt; B.y1)，注意是闭区间比较，端点相等算重叠）。</li>
+<li><strong>优化</strong>：因为每个矩形大小 ≤ L，只跨至多2格桶，因此与它重叠的矩形必定出现在它占据的那些桶里（或更早加入这些桶）。所以不用检查邻桶（与曼哈顿场景不同），只扫描新矩形自身覆盖的桶*即可发现所有重叠者。</li>
+</ul>
+<p><strong>考察重点</strong>：</p>
+<ul>
+<li><strong>矩形重叠判定</strong>：正确处理闭区间边界，确保“共享至少一个格子”包括边缘重合情况。新手常犯遗漏等于的情况。</li>
+<li><strong>DSU合并</strong>：动态合并组，正确更新组数量或大小等统计。</li>
+<li><strong>空间索引正确性</strong>：确认不会漏合并。若桶设计错误，可能漏掉跨桶相邻但重叠的形状。</li>
+<li><strong>复杂度</strong>：<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.986ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 878 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>次添加，每次比较仅桶内已有形状。因为形状有限跨1-4个桶，每桶比较若平均<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.179ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 521 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g></g></g></svg></mjx-container>个形状，则每添加耗<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.665ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2062 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g><g data-mml-node="mo" transform="translate(1673,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。极端情况下如果所有矩形都在同一桶（彼此堆叠重叠），那每次添加要和前面所有比较，复杂度<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.461ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2855.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(911,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2466.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>=225e6（m=15000）比较，还算勉强可过C++（需优化常数）。但通常分布不会这么极端。</li>
+</ul>
+<p><strong>常见错误思路</strong>：</p>
+<ul>
+<li>错误方案： 对每新矩形和之前所有矩形检查重叠（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.461ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2855.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(911,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2466.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>)，15000²=2.25亿次矩形相交判断，可能超时或非常吃力。如果没有剪枝优化，在低级语言甚至不可能通过。</li>
+<li>错误方案： 网格化时只用一个桶或桶大小过大，导致几乎所有形状都落入同一桶，等于无优化。</li>
+<li>错误方案： 矩形判交用“&lt;”或“&lt;=”搞混导致边界情况错误。例如以为A.x2 &lt; B.x1表示不相交，其实如果A.x2恰等于B.x1，它们是相交的（共用边界格点）。要小心闭区间。</li>
+<li>漏合并： 如果没有让矩形跨越多个桶（即仅按左上角所属桶存），一个矩形占据多桶的情况会造成错失潜在碰撞对象。因此一定要将矩形ID加入它所覆盖的所有桶。</li>
+</ul>
+<p><strong>案例</strong>：</p>
+<ul>
+<li><p>道路连接题：N×N土地上建若干水平/垂直道路段，长度≤L。如果两个道路段有至少一个重叠格子，则连通（即道路相交或延续算连通）。支持动态build道路和checkRoute查询任意两点连通性。</p>
+<p>  解决：将道路当成1格宽的矩形，用DSU维护连通组。用L为桶长分区加速重叠检测。每次新建道路与邻桶内旧路判定是否有坐标重叠。查询时，只需看起点和终点各属于哪条道路（可通过桶找到覆盖该格子的道路编号），再Find判断根是否同一组。考点在于桶定位单点所在道路、重叠判定和DSU维护。</p>
+</li>
+<li><p>矩形绘制题：N×N棋盘上动态绘制矩形；新矩形重叠则并组。提供查询矩形ID所在组大小、当前组总数。</p>
+<p>  解决：同样DSU+桶，矩形重叠即Union，同组大小在DSU根维护计数。查询组大小getRectCount(ID)只要Find再取组计数。countGroup()可在每次合并时用全局计数减1维护。考点在于高效连通判断和正确的组统计更新。</p>
+</li>
+</ul>
+<p>这类几何重叠问题本质就是一个<strong>区间图/矩形图的连通性</strong>问题。并查集+空间分桶能很好地管理动态添加。只要抓住“<strong>重叠=&gt;连边，传递合并</strong>”这个抽象，就能迅速建模。优化关键在于<strong>限定重叠检查范围</strong>——通常由最大形状尺寸或范围限制来指导桶大小。</p>
+<h3 id="字符串-特征连通：相似度并组"><a href="#字符串-特征连通：相似度并组" class="headerlink" title="字符串/特征连通：相似度并组"></a>字符串/特征连通：相似度并组</h3><p><strong>题型摘要</strong>：给定一系列字符串或其他离散元素，如果两个元素在某种定义下“相似”或“等价”，则视为连通。相似关系往往可传递（通常刻画某种<strong>等价类</strong>）。常见例子：</p>
+<ul>
+<li>长度相同且仅一处字符不同的两个字符串算相似，可通过若干次单字符替换把一个变成另一个。</li>
+<li>或字符串可以经过排列/变换互相到达（如字母异位词等）也形成组。</li>
+<li>有的题会实时给出元素序列（如日志流、关键词流），要求维持最新若干元素的相似分组、输出最热组等。</li>
+</ul>
+<p><strong>建模</strong>：将每个字符串视作节点，如果满足相似关系则连边。因为相似往往满足对称传递，多对元素可能形成连通集（<strong>等价类</strong>）。并查集可以将所有相似关系通过Union并起来，得到每个等价类代表。题目通常要求输出这些组的某些属性：比如每组出现次数之和、组代表词，或查询任意两词是否属于同组。</p>
+<p><strong>数据结构</strong>：</p>
+<ul>
+<li><strong>DSU</strong>：基础连通维护。有时我们不需要动态一直维护一个全局DSU，因为元素序列可能变化（滑动窗口）。可选择在需要时重建。</li>
+<li><strong>索引结构</strong>：根据相似判定的特点选择索引：<ul>
+<li>汉明距离=1：使用<strong>模式哈希</strong>或<strong>暴力比较</strong>如果数据量不大。</li>
+<li>异位词类：可将每个字符串排序或计数，作为标准形式存哈希表来找到等价类代表。</li>
+<li>其他复杂关系：有时需要定制算法或特判。</li>
+</ul>
+</li>
+<li><strong>ID映射</strong>：字符串等非整数元素，需要用unordered_map或字典将其映射到并查集整数ID。为了动态添加方便，可随添加增长ID。注意如果元素会移除再出现，可能需要区分是否当作新元素处理（防止旧关系干扰）。</li>
+<li><strong>滑动窗口处理</strong>：如果只考虑最近N个元素，需管理窗口:<ul>
+<li>窗口数据结构：可用循环数组或deque保存最近N元素及其IDs。</li>
+<li>过期处理：当元素出窗口，要将其标记不再参与连通（如计数减为0，或lazy跳过）。</li>
+<li>查询时构建当前有效元素的连通性：可以每次重建DSU（简单正确），或增量更新DSU并在Union时跳过无效元素（复杂）。</li>
+</ul>
+</li>
+<li><strong>聚合统计</strong>：每个组可能需要统计例如<strong>总频次</strong>（窗口内出现次数和）、<strong>组大小</strong>等，可在DSU根维护。这和前述聚合模板类似。</li>
+</ul>
+<p><strong>考察重点</strong>：</p>
+<ul>
+<li><strong>相似判定优化</strong>：能否用哈希/索引快速定位相似对，而不是双重循环所有对比。</li>
+<li><strong>DSU动态使用</strong>：窗口场景下正确处理元素ID的复用与失效，避免错误连通。</li>
+<li><strong>排序及输出</strong>：经常要求输出若干热门组或代表，涉及对聚合结果排序（考查Partial Sort等性能技巧）。</li>
+<li><strong>综合性</strong>：这类题往往情境复杂，包括字符串处理、哈希、滑动窗口、并查集等多个知识点的结合，需要全面把握。</li>
+</ul>
+<p><strong>常见错误思路</strong>：</p>
+<ul>
+<li>错误方案： 窗口每来一个元素，用双重循环与窗口内其他所有元素比对相似并Union。这在最坏情况<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="23.38ex" height="2.009ex" role="img" focusable="false" viewBox="0 -694 10333.8 888"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(1165.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(2221.6,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path></g><g data-mml-node="mo" transform="translate(3721.6,0)"><path data-c="2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path></g><g data-mml-node="mtext" transform="translate(4166.2,0)"><path data-c="77" d="M90 368Q84 378 76 380T40 385H18V431H24L43 430Q62 430 84 429T116 428Q206 428 221 431H229V385H215Q177 383 177 368Q177 367 221 239L265 113L339 328L333 345Q323 374 316 379Q308 384 278 385H258V431H264Q270 428 348 428Q439 428 454 431H461V385H452Q404 385 404 369Q404 366 418 324T449 234T481 143L496 100L537 219Q579 341 579 347Q579 363 564 373T530 385H522V431H529Q541 428 624 428Q692 428 698 431H703V385H697Q696 385 691 385T682 384Q635 377 619 334L559 161Q546 124 528 71Q508 12 503 1T487 -11H479Q460 -11 456 -4Q455 -3 407 133L361 267Q359 263 266 -4Q261 -11 243 -11H238Q225 -11 220 -3L90 368Z"></path><path data-c="69" d="M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z" transform="translate(722,0)"></path><path data-c="6E" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z" transform="translate(1000,0)"></path><path data-c="64" d="M376 495Q376 511 376 535T377 568Q377 613 367 624T316 637H298V660Q298 683 300 683L310 684Q320 685 339 686T376 688Q393 689 413 690T443 693T454 694H457V390Q457 84 458 81Q461 61 472 55T517 46H535V0Q533 0 459 -5T380 -11H373V44L365 37Q307 -11 235 -11Q158 -11 96 50T34 215Q34 315 97 378T244 442Q319 442 376 393V495ZM373 342Q328 405 260 405Q211 405 173 369Q146 341 139 305T131 211Q131 155 138 120T173 59Q203 26 251 26Q322 26 373 103V342Z" transform="translate(1556,0)"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(2112,0)"></path><path data-c="77" d="M90 368Q84 378 76 380T40 385H18V431H24L43 430Q62 430 84 429T116 428Q206 428 221 431H229V385H215Q177 383 177 368Q177 367 221 239L265 113L339 328L333 345Q323 374 316 379Q308 384 278 385H258V431H264Q270 428 348 428Q439 428 454 431H461V385H452Q404 385 404 369Q404 366 418 324T449 234T481 143L496 100L537 219Q579 341 579 347Q579 363 564 373T530 385H522V431H529Q541 428 624 428Q692 428 698 431H703V385H697Q696 385 691 385T682 384Q635 377 619 334L559 161Q546 124 528 71Q508 12 503 1T487 -11H479Q460 -11 456 -4Q455 -3 407 133L361 267Q359 263 266 -4Q261 -11 243 -11H238Q225 -11 220 -3L90 368Z" transform="translate(2612,0)"></path></g><g data-mml-node="mo" transform="translate(7778,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(8833.8,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path></g></g></g></svg></mjx-container>时，单次500比较不多，但如果每添加都做，并发执行10000次添加，总比较次数5千万，虽勉强可接受，但实现稍差可能超时，而且忽略了元素离开可能导致错误连通。</li>
+<li>错误方案： 对于大量元素（如果N更大）仍用暴力比较所有对，复杂度<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>不可取，需利用索引显著减小比较对数。</li>
+<li>边界漏洞： 没考虑字符串长度不同的情况。一般汉明距离1要求字符串长度相等，不等长不连通。若实现没加长度判断可能误将不同长的也Union了。</li>
+<li>窗口删除处理错误： 直接把出窗口的元素从DSU中删除是不行的，只能标记无效。若错误地继续将过期元素视为有效，会导致不应连通的组混在一起；反之，若简单跳过旧元素但其Union关系残留，下一次又把相同值的元素当新ID插入，可能出现一值多ID并存的错误。因此映射ID和有效性需要严格管理。常见做法是<strong>过期元素计数减到0就允许将该值映射移除</strong>（下次再来当新值处理），同时DSU里虽然有旧ID但因cnt=0不参与，这样历史关系不会错误影响当前分组。</li>
+</ul>
+<p><strong>案例</strong>：热门关键词问题</p>
+<p>描述：维护最近N个搜索关键词流，相似组定义为仅一字符不同（汉明距离1，可传递）。每隔一段操作，需要输出当前最热门的前5个“相似组”的代表关键词（代表选出现次数最多且字典序最小），按组总出现次数排序。</p>
+<p>难点：关键词流实时更新，旧词过期，组关系也可能分裂合并，查询要获取<strong>动态组</strong>。</p>
+<ul>
+<li><strong>模型</strong>：窗口内的关键词作为节点。边：汉明距离=1。组：相似等价类，组热度=总出现次数。代表=组内频次最高词（频次相等取字典序小）。</li>
+<li><strong>实现</strong>：因N最大500，查询最多100次，可以<strong>每次查询重建</strong>当前窗口DSU并统计组热度。具体：<ul>
+<li>用数组/列表保存窗口内各唯一词及其频次。</li>
+<li>建立DSU，按词两两比较或利用长度+暴力比较找汉明距=1的对进行Union。</li>
+<li>维护Union时的代表选择：频次高者为根，频次相同则字典序小者为根。</li>
+<li>建立完后，遍历所有根，收集组热度和代表词，排序输出前5。</li>
+</ul>
+</li>
+<li><strong>优化</strong>：也可以对每次新增用索引法连接相似词保存静态图，但由于有滑窗删除，处理复杂。竞赛中直接重建可靠简单。</li>
+<li><strong>考点</strong>：字符串处理、DSU应用、排序技巧（partial_sort拿top5）、正确应对窗口滑动的元素增删。</li>
+</ul>
+<p>这个案例展示了<strong>相似度并查集</strong>在静态和窗口场景的应用：静态下能简单Union全部，窗口下选择合适的重建或维护方案确保正确性。核心还是识别<strong>等价关系传递闭包-&gt;并查集建模</strong>这个套路。</p>
+<h3 id="动态连通性（加删边）的离线处理"><a href="#动态连通性（加删边）的离线处理" class="headerlink" title="动态连通性（加删边）的离线处理"></a>动态连通性（加删边）的离线处理</h3><p><strong>题型摘要</strong>：一系列操作包括“添加一条连接（边）”、“删除一条连接”、“查询两元素是否连通”。边的添加删除是动态的，但我们可以<strong>离线</strong>处理所有操作，即先读完整操作序列再求结果。</p>
+<p><strong>建模</strong>：元素作为并查集节点，连接操作就是Union，不同的是删除操作使原先连通可能断开，直接在线处理很难。通过<strong>离线变换</strong>：</p>
+<ul>
+<li>记录每条边的“生存区间”（被加时和删时刻）。对于一直存在到最后的边，结束时间可视作∞或最大操作号。</li>
+<li>采用<strong>分治或时空分割</strong>：把问题拆成时间段处理，在一个段里把始终有效的边Union起来。</li>
+<li>每到查询操作时，检查此刻活动的边是否已Union表示连通。</li>
+</ul>
+<p><strong>算法</strong>（DSU + 分治举例）：</p>
+<ul>
+<li>将所有操作分治处理：递归划分操作序列，一半一半。</li>
+<li>有些边在整个区间都存在，可以提前Union以影响整段查询；边只部分存在，则在递归深入相应子区间时Union。 - 在回溯时Undo先前Union（需要Rollback DSU支持）。</li>
+<li>在每个查询点正好DSU状态包含了当时有效的全部边，直接Find判断连通即可。</li>
+</ul>
+<p>考察重点：</p>
+<ul>
+<li><strong>DSU高级操作</strong>：实现可回滚的Union-Find，或巧妙利用栈记录变化。对开发者的实现功底要求高。</li>
+<li><strong>对实现的掌控</strong>：分治/线段树递归过程中，别遗漏Union或多Union，Undo对应正确。 </li>
+<li><strong>时空转换的思维</strong>：这比较偏OI竞赛的算法设计，工程中类似问题更可能用别的解决或降低要求避免这么搞。</li>
+</ul>
+<p>常见错误：</p>
+<ul>
+<li>不掌握离线技巧，尝试在线Remove：可能导致不能正确维护分量，或不得不每次删除做全图遍历，性能爆炸。</li>
+<li>Rollback DSU实现错误：没有恢复size/parent数组原状，会导致后续查询不准确。</li>
+<li>没考虑一条边多次添加删除的情形，要按时间区间处理而不是简单标记是否存在。</li>
+</ul>
+<p>说明：完全在线的连通性动态更新在工程里往往用<strong>动态图</strong>结构（如Ett树+link-cut tree维护生成树, 或Biconnected components维护)超出本次范围。离线的优势是利用并查集强大的Union效率来处理复杂时间维度问题，属于 oj 高级算法之一。</p>
+<h2 id="什么时候不用并查集？"><a href="#什么时候不用并查集？" class="headerlink" title="什么时候不用并查集？"></a>什么时候不用并查集？</h2><p>并查集擅长处理“<strong>无权连通性</strong>”相关的问题，但并不是万能钥匙。在以下情况，应考虑别的方法或并查集的改进版：</p>
+<ul>
+<li><p><strong>需要路径/距离信息</strong>：并查集只能判断连通或组属性，无法获取两节点间实际路径或距离。例如最短路径、最小花费、最大流量等，必须使用图的搜索或优化算法（BFS, Dijkstra, Floyd, Max-Flow等）。并查集完全不知道连接的结构细节，只知道连着。</p>
+<p>  举例： “判断两城是否连通”可以DSU，但“求两城最短路长度”必须图算法。</p>
+</li>
+<li><p><strong>涉及连通性的优化/最优选择</strong>：如要求在保持连通情况下优化某指标（最小生成树、最小生成森林），Kruskal算法里用并查集判环，但核心还是要选边、排序边，并查集只是辅助。又如要求连通子图但优化某种价值，通常需要搜索和DP/贪心，DSU不解决这类最优化问题。</p>
+</li>
+<li><p><strong>图结构频繁删除</strong>：在线删除使连通性可能增加分量，这对并查集模型是逆过程，标准DSU无法高效支持。必须借助离线处理或更复杂的数据结构。如果不能离线，需要维护比如动态树（Link-Cut Tree）或者每次删除重算等。若删除操作很多并实时要求，DSU不是首选。</p>
+</li>
+<li><p><strong>需要维护桥/割点等</strong>：并查集无法识别连通结构中的关键边或点。判断图的桥、割点等需要深度优先搜索（Tarjan算法）等专门算法，因为并查集丢失了图的具体连接信息。</p>
+</li>
+<li><p><strong>元素组合变化</strong>：并查集确定连通性后，对于组合变化不敏感。例如有些问题连通关系有条件或状态依赖（比如某些边有容量或要挑选性加入），并查集不能灵活应对这些“条件存在”的边。</p>
+</li>
+<li><p><strong>小规模、查询极少</strong>：如果元素和查询都很少，直接用DFS/BFS或者暴力也无妨，没必要上DSU。但在竞赛中我们一般追求更好的复杂度以防数据上限，所以宁滥勿缺。</p>
+</li>
+</ul>
+<p><strong>替代方案</strong>：当发现并查集不适合时，要考虑图搜索、树形结构、甚至维护森林的高级数据结构（如Euler Tour Tree，动态树等）或网络流算法，视具体需求而定。例如全动态连通可用ET-tree维护树链接，删除边通过维护生成树+桥检测等手段实现。不过这些超出本文讨论范围。读者需明确<strong>DSU的作用边界</strong>，在适合的情况下用好它，不适合时及时切换思路。</p>
+<h2 id="工程化与性能调优"><a href="#工程化与性能调优" class="headerlink" title="工程化与性能调优"></a>工程化与性能调优</h2><p>在实现并查集解题时，还需注意代码性能和工程细节，尤其在大数据量或多测情况下：</p>
+<ul>
+<li><strong>初始化多次测试</strong>：如果算法场景需要多次初始化（例如OJ多组数据或交互式调用init函数），尽量避免每次重新分配大数组。可以分配为全局静态数组一次到位，使用时重置长度范围或用memset重置。对于vector可以用vector.clear()或直接维护一个索引界限来重复使用空间。</li>
+</ul>
+<p>有时使用时间戳来避免清零整个数组很有用：例如用int lastUse[MAXN];记录每个元素上次操作时间戳，当不同时才认为未初始化。这在场景需要频繁init时节省了大量初始化时间。</p>
+<ul>
+<li><p><strong>内存与结构选择</strong>：一般并查集数组开大一点无妨，因为是O(n)空间。ID如果非常大但稀疏，需要坐标压缩或unordered_map映射。尽量用数组+偏移或哈希+reserve足够空间，减少rehash。像热门关键词题里字符串-&gt;id用了unordered_map，默认就够，但如果字符串很多可以考虑std::unordered_map的bucket大小设置或换用trie树等。</p>
+</li>
+<li><p><strong>Union-Find路径压缩递归</strong>：Find函数通常写成递归形式，但要小心C++递归深度（万一不压缩时会退化深链）。一般n=几万没问题，如果n上百万，可考虑改成迭代形式：</p>
+  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">findSet</span><span class="params">(<span class="type">int</span> x)</span> </span>{</span><br><span class="line">    <span class="type">int</span> r = x;</span><br><span class="line">    <span class="keyword">while</span>(parent[r] != r) r = parent[r];</span><br><span class="line">    <span class="comment">// r现在是根，再压缩路径</span></span><br><span class="line">    <span class="type">int</span> i = x;</span><br><span class="line">    <span class="keyword">while</span>(parent[i] != r) {</span><br><span class="line">        <span class="type">int</span> pi = parent[i];</span><br><span class="line">        parent[i] = r;</span><br><span class="line">        i = pi;</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>  或在CPP中关闭递归优化也行。大多数情况递归是安全的、易写的。</p>
+</li>
+<li><p><strong>I/O优化</strong>：并查集算法本身很快，反而大输入输出可能是瓶颈。可以使用scanf/printf或std::ios::sync_with_stdio(false)加上cin.tie(NULL)，以及必要时采用块读写、getchar_unlocked等方式。</p>
+</li>
+<li><p><strong>局部容器复用</strong>：在用**桶（vector数组）**时，每次清空可以像下面这样避免逐元素清：</p>
+<ul>
+<li>用静态二维数组 vector<int> buckets[MAX_BUCKET][MAX_BUCKET];。初始化时每桶clear()一下，后续每次使用不同桶不会干扰。或者如一些OJ代码一样，不每次clear整个容器而是在记录其中有效元素末尾位置。由于每次插入的元素都知道，不需要频繁删除插入，这种性能已经足够好。</int></li>
+<li>如果要重复使用同一个桶，可以用bucket[i].clear()，这开销是线性的。不过桶里的元素总量等于总插入次数，也就是<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.986ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 878 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>，总clear开销<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.473ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2419 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(2030,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，可接受。</li>
+<li>也可以维护一个vector<int> activeBuckets;列表记录本次有用的桶索引，方便统一清理。不过实现复杂度增加，不是必要。</int></li>
+</ul>
+</li>
+<li><p><strong>Partial Sort</strong>：输出要求Top K时，不必完全排序所有组，可以用std::partial_sort或nth_element将复杂度降为$O(n + k \log n)`. 如热门关键词top5，就是对代表列表partial_sort前5，比sort整个500组更快（虽然500也无所谓，但养成习惯）。</p>
+</li>
+<li><p><strong>哈希技巧</strong>：若使用字符串模式哈希，注意哈希冲突风险，可以用更大位数hash或者在竞赛中相信STL实现。使用unordered_map时可以reserve(期望大小)减少扩容成本。也可用std::map二叉树但一般慢些。对于较小字符串（长度&lt;=10），直接比较也快，甚至可以把字符转成整数拼成64位处理以更快判断相似（工程上如果要求极致，可这么做，但一般没必要）。</p>
+</li>
+<li><p><strong>多属性比较</strong>：实现稳定代表时，多字段比较要确保自反、传递。如果用std::tuple可以直接比较，或者自定义operator&lt;。DSU合并要使用该比较来选根。调试时，可打印每次合并后的root检查是否符合预期规则。</p>
+</li>
+<li><p><strong>调试连通性</strong>：怀疑DSU有问题时，可尝试通过遍历parent数组输出各组内容或检查最终组数是否等于初始元素数-合并次数。调试窗口问题可在小数据上打印窗口变化和DSU结果比对预期。</p>
+</li>
+<li><p><strong>毁灭性Union</strong>：有的实现喜欢用findSet(x) == findSet(y)判断再union，其实无需判断也可以直接unionSet里判断根是否相等再决定合并，避免上层再Find一次。注意不要搞成每union都无脑赋parent，会破坏结构。</p>
+</li>
+<li><p><strong>C++内置DSU</strong>：C++20没有直接提供并查集结构（只有在 <graph> 中有一些算法用disjoint_set concept，但并不直接给你类）。我们还是自己写比较好。</graph></p>
+</li>
+</ul>
+<h2 id="常见错误设计对比"><a href="#常见错误设计对比" class="headerlink" title="常见错误设计对比"></a>常见错误设计对比</h2><p>学习并查集应用时，对比错误方案和正确方案很有价值。下表列举了动态连通性题中常见的错误设计、超时原因，并给出正确思路：</p>
+<table>
+<thead>
+<tr>
+<th>错误方案</th>
+<th>问题分析</th>
+<th>正确思路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全局暴力连边（每加入一个元素，与之前所有元素比较关系并决定连通）</td>
+<td>时间复杂度 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，当 n 较大（上万）时比较次数过亿，容易超时。</td>
+<td><strong>索引优化</strong>：利用空间分桶或哈希，根据连通判据缩小比较范围。例如曼哈顿距离用 3×3 桶，字符串相似用模式表。每元素只比较邻近候选，大幅降低总比较量。</td>
+</tr>
+<tr>
+<td>不使用并查集，反复 DFS/BFS 查询</td>
+<td>每次 DFS 都是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.664ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3829.4 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1974.2,0)"><path data-c="2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path></g><g data-mml-node="mi" transform="translate(2974.4,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mo" transform="translate(3440.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，若查询很多，累积耗时严重。动态加边时遍历越来越大图，更慢。</td>
+<td><strong>并查集维护</strong>：增量构建连通信息，一次 Union 永久有效。Find 操作近 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 判断连通。将重复搜索转为渐进维护。</td>
+</tr>
+<tr>
+<td>忘记路径压缩/按秩</td>
+<td>并查集退化为链，Find 变 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.844ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2141 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1752,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。大量操作会拖垮性能，最坏 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.83ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3019 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(1752,0)"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(2630,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。</td>
+<td><strong>优化并查集</strong>：Find 时路径压缩，Union 时按秩/大小。保证几乎 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。竞赛标准配置。</td>
+</tr>
+<tr>
+<td>代表选择不当</td>
+<td>查询组内最值时，只能遍历全组，单次查询退化到 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.844ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2141 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1752,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。</td>
+<td><strong>合并时维护代表</strong>：Union 时比较代表，例如保留 ID 小的为根。Find 结果就是组最小 ID，可直接查询。</td>
+</tr>
+<tr>
+<td>聚合更新错误</td>
+<td>Union 时没更新统计量，导致组大小、总数错误。</td>
+<td><strong>小心更新聚合</strong>：合并时累加所有量，新 root 承担维护。组数每次成功合并减 1。写完要用简单用例验证。</td>
+</tr>
+<tr>
+<td>边界误判</td>
+<td>几何相交判断时错用 <code>&gt;</code> 而非 <code>&gt;=</code>，导致边界贴合没判连通。</td>
+<td><strong>闭区间法则</strong>：相交条件用 <code>&lt;=</code>，端点重合算相交。测试边界值验证实现。</td>
+</tr>
+<tr>
+<td>滑动窗口直连旧 ID</td>
+<td>元素出队后，新出现相同值误用旧 DSU 编号，导致错误连通。</td>
+<td><strong>新 ID 处理</strong>：完全移出的元素视作失效。再出现同值分配新 ID。用计数/标志判断是否存在。</td>
+</tr>
+<tr>
+<td>未考虑多桶覆盖</td>
+<td>只记录左上角桶，跨桶时遗漏邻接。</td>
+<td><strong>完整桶映射</strong>：覆盖范围的所有桶都要记录。检查所有桶内旧元素，避免漏连。</td>
+</tr>
+<tr>
+<td>Union 判断条件遗漏</td>
+<td>错用判据（如欧氏距离代替曼哈顿），连错或漏连。</td>
+<td><strong>严格按题意</strong>：确认条件定义并实现，测试临界例子验证。复杂条件要么按定义实现，要么引用已验证的优化策略。</td>
+</tr>
+<tr>
+<td>输出前未路径压缩</td>
+<td>懒更新导致查询阶段把同组当不同组。</td>
+<td><strong>Find 校正</strong>：输出或关键查询前统一 Find 刷新代表。保险起见，可先 <code>findSet()</code> 后再用代表。</td>
+</tr>
+</tbody></table>
+<p>通过以上对照，提醒我们实现并查集题解要细心，既要保证<strong>理论复杂度</strong>达标，又要照顾<strong>实现细节</strong>正确，以免阴沟翻船。</p>
+<h2 id="练习与自测题目"><a href="#练习与自测题目" class="headerlink" title="练习与自测题目"></a>练习与自测题目</h2><p>理解并查集动态连通性的最佳方式还是实践。下面列出几道练习题（仅描述关键点），建议读者自行思考建模和解法。每题旁附提示供对照：</p>
+<p><strong>练习1：传感器网络</strong>（曼哈顿距离聚类）</p>
+<p>有若干传感器节点依次布设在平面坐标上，通信范围L。新节点与范围内已有任意节点通信则接入其网络（连成一片）。每个节点有数据存储量，问在构建过程中，是否存在某一网络总存储量超过阈值K？若有输出该网络中存储量最小的节点坐标。</p>
+<ul>
+<li>提示： <strong>并查集</strong>连通网络，<strong>桶划分</strong>按L距离，<strong>compSum</strong>维护存储总量，<strong>比较器</strong>选最小存储节点为根。每次新节点加入后检查其所在连通分量总量是否≥K。</li>
+</ul>
+<p><strong>练习2：矩形区域合并</strong>（几何重叠并查集）</p>
+<p>在一个大矩形区域内依次放置小矩形，每个有唯一ID。若两个矩形有重叠，则视为连接。同一时间给若干查询：给出两个矩形ID，问它们是否属于同一重叠组。如果删除某些矩形后，上述关系会变化（可以离线考虑删除）。</p>
+<ul>
+<li>提示： <strong>并查集</strong>按ID合并重叠组，<strong>空间索引</strong>按坐标划分小块（可按最大矩形长分格）。离线删除可采用<strong>逆向添加</strong>或<strong>分治</strong>，或直接把删除操作按时间分两种DSU处理（较难）。如不考虑删除则直接动态Union。查询连通用Find判断。</li>
+</ul>
+<p><strong>练习3：相似单词分组</strong>（滑动窗口+并查集）</p>
+<p>实时记录用户最近N次输入的单词。如果两个单词长度相同且编辑距离（Levenshtein距离）为1，则归为一组（可以通过一次插删改转换，相当于特例：长度差不超过1，且满足一定条件）。实时输出当前窗口内最大的组的大小。</p>
+<ul>
+<li>提示： 这是稍复杂的变体。考虑<strong>长度分类</strong>：长度差&gt;1必不同组。长度相差1可能通过插删成相同再比较。用<strong>哈希</strong>存“缺一字母”的模式匹配插删关系。由于删除难在线维护，可每次窗口移动重算DSU。窗口N估计不大，或者用<strong>增量+过期标记</strong>策略。组大小DSU维护即可。</li>
+</ul>
+<p><strong>练习4：动态图连通性</strong>（离线 queries）</p>
+<p>有n个节点的图，初始无边，接下来会有如下两类操作共m个：ADD u v 添加无向边(u,v)，REMOVE u v 删除边(u,v)。同时给出若干查询ASK u v，问当时u与v是否连通。要求输出每个ASK的答案。</p>
+<ul>
+<li>提示： 典型<strong>离线动态连通</strong>问题。可用<strong>分治或线段树</strong>分配边存在区间，配合<strong>rollback并查集</strong>。实现较难，可以找已有模板练习。务必跟踪每条边什么时候存在、何时合并或回滚。</li>
+</ul>
+<p>通过这些练习，重点体会<strong>正确建立模型</strong>（元素-&gt;节点，关系-&gt;边）、<strong>选择高效索引</strong>（避免全比较）、<strong>运用并查集维护</strong>。建议先用较小数据手算或写暴力验证，再套并查集思路实现，对照输出，增强信心。</p>
+<h2 id="总结：并查集动态连通一页通览"><a href="#总结：并查集动态连通一页通览" class="headerlink" title="总结：并查集动态连通一页通览"></a>总结：并查集动态连通一页通览</h2><p>最后，以一张清单形式总结并查集动态连通题的关键知识点，便于赛前或面试前快速复习：</p>
+<ul>
+<li><strong>识别场景</strong>：连通性问题 + 传递闭包 + 多次查询/动态加入 → DSU。慎用场景：需路径/权重最优、在线删除频繁。</li>
+<li><strong>基本操作</strong>：findSet(x)（路径压缩），unionSet(a,b)（按秩/大小合并）。复杂度<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="7.006ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3096.8 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2248" d="M55 319Q55 360 72 393T114 444T163 472T205 482Q207 482 213 482T223 483Q262 483 296 468T393 413L443 381Q502 346 553 346Q609 346 649 375T694 454Q694 465 698 474T708 483Q722 483 722 452Q722 386 675 338T555 289Q514 289 468 310T388 357T308 404T224 426Q164 426 125 393T83 318Q81 289 69 289Q55 289 55 319ZM55 85Q55 126 72 159T114 210T163 238T205 248Q207 248 213 248T223 249Q262 249 296 234T393 179L443 147Q502 112 553 112Q609 112 649 141T694 220Q694 249 708 249T722 217Q722 153 675 104T555 55Q514 55 468 76T388 123T308 170T224 192Q164 192 125 159T83 84Q80 55 69 55Q55 55 55 85Z"></path></g><g data-mml-node="mi" transform="translate(1055.8,0)"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(1818.8,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(2207.8,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(2707.8,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。</li>
+<li><strong>聚合拓展</strong>：根节点维护组信息（大小、和值、最小值等），Union时汇总到新根。Find获取根再查询属性。</li>
+<li><strong>代表选取</strong>：Union时用自定义比较器保持全局稳定序。如选最小ID/字典序等为根，方便直接输出代表。</li>
+<li><strong>索引优化套路</strong>：<ul>
+<li>空间邻域：据阈值划分网格/桶，只检查周邻（曼哈顿/欧氏距离类）。</li>
+<li>区间分块：按最大范围L拆分空间块，映射形状到块，查相关块（矩形重叠类）。</li>
+<li>特征哈希：利用模式/特征键定位潜在相似元素（字符串相似类）。</li>
+<li>时间分治：将时间线离线处理，DSU处理稳定区间（动态加删边类）。</li>
+</ul>
+</li>
+<li><strong>动态窗口</strong>：元素过期用重建DSU或标记无效处理，不要试图直接在DSU中删除节点（不可逆操作）。</li>
+<li><strong>工程细节</strong>：<ul>
+<li>多测场景预分配数组，全局静态+初始化重用或用时间戳避免频繁memset。</li>
+<li>控制内存：坐标压缩/映射ID让数组不爆；reserve哈希容器空间减小再散列。</li>
+<li>优化I/O：关闭sync，批量读写等，防止输出瓶颈。</li>
+<li>C++实现注意路径压缩（递归/迭代）、Union逻辑正确性。调试可打印部分Union情况。</li>
+</ul>
+</li>
+<li><strong>常见陷阱</strong>：<ul>
+<li><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.832ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2577.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mn" transform="translate(633,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2188.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>暴力检查导致超时 → 引入桶/索引降低为近线性或<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.466ex;" xmlns="http://www.w3.org/2000/svg" width="6.36ex" height="2.036ex" role="img" focusable="false" viewBox="0 -694 2811.3 900"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(766.7,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2044.7,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2211.3,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container>。</li>
+<li>忘开路径压缩/按秩 → 退化慢。</li>
+<li>邻接条件边界弄错 → 连通性判断漏或错（特别是≤ / &lt; 辨清）。</li>
+<li>删除操作不会写 → 改用离线或重建策略。</li>
+<li>DSU属性更新遗漏 → 结果不对（组大小、组数要在Union维护）。</li>
+<li>一值多次出现ID复用问题 → 离开窗口或多次出现要当新处理，维护计数映射。</li>
+</ul>
+</li>
+</ul>
+<p>并查集动态连通性题目在 oj 中非常常见，从简单的图连通判定到复杂的综合应用都有覆盖。掌握以上方法论与模板代码，灵活套用索引技巧，将能迅速攻克这类题，游刃有余。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/algorithm/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"><i class="fa fa-tag"></i> 数据结构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/algorithm/2025/09/17/%E4%BA%8C%E7%BB%B4%E7%BD%91%E6%A0%BC%E7%B1%BB%E8%AE%BE%E8%AE%A1%E9%A2%98%E7%9A%84%E6%8A%80%E5%B7%A7/" rel="prev" title="二维网格类设计题的技巧">
+                  <i class="fa fa-angle-left"></i> 二维网格类设计题的技巧
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ziyoeng Zoeng</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">111k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:44</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
