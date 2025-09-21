@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="候选生成：把“可能连边的一小撮元素”高效列出来。手段是分桶&#x2F;倒排&#x2F;签名&#x2F;树等。校验：对候选逐一做“真条件”判定（距离阈值&#x2F;重叠&#x2F;相似度≥K…）。合并：用并查集把通过校验的点对连起来，并维护分量聚合量&#x2F;稳定代表。小而准地产生候选，快而狠地校验，轻而灵地合并。  在oj中经常会遇到动态连通性问题：一系列元素随着操作逐渐连接成组，我们需要快速判断连通关系或统计连通分量的属性。并查集（Disjoint">
+    <meta name="description" content="这篇文章系统讲解了并查集及其在动态连通性中的应用，从基础代码到聚合量、稳定代表等扩展实现，再到空间分桶、特征索引、滑动窗口等“索引与建边”策略，并结合几何聚类、字符串相似与动态加删边等典型题型，提供决策树、常见错误对比及性能调优方法。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并查集的Candidate-Verify-Union范式：高效处理动态增量连通性">
 <meta property="og:url" content="https://www.wuwangyangxin.com/2025/09/21/%E5%B9%B6%E6%9F%A5%E9%9B%86%E7%9A%84Candidate-Verify-Union%E8%8C%83%E5%BC%8F%EF%BC%9A%E9%AB%98%E6%95%88%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E5%A2%9E%E9%87%8F%E8%BF%9E%E9%80%9A%E6%80%A7/index.html">
 <meta property="og:site_name" content="勿忘羊心">
-<meta property="og:description" content="候选生成：把“可能连边的一小撮元素”高效列出来。手段是分桶&#x2F;倒排&#x2F;签名&#x2F;树等。校验：对候选逐一做“真条件”判定（距离阈值&#x2F;重叠&#x2F;相似度≥K…）。合并：用并查集把通过校验的点对连起来，并维护分量聚合量&#x2F;稳定代表。小而准地产生候选，快而狠地校验，轻而灵地合并。  在oj中经常会遇到动态连通性问题：一系列元素随着操作逐渐连接成组，我们需要快速判断连通关系或统计连通分量的属性。并查集（Disjoint">
+<meta property="og:description" content="这篇文章系统讲解了并查集及其在动态连通性中的应用，从基础代码到聚合量、稳定代表等扩展实现，再到空间分桶、特征索引、滑动窗口等“索引与建边”策略，并结合几何聚类、字符串相似与动态加删边等典型题型，提供决策树、常见错误对比及性能调优方法。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-09-20T16:20:01.000Z">
-<meta property="article:modified_time" content="2025-09-20T16:54:12.188Z">
+<meta property="article:modified_time" content="2025-09-21T14:05:56.891Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta property="article:tag" content="数据结构">
 <meta name="twitter:card" content="summary">
@@ -343,7 +343,7 @@ mjx-container[display="true"] + br {
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="并查集的Candidate-Verify-Union范式：高效处理动态增量连通性 | 勿忘羊心">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="这篇文章系统讲解了并查集及其在动态连通性中的应用，从基础代码到聚合量、稳定代表等扩展实现，再到空间分桶、特征索引、滑动窗口等“索引与建边”策略，并结合几何聚类、字符串相似与动态加删边等典型题型，提供决策树、常见错误对比及性能调优方法。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -359,7 +359,7 @@ mjx-container[display="true"] + br {
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-09-21 00:20:01 / 修改时间：00:54:12" itemprop="dateCreated datePublished" datetime="2025-09-21T00:20:01+08:00">2025-09-21</time>
+      <time title="创建时间：2025-09-21 00:20:01 / 修改时间：22:05:56" itemprop="dateCreated datePublished" datetime="2025-09-21T00:20:01+08:00">2025-09-21</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -396,6 +396,7 @@ mjx-container[display="true"] + br {
     </span>
 </div>
 
+            <div class="post-description">这篇文章系统讲解了并查集及其在动态连通性中的应用，从基础代码到聚合量、稳定代表等扩展实现，再到空间分桶、特征索引、滑动窗口等“索引与建边”策略，并结合几何聚类、字符串相似与动态加删边等典型题型，提供决策树、常见错误对比及性能调优方法。</div>
         </div>
       </header>
 
