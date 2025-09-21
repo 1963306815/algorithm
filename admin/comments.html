@@ -27,8 +27,8 @@
 <meta property="og:site_name" content="勿忘羊心">
 <meta property="og:description" content="评论管理    :root{--c:#3b82f6;--b:#e5e7eb;--t:#111;--sub:#666;}   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,&#39;Helvetica Neue&#39;,Arial,&#39;Noto Sans&#39;,sans-serif;        margin:16px;color">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-09-21T07:38:05.483Z">
-<meta property="article:modified_time" content="2025-09-21T07:38:05.483Z">
+<meta property="article:published_time" content="2025-09-21T07:59:02.055Z">
+<meta property="article:modified_time" content="2025-09-21T07:59:02.055Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta name="twitter:card" content="summary">
 
@@ -247,13 +247,16 @@
   .muted{color:var(--sub);font-size:12px}
   .pill{display:inline-block;border:1px solid var(--b);padding:2px 6px;border-radius:999px;font-size:12px;margin-left:6px}
 </style>
+
 <h1>评论管理</h1>
+
 <div class="bar">
   <label>接口基址
     <input id="base" value="/api" style="width:280px">
   </label>
   <label>状态
     <select id="status">
+      <option value="all">all</option>
       <option value="pending" selected>pending</option>
       <option value="approved">approved</option>
       <option value="spam">spam</option>
@@ -264,45 +267,100 @@
     <input id="post" placeholder="/2025/09/06/my-post/">
   </label>
   <button id="reload">刷新</button>
+  <button id="logout" class="secondary" title="清除本页保存的 ADMIN_TOKEN">退出登录</button>
 </div>
+
 <div class="muted">* 首次进入会询问 ADMIN_TOKEN，只保存在当前标签页的 sessionStorage。</div>
+
 <table id="tbl">
   <thead>
-    <tr><th style="width:70px">ID</th><th>信息</th><th style="width:220px">操作</th></tr>
+    <tr>
+      <th style="width:70px">ID</th>
+      <th>信息</th>
+      <th style="width:220px">操作</th>
+    </tr>
   </thead>
   <tbody></tbody>
 </table>
+
 <script>
+  // ====== 小工具 ======
   const $ = s => document.querySelector(s);
   const baseEl = $("#base"), statusEl = $("#status"), postEl = $("#post"), tbody = $("#tbl tbody");
   const KEY = "ADMIN_TOKEN";
+  const STATUSES = ["pending", "approved", "spam", "deleted"];
+
+  function escapeHTML(s){
+    return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  }
+
   function getToken(){
     let t = sessionStorage.getItem(KEY);
-    if(!t){ t = prompt("请输入 ADMIN_TOKEN"); if(t) sessionStorage.setItem(KEY,t); }
+    if(!t){
+      t = prompt("请输入 ADMIN_TOKEN");
+      if(t) sessionStorage.setItem(KEY, t);
+    }
     return t || "";
   }
-  async function apiList(){
-    const token = getToken(); if(!token) return alert("没有 token");
-    const u = new URL((baseEl.value||"/api") + "/admin/comments", location.origin);
-    u.searchParams.set("status", statusEl.value);
-    const p = (postEl.value||"").trim(); if(p) u.searchParams.set("post", p);
-    const res = await fetch(u, { headers:{ "Authorization": "Bearer "+token }});
-    if(!res.ok){ alert("接口错误: "+res.status); return; }
+
+  function authHeaders(){
+    const token = getToken();
+    if(!token) throw new Error("没有 ADMIN_TOKEN");
+    return { "Authorization": "Bearer " + token };
+  }
+
+  // ====== 数据请求 ======
+  async function fetchOneStatus(status, postFilter){
+    const base = (baseEl.value || "/api").replace(/\/+$/,"");
+    const u = new URL(base + "/admin/comments", location.origin);
+    if (status) u.searchParams.set("status", status);
+    if (postFilter) u.searchParams.set("post", postFilter);
+    const res = await fetch(u, { headers: authHeaders() });
+    if(!res.ok) throw new Error("接口错误: " + res.status);
     const data = await res.json();
-    render(data.list||[]);
+    return Array.isArray(data.list) ? data.list : [];
   }
+
+  async function apiList(){
+    try{
+      const sel = statusEl.value;
+      const postFilter = (postEl.value || "").trim();
+      let list = [];
+      if (sel === "all") {
+        // 兼容后端未实现 all：前端分别拉四种状态合并
+        const parts = await Promise.all(STATUSES.map(s => fetchOneStatus(s, postFilter)));
+        list = parts.flat();
+        // 按时间倒序
+        list.sort((a,b) => (b.created_at||0) - (a.created_at||0));
+      } else {
+        list = await fetchOneStatus(sel, postFilter);
+      }
+      render(list);
+    } catch (e){
+      alert(e.message || e);
+    }
+  }
+
   async function moderate(id, action){
-    const token = getToken(); if(!token) return;
-    const res = await fetch((baseEl.value||"/api")+"/admin/moderate", {
-      method:"POST",
-      headers:{ "Authorization":"Bearer "+token, "Content-Type":"application/json" },
-      body: JSON.stringify({ id, action })
-    });
-    if(!res.ok){ alert("失败: "+res.status); return; }
-    await apiList();
+    try{
+      const base = (baseEl.value || "/api").replace(/\/+$/,"");
+      const res = await fetch(base + "/admin/moderate", {
+        method:"POST",
+        headers:{ ...authHeaders(), "Content-Type":"application/json" },
+        body: JSON.stringify({ id, action })
+      });
+      if(!res.ok){ throw new Error("失败: " + res.status); }
+      await apiList();
+    } catch (e){
+      alert(e.message || e);
+    }
   }
+  // 暴露到全局给按钮 onclick 调用
+  window.moderate = moderate;
+
+  // ====== 渲染 ======
   function render(list){
-    tbody.innerHTML = (list.length? "" : "<tr><td colspan=3>暂无数据</td></tr>");
+    tbody.innerHTML = (list.length ? "" : "<tr><td colspan=3>暂无数据</td></tr>");
     for(const it of list){
       const tr = document.createElement("tr");
       const t = new Date(it.created_at);
@@ -310,9 +368,9 @@
         <td>${it.id}</td>
         <td>
           <div><strong>${escapeHTML(it.author||"匿名")}</strong>
-            <span class="pill">${escapeHTML(it.status)}</span></div>
-          <div class="muted">${t.toLocaleString()} · ${escapeHTML(it.post||"")}</div>
-          <div style="margin-top:6px;white-space:pre-wrap">${it.content}</div>
+            <span class="pill">${escapeHTML(it.status||"")}</span></div>
+          <div class="muted">${isNaN(t)? "" : t.toLocaleString()} · ${escapeHTML(it.post||"")}</div>
+          <div style="margin-top:6px;white-space:pre-wrap">${it.content||""}</div>
         </td>
         <td>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -324,11 +382,15 @@
       tbody.appendChild(tr);
     }
   }
-  function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+
+  // ====== 事件 ======
   $("#reload").onclick = apiList;
+  $("#logout").onclick = () => { sessionStorage.removeItem(KEY); alert("已清除 ADMIN_TOKEN"); };
+  statusEl.onchange = apiList;
+  postEl.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); apiList(); } });
+
+  // 首次加载
   apiList();
-  // 暴露到全局给按钮调
-  window.moderate = moderate;
 </script>
 
       </div>
