@@ -893,57 +893,68 @@ mjx-container[display="true"] + br {
     margin-top: 2rem;
   }
   @media (prefers-color-scheme: dark) {
-    #comments-app {
-      --c-bg: #111318;
-      --c-text: #e8e8e8;
-      --c-sub: #a5a5a5;
-      --c-border: #30363d;
-      --shadow: 0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35);
-    }
+    #comments-app { --c-bg:#111318; --c-text:#e8e8e8; --c-sub:#a5a5a5; --c-border:#30363d;
+      --shadow:0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35); }
   }
   #comments-app, #comments-app * { box-sizing: border-box; }
 
-  /* 容器卡片 */
+  /* 外层大卡片 */
   #comments-app .wrap {
-    max-width: 860px;
-    width: 100%;
-    margin: 0 auto;
-    background: var(--c-bg);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 16px;
-    overflow: hidden; /* 防止子元素圆角外突 */
+    max-width: 860px; width: 100%; margin: 0 auto;
+    background: var(--c-bg); border: 1px solid var(--c-border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; overflow: hidden;
   }
 
-  /* 标题 */
+  /* 顶部标题 */
   #comments-app .title {
     display: flex; align-items: center; gap: 8px;
-    margin: 2px 0 14px;
-    font-size: clamp(1.06rem, 1.6vw, 1.25rem);
-    font-weight: 700; color: var(--c-text);
+    margin: 2px 0 16px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--c-text);
   }
-  #comments-app .title::before {
-    content:""; width:8px; height:20px; border-radius: 4px; background: var(--c-accent);
+  #comments-app .title::before{
+    content:""; width:8px; height:20px; border-radius:4px; background: var(--c-accent);
   }
 
-  /* 顶部提示条（只显示一次） */
-  #comments-app .alert {
-    display: none;
-    padding: 10px 12px;
+  /* 内部分区：上下两张卡：列表卡 + 表单卡 */
+  #comments-app .sections { display: grid; gap: 16px; }
+  #comments-app .card {
+    background: color-mix(in srgb, var(--c-bg) 98%, #000 2%);
     border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: rgba(107,114,128,.08);
-    color: var(--c-sub);
-    margin-bottom: 12px;
+    padding: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    #comments-app .card { background: color-mix(in srgb, var(--c-bg) 94%, #fff 6%); }
   }
 
-  /* 表单 12 栅格（防溢出） */
+  /* 仅列表卡的列表样式 */
+  #comments-app .list { display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 12px 14px; background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark){ #comments-app .item{ background: rgba(255,255,255,.03);} }
+  #comments-app .meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size:.86rem; margin-bottom:6px; }
+  #comments-app .meta .author { color: var(--c-text); font-weight:600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height:1.7; }
+
+  /* 表单卡：提示条 + 表单 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px; border: 1px solid var(--c-border);
+    border-radius: 12px; background: rgba(107,114,128,.08);
+    color: var(--c-sub); margin-bottom: 12px;
+  }
+  /* 没文字时自动隐藏，杜绝“空白横条” */
+  #comments-app .alert:empty { display: none !important; }
+
+  /* 表单栅格（12栅格） */
   #comments-app .form {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 12px;
-    align-items: start;
+    gap: 12px; align-items: start;
   }
   #comments-app .col-6  { grid-column: span 6 / span 6; }
   #comments-app .col-12 { grid-column: span 12 / span 12; }
@@ -952,61 +963,30 @@ mjx-container[display="true"] + br {
   #comments-app textarea {
     width: 100%;
     border: 1px solid var(--c-border);
-    background: var(--c-bg);
-    color: var(--c-text);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-size: .95rem;
-    outline: none;
-    transition: border-color .15s ease, box-shadow .15s ease;
+    background: var(--c-bg); color: var(--c-text);
+    border-radius: 12px; padding: 12px 14px; font-size:.95rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
   }
-  #comments-app textarea {
-    min-height: 140px;
-    resize: vertical;       /* 仅允许垂直拉伸 */
-    max-width: 100%;        /* 禁止横向拉伸导致溢出 */
-    line-height: 1.6;
-  }
-  #comments-app input:focus,
-  #comments-app textarea:focus {
-    border-color: var(--c-accent);
-    box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  #comments-app textarea { min-height: 140px; resize: vertical; max-width:100%; line-height:1.6; }
+  #comments-app input:focus, #comments-app textarea:focus {
+    border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(59,130,246,.25);
   }
 
-  /* Turnstile + 提交按钮 */
   #comments-app .actions {
     grid-column: span 12 / span 12;
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-top: 4px;
   }
   #comments-app .btn {
     display:inline-flex; align-items:center; justify-content:center;
-    background: var(--c-accent); color:#fff;
-    border: 1px solid transparent;
-    padding: 10px 16px; border-radius: 10px;
-    font-weight: 600; cursor: pointer;
-    transition: transform .06s ease, filter .15s ease;
+    background: var(--c-accent); color:#fff; border:1px solid transparent;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+    transition: transform .06s, filter .15s;
   }
-  #comments-app .btn:hover { filter: brightness(1.05); }
-  #comments-app .btn:active { transform: translateY(1px); }
+  #comments-app .btn:hover{ filter:brightness(1.05); }
+  #comments-app .btn:active{ transform: translateY(1px); }
 
-  /* 列表 */
-  #comments-app .list { margin-top: 14px; display: grid; gap: 10px; }
-  #comments-app .item {
-    border: 1px solid var(--c-border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: rgba(0,0,0,.02);
-  }
-  @media (prefers-color-scheme: dark) {
-    #comments-app .item { background: rgba(255,255,255,.03); }
-  }
-  #comments-app .meta {
-    display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
-    color: var(--c-sub); font-size: .86rem; margin-bottom: 6px;
-  }
-  #comments-app .meta .author { color: var(--c-text); font-weight: 600; }
-  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height: 1.7; }
-
-  /* 小屏：自动单列、按钮全宽 */
+  /* 小屏优化：表单单列、按钮全宽 */
   @media (max-width: 720px){
     #comments-app .col-6 { grid-column: span 12 / span 12; }
     #comments-app .btn { width: 100%; }
@@ -1017,27 +997,31 @@ mjx-container[display="true"] + br {
   <div class="wrap">
     <div class="title">评论</div>
 
-    <!-- 顶部提示条（统一显示一次） -->
-    <div id="comment-msg" class="alert"></div>
+    <div class="sections">
+      <!-- 列表卡 -->
+      <section class="card list-card">
+        <div id="comments-list" class="list">
+          <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+        </div>
+      </section>
 
-    <!-- 评论列表（初始占位） -->
-    <div id="comments-list" class="list">
-      <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+      <!-- 表单卡 -->
+      <section class="card form-card">
+        <div id="comment-msg" class="alert"></div>
+
+        <form id="comment-form" class="form" novalidate>
+          <input class="col-12" type="hidden" name="post" />
+          <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+          <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+          <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+          <div class="actions">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+            <button type="submit" class="btn">提交</button>
+          </div>
+        </form>
+      </section>
     </div>
-
-    <!-- 评论表单 -->
-    <form id="comment-form" class="form" novalidate>
-      <input class="col-12" type="hidden" name="post" />
-      <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
-      <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
-      <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
-
-      <div class="actions">
-        <!-- Turnstile：替换成你的 Site Key -->
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
-        <button type="submit" class="btn">提交</button>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -1047,7 +1031,6 @@ mjx-container[display="true"] + br {
 <script>
 (function () {
   'use strict';
-
   const API_BASE = '/api';
   const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
 
@@ -1055,8 +1038,6 @@ mjx-container[display="true"] + br {
   const listEl = $('#comments-list');
   const form   = $('#comment-form');
   const msg    = $('#comment-msg');
-
-  // 有时自定义插槽被重复注入，确保不重复挂载
   if (!form || !listEl || !msg) return;
 
   form.querySelector('input[name="post"]').value = postId;
@@ -1066,9 +1047,9 @@ mjx-container[display="true"] + br {
   );
 
   const showMsg = (text) => {
-    if (!text) { msg.style.display = 'none'; msg.textContent = ''; return; }
-    msg.textContent = text;
-    msg.style.display = 'block';
+    msg.textContent = text || '';
+    // :empty 会自动隐藏，这里不强制 display
+    if (!text) return;
   };
 
   const itemTpl = (it) => {
@@ -1078,19 +1059,14 @@ mjx-container[display="true"] + br {
     const authorHtml = it.website
       ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
       : safeAuthor;
-    // content 已在后端转义，这里再兜底一次
     return `
       <div class="item">
-        <div class="meta">
-          <span class="author">${authorHtml}</span>
-          <span>${escapeHTML(time)}</span>
-        </div>
+        <div class="meta"><span class="author">${authorHtml}</span><span>${escapeHTML(time)}</span></div>
         <div class="content">${it.content}</div>
       </div>`;
   };
 
   async function loadComments(page = 1) {
-    // 仅使用顶部提示，不再在列表里重复报错
     showMsg('');
     try {
       const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
@@ -1100,22 +1076,18 @@ mjx-container[display="true"] + br {
       listEl.innerHTML = list.length
         ? list.map(itemTpl).join('')
         : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
-    } catch (e) {
+    } catch {
       showMsg('评论加载失败，请稍后重试。');
-      // 保留当前列表内容（通常仍是“加载中…”），不再塞第二条错误
     }
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
-
-    // Turnstile 会自动注入隐藏 input[name=cf-turnstile-response]
     let token = fd.get('cf-turnstile-response');
     if (!token && window.turnstile && window.turnstile.getResponse) {
       token = window.turnstile.getResponse();
     }
-
     const payload = {
       post: fd.get('post'),
       author: fd.get('author') || '匿名',
