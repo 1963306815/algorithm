@@ -879,7 +879,81 @@ mjx-container[display="true"] + br {
     
     
 
-    <footer class="post-footer">
+    <footer class="post-footer"><div id="comments-app" class="comments">
+  <h3>评论</h3>
+  <div id="comments-list"></div>
+
+  <form id="comment-form">
+    <input name="author" placeholder="昵称（可选）" />
+    <input name="website" placeholder="网站（可选）" />
+    <textarea name="content" placeholder="写点什么吧..." required></textarea>
+
+    <!-- Turnstile：把 data-sitekey 换成你的 Site Key -->
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+
+    <button type="submit">提交</button>
+  </form>
+  <p id="comment-msg" style="display:none"></p>
+</div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+(function () {
+  const API_BASE = '/api';
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/,'/'));
+
+  const listEl = document.getElementById('comments-list');
+  const form = document.getElementById('comment-form');
+  const msg = document.getElementById('comment-msg');
+
+  async function loadComments(page=1){
+    const r = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+    const d = await r.json();
+    listEl.innerHTML = (d.list||[]).map(it => `
+      <div class="comment-item">
+        <div class="meta">
+          <strong>${(it.author||'匿名')}</strong>
+          <span>${new Date(it.created_at).toLocaleString()}</span>
+        </div>
+        <div class="content">${it.content}</div>
+      </div>
+    `).join('') || '<p>还没有评论，来做第一个吧！</p>';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const payload = {
+      post: postId,
+      author: fd.get('author') || '匿名',
+      website: fd.get('website') || '',
+      content: fd.get('content') || '',
+      turnstileToken: (window.turnstile && window.turnstile.getResponse)
+        ? window.turnstile.getResponse()
+        : (document.querySelector('input[name="cf-turnstile-response"]')?.value || '')
+    };
+    const r = await fetch(`${API_BASE}/comments`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    msg.style.display = 'block';
+    if (r.ok && d.ok) {
+      msg.textContent = (d.status === 'pending') ? '已提交，待审核通过后可见。' : '发表成功！';
+      form.reset();
+      if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      if (d.status !== 'pending') loadComments();
+    } else {
+      msg.textContent = '提交失败：' + (d.error || r.status);
+      if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+    }
+  });
+
+  loadComments();
+})();
+</script>
+
           <div class="post-tags">
               <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"><i class="fa fa-tag"></i> 数据结构</a>
           </div>
