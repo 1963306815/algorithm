@@ -1409,7 +1409,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #f6ff42;
+  background: #b9ffff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2848,5 +2848,149 @@ header.header {
   }
   .sidebar-active .footer-fixed {
     left: 320px;
+  }
+}
+/* ===== 仅首页变宽，不影响正文 ===== */
+/* NexT 的 main 容器在首页会带上 class：index posts-expand */
+.index.posts-expand {
+  max-width: 1280px /* 桌面 */;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+@media (min-width: 1600px) {
+  .index.posts-expand {
+    max-width: 1440px /* 超宽屏 */;
+  }
+}
+/* ===== 栅格：轨道整体水平居中，避免“偏右”错觉 ===== */
+.posts-grid {
+  display: grid;
+  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+  gap: 24px;
+  justify-content: center /* 关键：让所有列在容器里居中对齐 */;
+}
+@media (max-width: 1100px) {
+  .posts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+/* ===== 主题变量 ===== */
+:root {
+  --card-radius: 20px;
+  --card-bg: rgba(255,255,255,0.92);
+  --card-border: rgba(0,0,0,0.06);
+  --card-shadow: 0 10px 28px rgba(0,0,0,0.1);
+  --card-shadow-hover: 0 16px 36px rgba(0,0,0,0.14);
+  --cover-col: 25% /* 左侧封面列宽：22%~30% 可调 */;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: rgba(20,21,24,0.72);
+    --card-border: rgba(255,255,255,0.1);
+    --card-shadow: 0 10px 28px rgba(0,0,0,0.45);
+    --card-shadow-hover: 0 16px 36px rgba(0,0,0,0.56);
+  }
+}
+/* ===== 横向卡片：封面在左，正文在右 ===== */
+.post-card {
+  position: relative;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  display: grid;
+  grid-template-columns: var(--cover-col) 1fr;
+  align-items: stretch;
+}
+/* 封面与正文锁定各自网格，杜绝覆盖 */
+.post-card .card-cover {
+  grid-column: 1/2;
+  grid-row: 1/2;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1/1;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.28s ease, filter 0.28s ease;
+  will-change: transform;
+}
+.post-card .card-body {
+  grid-column: 2/3;
+  grid-row: 1/2;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0 /* 防长标题撑裂 */;
+}
+/* 悬停：卡片轻浮、封面轻放大 */
+.post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+.post-card:hover .card-cover {
+  transform: scale(1.05);
+  filter: saturate(1.05);
+}
+/* 标题与摘要占位，对齐统一 */
+.card-title {
+  font-size: 18px;
+  line-height: 1.4;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 2.8em;
+}
+.card-title a {
+  text-decoration: none;
+}
+.card-excerpt {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+  opacity: 0.78;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  min-height: 4.8em;
+}
+.card-meta {
+  margin-top: auto;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.85;
+}
+.card-meta .tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  text-decoration: none;
+}
+@media (prefers-color-scheme: dark) {
+  .card-meta .tag {
+    background: rgba(255,255,255,0.1);
+  }
+}
+/* ===== 小屏：回退为上图下文 ===== */
+@media (max-width: 640px) {
+  .post-card {
+    grid-template-columns: 1fr;
+  }
+  .post-card .card-cover {
+    grid-column: 1/-1;
+    width: 100%;
+    aspect-ratio: 1/1;
+  }
+  .post-card .card-body {
+    grid-column: 1/-1;
   }
 }
