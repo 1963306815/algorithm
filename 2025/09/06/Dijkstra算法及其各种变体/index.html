@@ -1492,13 +1492,13 @@ mjx-container[display="true"] + br {
 
     <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
 <style>
-  /* 作用域：只影响 #comments-app 内部 */
+  /* 作用域：仅影响 #comments-app */
   #comments-app {
-    --c-bg: #ffffff;
-    --c-text: #222222;
+    --c-bg: #fff;
+    --c-text: #222;
     --c-sub: #6b7280;
     --c-border: #e5e7eb;
-    --c-accent: #3b82f6; /* 可按需改成你的主题主色 */
+    --c-accent: #3b82f6;
     --radius: 14px;
     --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
     margin-top: 2rem;
@@ -1538,7 +1538,7 @@ mjx-container[display="true"] + br {
     content:""; width:8px; height:20px; border-radius: 4px; background: var(--c-accent);
   }
 
-  /* 提示条 */
+  /* 顶部提示条（只显示一次） */
   #comments-app .alert {
     display: none;
     padding: 10px 12px;
@@ -1549,14 +1549,14 @@ mjx-container[display="true"] + br {
     margin-bottom: 12px;
   }
 
-  /* 表单网格：12 栅格，防溢出 */
+  /* 表单 12 栅格（防溢出） */
   #comments-app .form {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 12px;
     align-items: start;
   }
-  #comments-app .col-6 { grid-column: span 6 / span 6; }
+  #comments-app .col-6  { grid-column: span 6 / span 6; }
   #comments-app .col-12 { grid-column: span 12 / span 12; }
 
   #comments-app input[type="text"],
@@ -1573,8 +1573,8 @@ mjx-container[display="true"] + br {
   }
   #comments-app textarea {
     min-height: 140px;
-    resize: vertical;
-    max-width: 100%; /* 禁止横向拉伸导致溢出 */
+    resize: vertical;       /* 仅允许垂直拉伸 */
+    max-width: 100%;        /* 禁止横向拉伸导致溢出 */
     line-height: 1.6;
   }
   #comments-app input:focus,
@@ -1583,7 +1583,7 @@ mjx-container[display="true"] + br {
     box-shadow: 0 0 0 3px rgba(59,130,246,.25);
   }
 
-  /* 验证+提交 */
+  /* Turnstile + 提交按钮 */
   #comments-app .actions {
     grid-column: span 12 / span 12;
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
@@ -1628,10 +1628,10 @@ mjx-container[display="true"] + br {
   <div class="wrap">
     <div class="title">评论</div>
 
-    <!-- 加载/错误信息 -->
+    <!-- 顶部提示条（统一显示一次） -->
     <div id="comment-msg" class="alert"></div>
 
-    <!-- 评论列表 -->
+    <!-- 评论列表（初始占位） -->
     <div id="comments-list" class="list">
       <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
     </div>
@@ -1645,7 +1645,7 @@ mjx-container[display="true"] + br {
 
       <div class="actions">
         <!-- Turnstile：替换成你的 Site Key -->
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY"></div>
         <button type="submit" class="btn">提交</button>
       </div>
     </form>
@@ -1657,12 +1657,19 @@ mjx-container[display="true"] + br {
 
 <script>
 (function () {
+  'use strict';
+
   const API_BASE = '/api';
   const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
 
-  const listEl = document.getElementById('comments-list');
-  const form   = document.getElementById('comment-form');
-  const msg    = document.getElementById('comment-msg');
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#comments-list');
+  const form   = $('#comment-form');
+  const msg    = $('#comment-msg');
+
+  // 有时自定义插槽被重复注入，确保不重复挂载
+  if (!form || !listEl || !msg) return;
+
   form.querySelector('input[name="post"]').value = postId;
 
   const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
@@ -1670,7 +1677,7 @@ mjx-container[display="true"] + br {
   );
 
   const showMsg = (text) => {
-    if (!text) { msg.style.display = 'none'; return; }
+    if (!text) { msg.style.display = 'none'; msg.textContent = ''; return; }
     msg.textContent = text;
     msg.style.display = 'block';
   };
@@ -1682,7 +1689,7 @@ mjx-container[display="true"] + br {
     const authorHtml = it.website
       ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
       : safeAuthor;
-    // content 后端已做 XSS 转义；此处再兜底一次
+    // content 已在后端转义，这里再兜底一次
     return `
       <div class="item">
         <div class="meta">
@@ -1694,6 +1701,7 @@ mjx-container[display="true"] + br {
   };
 
   async function loadComments(page = 1) {
+    // 仅使用顶部提示，不再在列表里重复报错
     showMsg('');
     try {
       const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
@@ -1704,8 +1712,8 @@ mjx-container[display="true"] + br {
         ? list.map(itemTpl).join('')
         : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
     } catch (e) {
-      listEl.innerHTML = '<div class="item"><div class="content">评论加载失败，请稍后重试。</div></div>';
       showMsg('评论加载失败，请稍后重试。');
+      // 保留当前列表内容（通常仍是“加载中…”），不再塞第二条错误
     }
   }
 
@@ -1713,11 +1721,12 @@ mjx-container[display="true"] + br {
     e.preventDefault();
     const fd = new FormData(form);
 
-    // Turnstile 会在表单里注入隐藏 input[name=cf-turnstile-response]
+    // Turnstile 会自动注入隐藏 input[name=cf-turnstile-response]
     let token = fd.get('cf-turnstile-response');
     if (!token && window.turnstile && window.turnstile.getResponse) {
       token = window.turnstile.getResponse();
     }
+
     const payload = {
       post: fd.get('post'),
       author: fd.get('author') || '匿名',
@@ -1725,10 +1734,7 @@ mjx-container[display="true"] + br {
       content: fd.get('content') || '',
       turnstileToken: token || ''
     };
-    if (!payload.content.trim()) {
-      showMsg('内容不能为空。');
-      return;
-    }
+    if (!payload.content.trim()) { showMsg('内容不能为空。'); return; }
 
     showMsg('提交中…');
     try {
@@ -1738,17 +1744,17 @@ mjx-container[display="true"] + br {
         body: JSON.stringify(payload)
       });
       const data = await resp.json().catch(()=> ({}));
+
       if (resp.ok && data.ok) {
         showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
         form.reset();
-        // 重置 Turnstile
         if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
         if (data.status !== 'pending') loadComments();
       } else {
         showMsg('提交失败：' + (data.error || resp.status));
         if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
       }
-    } catch (err) {
+    } catch {
       showMsg('网络异常，请稍后再试。');
     }
   });
