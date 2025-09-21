@@ -74,13 +74,6 @@
 
   
   <url>
-    <loc>https://www.wuwangyangxin.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
-    <lastmod>2025-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://www.wuwangyangxin.com/tags/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2025-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -102,6 +95,13 @@
   </url>
   
   <url>
+    <loc>https://www.wuwangyangxin.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
+    <lastmod>2025-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://www.wuwangyangxin.com/tags/%E5%87%A0%E4%BD%95/</loc>
     <lastmod>2025-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -111,14 +111,14 @@
 
   
   <url>
-    <loc>https://www.wuwangyangxin.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
+    <loc>https://www.wuwangyangxin.com/categories/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2025-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://www.wuwangyangxin.com/categories/%E7%AE%97%E6%B3%95/</loc>
+    <loc>https://www.wuwangyangxin.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
     <lastmod>2025-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

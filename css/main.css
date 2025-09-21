@@ -1409,7 +1409,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #70f7ff;
+  background: #ff3eff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2912,7 +2912,7 @@ header.header {
   grid-column: 1/2;
   width: 100%;
   height: 100%;
-  aspect-ratio: 1/1 /* 冗余保护：保持方图 */;
+  aspect-ratio: 1/1;
   background-size: cover;
   background-position: center;
   transition: transform 0.28s ease, filter 0.28s ease;
