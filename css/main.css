@@ -1409,7 +1409,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #ff3eff;
+  background: #749e2f;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2878,7 +2878,7 @@ header.header {
 }
 /* ===== 变量：卡片固定高（桌面端） ===== */
 :root {
-  --card-h: 220px /* 调这里：240–300px 看你的摘要行数 */;
+  --card-h: 240px /* 调这里：240–300px 看你的摘要行数 */;
   --card-radius: 20px;
   --card-bg: rgba(255,255,255,0.92);
   --card-border: rgba(0,0,0,0.06);
