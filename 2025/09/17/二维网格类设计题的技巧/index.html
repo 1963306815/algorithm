@@ -1267,74 +1267,266 @@ mjx-container[display="true"] + br {
     
     
 
-    <footer class="post-footer"><div id="comments-app" class="comments">
-  <h3>评论</h3>
-  <div id="comments-list"></div>
+    <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
+<style>
+  /* 作用域：只影响 #comments-app 内部 */
+  #comments-app {
+    --c-bg: #ffffff;
+    --c-text: #222222;
+    --c-sub: #6b7280;
+    --c-border: #e5e7eb;
+    --c-accent: #3b82f6; /* 可按需改成你的主题主色 */
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
+    margin-top: 2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app {
+      --c-bg: #111318;
+      --c-text: #e8e8e8;
+      --c-sub: #a5a5a5;
+      --c-border: #30363d;
+      --shadow: 0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35);
+    }
+  }
+  #comments-app, #comments-app * { box-sizing: border-box; }
 
-  <form id="comment-form">
-    <input name="author" placeholder="昵称（可选）" />
-    <input name="website" placeholder="网站（可选）" />
-    <textarea name="content" placeholder="写点什么吧..." required></textarea>
+  /* 容器卡片 */
+  #comments-app .wrap {
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    overflow: hidden; /* 防止子元素圆角外突 */
+  }
 
-    <!-- Turnstile：把 data-sitekey 换成你的 Site Key -->
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+  /* 标题 */
+  #comments-app .title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 2px 0 14px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem);
+    font-weight: 700; color: var(--c-text);
+  }
+  #comments-app .title::before {
+    content:""; width:8px; height:20px; border-radius: 4px; background: var(--c-accent);
+  }
 
-    <button type="submit">提交</button>
-  </form>
-  <p id="comment-msg" style="display:none"></p>
+  /* 提示条 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    background: rgba(107,114,128,.08);
+    color: var(--c-sub);
+    margin-bottom: 12px;
+  }
+
+  /* 表单网格：12 栅格，防溢出 */
+  #comments-app .form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  #comments-app .col-6 { grid-column: span 6 / span 6; }
+  #comments-app .col-12 { grid-column: span 12 / span 12; }
+
+  #comments-app input[type="text"],
+  #comments-app textarea {
+    width: 100%;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg);
+    color: var(--c-text);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: .95rem;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  #comments-app textarea {
+    min-height: 140px;
+    resize: vertical;
+    max-width: 100%; /* 禁止横向拉伸导致溢出 */
+    line-height: 1.6;
+  }
+  #comments-app input:focus,
+  #comments-app textarea:focus {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  }
+
+  /* 验证+提交 */
+  #comments-app .actions {
+    grid-column: span 12 / span 12;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  #comments-app .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    background: var(--c-accent); color:#fff;
+    border: 1px solid transparent;
+    padding: 10px 16px; border-radius: 10px;
+    font-weight: 600; cursor: pointer;
+    transition: transform .06s ease, filter .15s ease;
+  }
+  #comments-app .btn:hover { filter: brightness(1.05); }
+  #comments-app .btn:active { transform: translateY(1px); }
+
+  /* 列表 */
+  #comments-app .list { margin-top: 14px; display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app .item { background: rgba(255,255,255,.03); }
+  }
+  #comments-app .meta {
+    display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size: .86rem; margin-bottom: 6px;
+  }
+  #comments-app .meta .author { color: var(--c-text); font-weight: 600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height: 1.7; }
+
+  /* 小屏：自动单列、按钮全宽 */
+  @media (max-width: 720px){
+    #comments-app .col-6 { grid-column: span 12 / span 12; }
+    #comments-app .btn { width: 100%; }
+  }
+</style>
+
+<div id="comments-app">
+  <div class="wrap">
+    <div class="title">评论</div>
+
+    <!-- 加载/错误信息 -->
+    <div id="comment-msg" class="alert"></div>
+
+    <!-- 评论列表 -->
+    <div id="comments-list" class="list">
+      <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+    </div>
+
+    <!-- 评论表单 -->
+    <form id="comment-form" class="form" novalidate>
+      <input class="col-12" type="hidden" name="post" />
+      <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+      <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+      <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+      <div class="actions">
+        <!-- Turnstile：替换成你的 Site Key -->
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+        <button type="submit" class="btn">提交</button>
+      </div>
+    </form>
+  </div>
 </div>
 
+<!-- Turnstile -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 <script>
 (function () {
   const API_BASE = '/api';
-  const postId = decodeURIComponent(location.pathname.replace(/\/+$/,'/'));
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
 
   const listEl = document.getElementById('comments-list');
-  const form = document.getElementById('comment-form');
-  const msg = document.getElementById('comment-msg');
+  const form   = document.getElementById('comment-form');
+  const msg    = document.getElementById('comment-msg');
+  form.querySelector('input[name="post"]').value = postId;
 
-  async function loadComments(page=1){
-    const r = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
-    const d = await r.json();
-    listEl.innerHTML = (d.list||[]).map(it => `
-      <div class="comment-item">
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+
+  const showMsg = (text) => {
+    if (!text) { msg.style.display = 'none'; return; }
+    msg.textContent = text;
+    msg.style.display = 'block';
+  };
+
+  const itemTpl = (it) => {
+    const t = new Date(it.created_at);
+    const time = isNaN(t) ? '' : t.toLocaleString();
+    const safeAuthor = escapeHTML(it.author || '匿名');
+    const authorHtml = it.website
+      ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
+      : safeAuthor;
+    // content 后端已做 XSS 转义；此处再兜底一次
+    return `
+      <div class="item">
         <div class="meta">
-          <strong>${(it.author||'匿名')}</strong>
-          <span>${new Date(it.created_at).toLocaleString()}</span>
+          <span class="author">${authorHtml}</span>
+          <span>${escapeHTML(time)}</span>
         </div>
         <div class="content">${it.content}</div>
-      </div>
-    `).join('') || '<p>还没有评论，来做第一个吧！</p>';
+      </div>`;
+  };
+
+  async function loadComments(page = 1) {
+    showMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const list = Array.isArray(data.list) ? data.list : [];
+      listEl.innerHTML = list.length
+        ? list.map(itemTpl).join('')
+        : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
+    } catch (e) {
+      listEl.innerHTML = '<div class="item"><div class="content">评论加载失败，请稍后重试。</div></div>';
+      showMsg('评论加载失败，请稍后重试。');
+    }
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
+
+    // Turnstile 会在表单里注入隐藏 input[name=cf-turnstile-response]
+    let token = fd.get('cf-turnstile-response');
+    if (!token && window.turnstile && window.turnstile.getResponse) {
+      token = window.turnstile.getResponse();
+    }
     const payload = {
-      post: postId,
+      post: fd.get('post'),
       author: fd.get('author') || '匿名',
       website: fd.get('website') || '',
       content: fd.get('content') || '',
-      turnstileToken: (window.turnstile && window.turnstile.getResponse)
-        ? window.turnstile.getResponse()
-        : (document.querySelector('input[name="cf-turnstile-response"]')?.value || '')
+      turnstileToken: token || ''
     };
-    const r = await fetch(`${API_BASE}/comments`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const d = await r.json();
-    msg.style.display = 'block';
-    if (r.ok && d.ok) {
-      msg.textContent = (d.status === 'pending') ? '已提交，待审核通过后可见。' : '发表成功！';
-      form.reset();
-      if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
-      if (d.status !== 'pending') loadComments();
-    } else {
-      msg.textContent = '提交失败：' + (d.error || r.status);
-      if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+    if (!payload.content.trim()) {
+      showMsg('内容不能为空。');
+      return;
+    }
+
+    showMsg('提交中…');
+    try {
+      const resp = await fetch(`${API_BASE}/comments`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(()=> ({}));
+      if (resp.ok && data.ok) {
+        showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
+        form.reset();
+        // 重置 Turnstile
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+        if (data.status !== 'pending') loadComments();
+      } else {
+        showMsg('提交失败：' + (data.error || resp.status));
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      }
+    } catch (err) {
+      showMsg('网络异常，请稍后再试。');
     }
   });
 
