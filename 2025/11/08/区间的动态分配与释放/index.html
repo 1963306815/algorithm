@@ -20,17 +20,16 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="这篇文章系统总结了“区间占用与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
+    <meta name="description" content="这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="区间的动态分配与释放">
 <meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/index.html">
 <meta property="og:site_name" content="勿忘羊心">
-<meta property="og:description" content="这篇文章系统总结了“区间占用与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
+<meta property="og:description" content="这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-08T14:50:00.000Z">
-<meta property="article:modified_time" content="2025-11-08T15:55:46.481Z">
+<meta property="article:modified_time" content="2025-11-08T16:52:48.231Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
-<meta property="article:tag" content="倒排索引">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
 
@@ -279,7 +278,7 @@ mjx-container[display="true"] + br {
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF%E4%B8%8E%E5%B8%B8%E8%A7%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">问题背景与常见应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AE%B2%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">常用数据结构讲解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%A2%98%E5%9E%8B%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">不同题型策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%AE%BA%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">方法论总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98%E8%AE%B2%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">例题讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9A%E5%8C%BA%E9%97%B4%E6%8F%92%E5%85%A5%E4%B8%8E%E5%90%88%E5%B9%B6"><span class="nav-number">5.1.</span> <span class="nav-text">示例1：区间插入与合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B2%EF%BC%9A%E4%BA%8C%E7%BB%B4%E8%AF%8D%E6%B1%87%E8%A1%A8"><span class="nav-number">5.2.</span> <span class="nav-text">示例2：二维词汇表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B3%EF%BC%9A%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.3.</span> <span class="nav-text">示例3：文件存储系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B4%EF%BC%9A%E7%BA%BF%E6%80%A7%E5%9F%8E%E5%B8%82%E5%BB%BA%E8%AE%BE"><span class="nav-number">5.4.</span> <span class="nav-text">示例4：线性城市建设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B5%EF%BC%9A%E5%9C%B0%E4%B8%8B%E5%9F%8E%E5%BB%BA%E8%AE%BE%E4%B8%8E%E5%8A%A8%E6%80%81%E8%B7%AF%E5%BE%84%E6%8E%A2%E7%B4%A2"><span class="nav-number">5.5.</span> <span class="nav-text">示例5：地下城建设与动态路径探索</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E4%B8%8E%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.</span> <span class="nav-text">常见错误与优化建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89%E8%AE%AD%E7%BB%83"><span class="nav-number">7.</span> <span class="nav-text">举一反三训练</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF%E4%B8%8E%E5%B8%B8%E8%A7%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">问题背景与常见应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AE%B2%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">常用数据结构讲解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%A2%98%E5%9E%8B%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">不同题型策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%AE%BA%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">方法论总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98%E8%AE%B2%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">例题讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9A%E5%9F%BA%E7%A1%80%E2%80%94%E2%80%94%E5%8C%BA%E9%97%B4%E6%8F%92%E5%85%A5%E4%B8%8E%E5%90%88%E5%B9%B6"><span class="nav-number">5.1.</span> <span class="nav-text">示例1：基础——区间插入与合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B2%EF%BC%9A%E4%BA%8C%E7%BB%B4%E8%AF%8D%E6%B1%87%E8%A1%A8"><span class="nav-number">5.2.</span> <span class="nav-text">示例2：二维词汇表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B3%EF%BC%9A%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.3.</span> <span class="nav-text">示例3：文件存储系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B4%EF%BC%9A%E7%BA%BF%E6%80%A7%E5%9F%8E%E5%B8%82%E5%BB%BA%E8%AE%BE"><span class="nav-number">5.4.</span> <span class="nav-text">示例4：线性城市建设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B5%EF%BC%9A%E5%9C%B0%E4%B8%8B%E5%9F%8E%E5%BB%BA%E8%AE%BE%E4%B8%8E%E5%8A%A8%E6%80%81%E8%B7%AF%E5%BE%84%E6%8E%A2%E7%B4%A2"><span class="nav-number">5.5.</span> <span class="nav-text">示例5：地下城建设与动态路径探索</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E4%B8%8E%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.</span> <span class="nav-text">常见错误与优化建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89%E8%AE%AD%E7%BB%83"><span class="nav-number">7.</span> <span class="nav-text">举一反三训练</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -344,7 +343,7 @@ mjx-container[display="true"] + br {
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="区间的动态分配与释放 | 勿忘羊心">
-      <meta itemprop="description" content="这篇文章系统总结了“区间占用与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
+      <meta itemprop="description" content="这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -358,9 +357,15 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-11-08 22:50:00 / 修改时间：23:55:46" itemprop="dateCreated datePublished" datetime="2025-11-08T22:50:00+08:00">2025-11-08</time>
+      <time title="创建时间：2025-11-08 22:50:00" itemprop="dateCreated datePublished" datetime="2025-11-08T22:50:00+08:00">2025-11-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-11-09 00:52:48" itemprop="dateModified" datetime="2025-11-09T00:52:48+08:00">2025-11-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -397,7 +402,7 @@ mjx-container[display="true"] + br {
     </span>
 </div>
 
-            <div class="post-description">这篇文章系统总结了“区间占用与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。</div>
+            <div class="post-description">这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。</div>
         </div>
       </header>
 
@@ -443,7 +448,7 @@ mjx-container[display="true"] + br {
 </ul>
 <p>以上方法论可以指导我们从宏观上设计解法。归纳起来就是：<strong>抽象模型，分清维度；确定规则，对应结构；优化热path，利用边界；维护状态，及时更新</strong>。带着这套思路，我们再来看具体例题的分层讲解。</p>
 <h2 id="例题讲解"><a href="#例题讲解" class="headerlink" title="例题讲解"></a>例题讲解</h2><p>下面通过从基础到复杂的一系列例题，演示如何应用上述思想解决区间占用与释放类问题。每个例题会包含问题描述简述、解题思路分析和关键代码片段（均为C++11实现）。</p>
-<h3 id="示例1：区间插入与合并"><a href="#示例1：区间插入与合并" class="headerlink" title="示例1：区间插入与合并"></a>示例1：区间插入与合并</h3><p><strong>问题描述</strong>：维护一个一维空间0~N-1，支持两种操作：build(L)在当前空闲空间中放入一个长度为L的占用段并返回其起始位置；demolish(X)移除以地址X开头的占用段并返回其长度。如果build找不到可用空位则返回-1，如果demolish给定地址没有建筑则返回-1。</p>
+<h3 id="示例1：基础——区间插入与合并"><a href="#示例1：基础——区间插入与合并" class="headerlink" title="示例1：基础——区间插入与合并"></a>示例1：基础——区间插入与合并</h3><p><strong>问题描述</strong>：维护一个一维空间0~N-1，支持两种操作：build(L)在当前空闲空间中放入一个长度为L的占用段并返回其起始位置；demolish(X)移除以地址X开头的占用段并返回其长度。如果build找不到可用空位则返回-1，如果demolish给定地址没有建筑则返回-1。</p>
 <p>这是区间动态分配问题的最简化模型，抽象自内存分区管理。可以用它演练<strong>首次适配</strong>或<strong>最坏适配</strong>策略。</p>
 <p><strong>解题思路</strong>：我们选择按照<strong>最坏适配</strong>（最长空段）策略分配，使得每次都利用最大的空闲段。具体步骤：</p>
 <ul>
@@ -767,7 +772,6 @@ mjx-container[display="true"] + br {
 </script>
 
           <div class="post-tags">
-              <a href="/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/" rel="tag"><i class="fa fa-tag"></i> 倒排索引</a>
               <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 算法</a>
           </div>
 
