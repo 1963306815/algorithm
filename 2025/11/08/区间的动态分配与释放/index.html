@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+    <meta name="description" content="这篇文章系统总结了“区间占用与释放”类问题的核心模型、常用数据结构与关键策略，并通过多题型示例展示区间分配、合并、查询与连通性建模等通用方法。内容覆盖从内存与文件系统分配到二维抽象与动态图构建的完整思路，为理解和实现各类动态区间管理任务提供高密度的结构化框架。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="区间的动态分配与释放">
 <meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/index.html">
 <meta property="og:site_name" content="勿忘羊心">
-<meta property="og:description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+<meta property="og:description" content="这篇文章系统总结了“区间占用与释放”类问题的核心模型、常用数据结构与关键策略，并通过多题型示例展示区间分配、合并、查询与连通性建模等通用方法。内容覆盖从内存与文件系统分配到二维抽象与动态图构建的完整思路，为理解和实现各类动态区间管理任务提供高密度的结构化框架。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-08T14:50:00.000Z">
-<meta property="article:modified_time" content="2025-11-08T15:50:46.881Z">
+<meta property="article:modified_time" content="2025-11-08T15:53:18.492Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta property="article:tag" content="算法">
 <meta property="article:tag" content="倒排索引">
@@ -344,7 +344,7 @@ mjx-container[display="true"] + br {
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="区间的动态分配与释放 | 勿忘羊心">
-      <meta itemprop="description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+      <meta itemprop="description" content="这篇文章系统总结了“区间占用与释放”类问题的核心模型、常用数据结构与关键策略，并通过多题型示例展示区间分配、合并、查询与连通性建模等通用方法。内容覆盖从内存与文件系统分配到二维抽象与动态图构建的完整思路，为理解和实现各类动态区间管理任务提供高密度的结构化框架。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -360,7 +360,7 @@ mjx-container[display="true"] + br {
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-11-08 22:50:00 / 修改时间：23:50:46" itemprop="dateCreated datePublished" datetime="2025-11-08T22:50:00+08:00">2025-11-08</time>
+      <time title="创建时间：2025-11-08 22:50:00 / 修改时间：23:53:18" itemprop="dateCreated datePublished" datetime="2025-11-08T22:50:00+08:00">2025-11-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -397,7 +397,7 @@ mjx-container[display="true"] + br {
     </span>
 </div>
 
-            <div class="post-description">这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。</div>
+            <div class="post-description">这篇文章系统总结了“区间占用与释放”类问题的核心模型、常用数据结构与关键策略，并通过多题型示例展示区间分配、合并、查询与连通性建模等通用方法。内容覆盖从内存与文件系统分配到二维抽象与动态图构建的完整思路，为理解和实现各类动态区间管理任务提供高密度的结构化框架。</div>
         </div>
       </header>
 
