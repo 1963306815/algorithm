@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="这篇文章系统介绍了倒排索引在算法与竞赛题中的识别方法、设计原则、优化技巧及典型应用场景，帮助读者以结构化方式理解如何通过预处理构建高效的“特征到对象”映射，从而显著提升查询性能与解题效率。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="倒排索引的设计与实现">
+<meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/08/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="勿忘羊心">
+<meta property="og:description" content="这篇文章系统介绍了倒排索引在算法与竞赛题中的识别方法、设计原则、优化技巧及典型应用场景，帮助读者以结构化方式理解如何通过预处理构建高效的“特征到对象”映射，从而显著提升查询性能与解题效率。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-08T13:50:00.000Z">
+<meta property="article:modified_time" content="2025-11-08T14:46:05.777Z">
+<meta property="article:author" content="Ziyoeng Zoeng">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="倒排索引">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://www.wuwangyangxin.com/2025/11/08/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://www.wuwangyangxin.com/2025/11/08/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/","path":"2025/11/08/倒排索引的设计与实现/","title":"倒排索引的设计与实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>倒排索引的设计与实现 | 勿忘羊心</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="stylesheet" href="/css/prism-vs.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">勿忘羊心</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-算法"><a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="section"><i class="fa fa-code fa-fw"></i>算法</a></li><li class="menu-item menu-item-随笔"><a href="/categories/%E9%9A%8F%E7%AC%94/" rel="section"><i class="fa fa-pen fa-fw"></i>随笔</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E9%A2%98%E7%9A%84%E9%80%9A%E7%94%A8%E8%AF%86%E5%88%AB%E6%8A%80%E5%B7%A7"><span class="nav-number">1.</span> <span class="nav-text">倒排索引题的通用识别技巧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%82%BC%E9%A2%98%E9%9D%A2%E6%A0%B8%E5%BF%83%E7%BB%B4%E5%BA%A6%EF%BC%9A%E5%9B%BA%E5%AE%9A-%E6%9F%A5%E8%AF%A2%E3%80%81%E5%8C%B9%E9%85%8D%E5%85%B3%E7%B3%BB%E3%80%81%E6%A8%A1%E6%9D%BF-%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">提炼题面核心维度：固定&#x2F;查询、匹配关系、模板&#x2F;数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E7%B4%A2%E5%BC%95%E6%96%B9%E5%90%91%EF%BC%9A%E6%9F%A5%E8%AF%A2%E9%A1%B9-%E6%95%B0%E6%8D%AE-vs-%E6%95%B0%E6%8D%AE-%E6%9F%A5%E8%AF%A2"><span class="nav-number">3.</span> <span class="nav-text">选择索引方向：查询项-&gt;数据 vs. 数据-&gt;查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E6%95%88%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9E%84%E9%80%A0%E4%B8%8E%E5%8E%8B%E7%BC%A9%E6%8A%80%E5%B7%A7"><span class="nav-number">4.</span> <span class="nav-text">高效倒排索引的构造与压缩技巧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D%E4%B8%8E%E5%89%AA%E6%9E%9D%E7%AD%96%E7%95%A5"><span class="nav-number">5.</span> <span class="nav-text">匹配与剪枝策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%88%E7%8E%87-vs-%E9%A2%84%E5%A4%84%E7%90%86%E5%BC%80%E9%94%80%E7%9A%84%E6%9D%83%E8%A1%A1"><span class="nav-number">6.</span> <span class="nav-text">查询效率 vs 预处理开销的权衡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E4%BB%A3%E7%A0%81%E6%A8%A1%E6%9D%BF%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E6%8A%80%E5%B7%A7"><span class="nav-number">7.</span> <span class="nav-text">通用代码模板与工程化技巧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E5%9E%8B%E5%BD%92%E7%B1%BB%E4%B8%8E%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89"><span class="nav-number">8.</span> <span class="nav-text">题型归类与举一反三</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%E9%A2%98"><span class="nav-number">9.</span> <span class="nav-text">练习题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ziyoeng Zoeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.wuwangyangxin.com/2025/11/08/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ziyoeng Zoeng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="倒排索引的设计与实现 | 勿忘羊心">
+      <meta itemprop="description" content="这篇文章系统介绍了倒排索引在算法与竞赛题中的识别方法、设计原则、优化技巧及典型应用场景，帮助读者以结构化方式理解如何通过预处理构建高效的“特征到对象”映射，从而显著提升查询性能与解题效率。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          倒排索引的设计与实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-11-08 21:50:00 / 修改时间：22:46:05" itemprop="dateCreated datePublished" datetime="2025-11-08T21:50:00+08:00">2025-11-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>31 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">这篇文章系统介绍了倒排索引在算法与竞赛题中的识别方法、设计原则、优化技巧及典型应用场景，帮助读者以结构化方式理解如何通过预处理构建高效的“特征到对象”映射，从而显著提升查询性能与解题效率。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>倒排索引也是pro算法考试的大热门题型之一。有时会很明显，有时会隐藏在某个API中。</p>
+</blockquote>
+<p><strong>倒排索引</strong>是一种通过“以属性值定位记录”的索引方法，即<strong>不是由记录确定属性值，而是由属性值确定记录的位置</strong>。搜索引擎正是利用倒排索引，将每个关键词映射到包含该词的文档列表，从而快速检索相关文档。对于算法竞赛和机试而言，许多涉及大量查询或多重匹配关系的问题也可以建模为倒排索引类型，通过预先建立高效映射来显著加速查询。本文将循序渐进介绍识别这类题目的方法、倒排索引的设计与实现技巧，以及如何提升解题能力。</p>
+<h2 id="倒排索引题的通用识别技巧"><a href="#倒排索引题的通用识别技巧" class="headerlink" title="倒排索引题的通用识别技巧"></a>倒排索引题的通用识别技巧</h2><p>在题目中，如何判断一道题适合使用倒排索引思想？以下是一些常见特征，满足其中多数时可考虑倒排索引建模：</p>
+<ul>
+<li><strong>多次查询</strong>： 题目需要对一批查询反复执行类似的检索操作。如果直接每次遍历数据耗时过高，而通过预处理建立索引可复用结果，加速每次查询。</li>
+<li><strong>键值到集合的映射</strong>： 题目隐含“给定一个键，查找含有该键的所有元素”或类似映射关系。例如“关键词 -&gt; 包含该词的文档列表”或“属性值 -&gt; 拥有该属性的对象列表”。</li>
+<li><strong>多条件匹配</strong>： 查询包含多个条件，需要找到同时满足所有条件的对象集合。这种情况往往可以将每个条件对应的列表预先求出，再对这些列表求交集完成查询。</li>
+<li><strong>大数据+高频查询</strong>： 数据规模较大且查询操作频繁。如果按查询逐一扫描数据不可行，而通过建立索引可将查询复杂度降低到可接受范围。</li>
+<li><strong>模式与数据分离</strong>： 题目将输入分为“数据”和“查询”两部分，查询部分需要在数据中寻找模式或满足条件的项，适合在数据上建索引供查询使用。</li>
+</ul>
+<p>简单来说，当你看到题目涉及<strong>大量重复的查找、匹配或条件筛选</strong>，而直接解法复杂度过高时，要考虑倒排索引是否是突破口。识别出这一点，才能正确选择索引方案进入解题。</p>
+<h2 id="提炼题面核心维度：固定-查询、匹配关系、模板-数据"><a href="#提炼题面核心维度：固定-查询、匹配关系、模板-数据" class="headerlink" title="提炼题面核心维度：固定/查询、匹配关系、模板/数据"></a>提炼题面核心维度：固定/查询、匹配关系、模板/数据</h2><p>一旦怀疑是倒排索引题，我们需要从题面提炼出索引设计的核心要素，包括：</p>
+<ul>
+<li><strong>静态数据 vs. 在线查询</strong>： 判断题目中是否存在相对<strong>固定不变</strong>的部分和<strong>多次变化</strong>的查询。通常如果数据集在查询过程中不变（静态），而有大量查询，则适合在数据上构建索引供查询使用。反之，如果查询条件集合固定但需要针对多个数据进行匹配，有时可以考虑在查询上建立索引，让数据去反查查询（见第三节）。</li>
+<li><strong>匹配关系类型</strong>： 分析查询与数据的匹配规则是什么。是<strong>精确匹配</strong>（如键相等）、<strong>集合包含</strong>（如包含某关键词）、<strong>前缀/后缀匹配</strong>、还是<strong>范围匹配</strong>？匹配关系直接决定索引键的设计。例如精确匹配可直接用哈希映射，前缀匹配可能需要前缀树或将所有前缀作为键，范围查询可能需要区间树或排序+双指针等辅助索引。</li>
+<li><strong>“模板” vs “数据”</strong>： 辨析题目中谁是模式（模板），谁是待搜索的数据。有些题目提供一个“模板”（例如一个形状、一段模式串）需要在大量数据中找位置，这种情况通常在数据一侧建立索引，键为可能匹配模板的特征；而有些题目提供大量模式（查询）但数据（事件）逐个出现，则可能在模式上预建索引，使每条数据能快速找到匹配的模式。换言之，如果<strong>模式数较少</strong>且<strong>数据对象很多</strong>，倾向于给每个模式建索引以定位数据中的出现位置；反之，<strong>模式很多</strong>且<strong>数据固定</strong>，就先索引数据。</li>
+</ul>
+<p>举例来说，搜索引擎场景中<strong>文档集</strong>是静态数据，<strong>用户查询</strong>不断出现，因此索引从“词 -&gt; 文档”。相反，如果有道题提供许多查询模式（如订阅过滤条件），然后输入一系列事件数据需要找出满足哪些查询，此时<strong>查询模式</strong>是固定的，可考虑将“查询条件 -&gt; 查询ID列表”建立索引，然后对每个事件快速匹配相关查询。</p>
+<p>提炼以上维度有助于确定索引设计：<strong>选择合适的键</strong>（例如关键词、属性值、模式片段）、<strong>索引值</strong>（发生的位置或对象ID集合）、以及<strong>索引应建立在哪一侧</strong>（数据或查询）。下一节将进一步讨论这一点。</p>
+<h2 id="选择索引方向：查询项-数据-vs-数据-查询"><a href="#选择索引方向：查询项-数据-vs-数据-查询" class="headerlink" title="选择索引方向：查询项->数据 vs. 数据->查询"></a>选择索引方向：查询项-&gt;数据 vs. 数据-&gt;查询</h2><p>倒排索引可以有不同“朝向”。一般来说，典型做法是<strong>从数据建立索引供查询使用</strong>，即“查询项 -&gt; 被查询项列表”。例如将每个关键词映射到包含它的文档列表，这在用户查询给出关键词时直接查表获取结果。然而，根据题目特性，有时反方向的索引更高效。以下是如何抉择索引方向的原则：</p>
+<ul>
+<li><strong>数据集大且查询多</strong>： 这是最常见情形，应该<strong>预处理数据</strong>。如前述搜索引擎例子，数据（网页文档）量大且查询频繁，构建“关键词 -&gt; 文档列表”的倒排索引是最佳选择。同样，在竞赛中如果给定庞大数据集和众多查询，让查询直接扫描数据会超时，理应在数据上建索引供查询查找。</li>
+<li><strong>查询条件复杂或模式多变</strong>： 当<strong>查询本身的种类很多</strong>（甚至可视为一个大的集合），而每次输入的数据较少或逐条出现，此时可考虑<strong>预处理查询条件</strong>。举例：假设有上万条订阅，每条是一个条件组合，要处理实时事件流判断哪些订阅满足。遍历所有订阅检查每个事件不现实，可以为<strong>每种可能条件值建立索引到订阅ID</strong>，当事件出现时，根据事件的属性快速定位相关的订阅集合进行处理。这相当于把索引方向反了过来：由<strong>数据属性 -&gt; 触发的查询列表</strong>。</li>
+<li><strong>避免指数级爆炸</strong>： 如果某一方向的索引会导致巨大的索引规模，应考虑反向。例如某题中带有“通配符”匹配，若直接在数据上展开通配符的所有可能组合建立索引，可能产生指数级候选，不如倒过来将<strong>模式分解</strong>后索引。例如，“abcd”这样的后缀通配符查询，与其为每种可能前缀都索引数据，不如将数据后缀建立索引或用后缀树，再让查询匹配索引。总之，索引尽量建立在状态空间较小的一侧*，以避免索引过于庞大。</li>
+</ul>
+<p><strong>简而言之</strong>：数据不变而查询频繁 -&gt; 在数据上建索引；查询集合庞大而数据逐条出现 -&gt; 在查询上建索引。也可以双向都建，具体取决于数据量、查询量和匹配复杂度。要善于权衡：索引方向选对了，才能事半功倍。</p>
+<h2 id="高效倒排索引的构造与压缩技巧"><a href="#高效倒排索引的构造与压缩技巧" class="headerlink" title="高效倒排索引的构造与压缩技巧"></a>高效倒排索引的构造与压缩技巧</h2><p>建立倒排索引时，既要追求构建和查询的效率，也要注意存储和内存的开销。以下介绍几种常用的优化技巧：</p>
+<ul>
+<li><strong>位运算优化索引</strong>： 借助位操作可以提高效率或压缩空间。例如，当键空间较小时，可使用位图/位集表示集合：每个被查询对象对应一位，比起存储整数ID列表，位图在空间和集合运算上都更高效（按机器字并行）。又如在哈希计算、取模运算中，用位掩码替代取模（限定长度为2的幂）可以加速运算。位运算还可用于快速交集（&amp;）、并集（|）操作多个集合的位向量表示，大幅提高匹配速度。</li>
+<li><strong>前缀压缩</strong>： 如果索引键本身占用较大空间（如字符串关键词较长且数量多），可以对键进行压缩存储。常用方法是<strong>前缀编码</strong>：只存储每个关键词相对于上一个关键词的<strong>共同前缀长度</strong>和余下后缀，从而减少冗余。例如词典中有“阿拉伯”和“阿拉伯语”两个词，后者可存为&lt;前缀长度=3, 后缀=”语”&gt;。这样在不影响查找的前提下显著节省内存。</li>
+<li><strong>差值存储</strong>： 对倒排列表（记录ID集合）进行压缩的经典方法是<strong>差值编码</strong>。将文档ID等数值按升序保存时，存储每个ID与前一个ID的差值往往比存储原始值节省空间。因为差值通常是较小的整数，可以用更少比特表示。例如文档号16382和16389，直接存需要两个完整ID，而差值为7只需很短的编码即可。配合可变长编码（如Varint、Gamma编码等）进一步压缩，可以让大规模倒排链表的存储大幅减小。当然，压缩算法是空间换时间的权衡，需要在读取时解码，但整体上利于缓存和减少IO。</li>
+<li><strong>归一化处理</strong>： 针对索引键值，可做一些<strong>规范化</strong>预处理，以简化匹配过程。这包括统一大小写、去除无关符号、提取或转换特征等。在文本类问题中，可能需要对字符串<strong>正规化</strong>（如去标点、同义词替换）以减少无意义的区别；在数值或坐标问题中，可能通过减去最小值等方式将值域归一化，从而使用更小范围的数组或位图作为索引结构。这类预处理有助于<strong>缩小索引规模</strong>、提高匹配准确性。</li>
+</ul>
+<p>综合运用以上技巧，可以构建<strong>高效且紧凑</strong>的倒排索引。例如，搜索引擎Lucene就在构建索引时对<strong>关键词进行了前缀压缩</strong>、对<strong>倒排列表存储了差值</strong>并进行变长编码，大幅降低索引大小。在oj中，数据规模虽然不如工业级庞大，但也常需要考虑内存限制和速度，通过这些“小手段”优化索引的表示和操作。</p>
+<h2 id="匹配与剪枝策略"><a href="#匹配与剪枝策略" class="headerlink" title="匹配与剪枝策略"></a>匹配与剪枝策略</h2><p>建立好索引后，如何利用它<strong>高效地匹配</strong>查询条件，并尽早剪除无效候选？这是解题的关键步骤。下面介绍几种常见策略：</p>
+<ul>
+<li><strong>交集优先与顺序优化</strong>： 对于需要多条件同时满足的查询，将各条件对应的候选列表求交集是主要任务。<strong>优化顺序</strong>很重要——应该始终从最难满足（候选最少）的条件开始，逐步缩小候选集。例如如果查询包含3个关键词，对应文档列表长度分别为100、500、1000，那么先取长度100的列表，再与其他交集，代价最低。如果顺序反了，处理中间结果会庞大且浪费时间。这类似“最小集合先碰撞”原则，可显著减少比较次数。</li>
+<li><strong>双指针和跳跃查找</strong>： 当倒排列表有序时，可以用<strong>双指针法</strong>高效求交集、并集等。例如两条有序列表求交集，只需线性扫描一次。对多条列表的交集，也可以采用<strong>归并思路</strong>：维护每条列表的当前指针，比较当前值，如果不全相等就<strong>提升最小值的指针</strong>前进（因为更小的不可能出现在其它列表）。此外，为了加快跳过无关部分，可以为很长的列表建立<strong>跳表</strong>，在某个列表当前元素远小于其他列表当前最大值时，快速跳到一个更大的位置，避免逐个递增检查。这类剪枝技术在搜索引擎合并倒排链表算法中广泛使用，可以在稀疏匹配时极大节省比较次数。</li>
+<li><strong>存在性剪枝</strong>： 如果查询要求某些条件必须满足，但索引显示其中一个条件<strong>没有任何候选</strong>，则查询结果直接为空，无需进一步计算。这是<strong>显而易见的剪枝</strong>：比如需要包含关键词A且包含B的文档，但如果倒排索引里关键词B没有任何文档，则直接输出“无结果”。实现上，在处理查询时可先检查每个必须条件的列表是否为空，如有为空立即返回，无需做交集运算。</li>
+<li><strong>部分匹配剪枝</strong>： 某些查询允许部分条件匹配（如布尔查询中的OR或至少匹配k个条件等）。这类情况下，可以在遍历倒排列表时利用<strong>累积计分或计数</strong>，及早淘汰不可能达到阈值的候选。例如需要至少匹配3个关键词的文档，可以在按某顺序扫描文档ID过程中，如果某文档目前只命中了1个关键词且就算把剩余所有关键词都算上也无法达到3个，则提前放弃该文档的考虑。这属于<strong>上界剪枝</strong>思想，提前终止对不符合条件的候选的跟踪。</li>
+<li><strong>利用索引顺序的剪枝</strong>： 很多索引键本身有序（如数值、字母顺序），可以在查询有范围限定或顺序限定时剪枝。例如索引存的是时间戳-&gt;记录列表，如果查询要求时间在2020之前，则可以<strong>二分找到2020在索引中的位置</strong>，跳过后面的部分。又如查询词组（短语匹配）时，虽然单词各自出现很多，但要求它们挨着出现，可以在倒排列表中存储位置并在匹配时<strong>跳过不满足相对位置的候选</strong>，大幅减少验证工作。</li>
+</ul>
+<p>总之，在匹配阶段应充分利用<strong>倒排索引提供的结构信息</strong>（有序性、分段等），通过<strong>巧妙安排遍历顺序</strong>和<strong>设定跳出条件</strong>来做到“只做必要的比较”。一个高效的查询算法往往能在海量候选中“跳跃”前进，每次剔除大批无效项，从而将本可能指数级的匹配处理压缩到可行范围。这种剪枝思路也是竞赛解题的重点，要在阅读题目时就思考：**有没有办法提前知道某些候选不可能满足所有条件？**如果有，就可以设计相应剪枝策略嵌入算法中。</p>
+<h2 id="查询效率-vs-预处理开销的权衡"><a href="#查询效率-vs-预处理开销的权衡" class="headerlink" title="查询效率 vs 预处理开销的权衡"></a>查询效率 vs 预处理开销的权衡</h2><p>构建倒排索引本质上是<strong>用预处理换取查询提速</strong>。但预处理也有成本，何时值得投入？关键在于<strong>查询调用频率</strong>和<strong>实时性要求</strong>。我们需要根据题目规模权衡预处理和查询效率：</p>
+<ul>
+<li><strong>高查询频率场景</strong>： 如果查询次数很多（如 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="3.25ex" height="2.005ex" role="img" focusable="false" viewBox="0 -864 1436.6 886"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g></g></g></g></svg></mjx-container> 级别），每次查询又要求很快返回，那么重预处理、轻查询是明智的。哪怕预处理耗费较多时间，只要后续每次查询足够快，总体仍划算。这类场景往往会在题目限制中暗示，例如提供大量查询输入。对这种情况，可以大胆采用<strong>复杂度较高的离线建索引</strong>，哪怕构建过程 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="11.15ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4928.3 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mi" transform="translate(2206.7,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(3484.7,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(3651.3,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(4539.3,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 或 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="10.639ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4702.4 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(2262.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="mi" transform="translate(3262.4,0)"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g><g data-mml-node="mo" transform="translate(4313.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（只要可控），换取每次查询 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 或 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.764ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3873.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(3484.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 的极致速度。典型例子是离线处理：先读入所有查询，再一次性建好索引或甚至预计算出所有答案，然后批量输出结果。只要总时间不超限，这种做法在查询很多时非常高效。</li>
+<li><strong>低查询频率场景</strong>： 如果查询次数很少（甚至只有一次），则不应投入过多预处理。在极端情况下，预处理本身可能比直接查询更慢。这时可以接受稍高的单次查询代价，采用<strong>即席计算</strong>或轻量结构。例如数据规模中等而只有一两个查询，直接遍历筛选未必会超时，反而构建索引是浪费时间。一个折衷是建立<strong>部分索引</strong>：先做基本排序或分组等轻量预处理，再针对具体查询做小范围扫描。</li>
+<li><strong>折中与按需策略</strong>： 在有些情形下，可以<strong>延迟构建</strong>或<strong>按需构建</strong>索引。当查询开始变多变重时，再逐步加大预处理投入。比如使用<strong>惰性求值</strong>思想：开始仅做最简单的处理，如果发现某些数据反复被查询，就对它建立局部索引缓存，避免后续重复处理。当题目API之间是交互或多轮时，此策略往往奏效。</li>
+</ul>
+<p>总而言之，要<strong>结合输入规模分析时间复杂度</strong>：假设数据规模为N，查询次数为Q，每次查询处理的数据量为k。<strong>不建索引</strong>的总复杂度约 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="10.051ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4442.4 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(2262.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="mi" transform="translate(3262.4,0)"><path data-c="1D444" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path></g><g data-mml-node="mo" transform="translate(4053.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>；<strong>建立索引</strong>的开销 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.186ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2292 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path></g><g data-mml-node="mo" transform="translate(1903,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（P为预处理耗时）加上查询总耗时 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="9.848ex" height="2.283ex" role="img" focusable="false" viewBox="0 -759 4352.9 1009"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D444" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path></g><g data-mml-node="mo" transform="translate(2165.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="msup" transform="translate(3165.4,0)"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g><g data-mml-node="mo" transform="translate(554,363) scale(0.707)"><path data-c="2032" d="M79 43Q73 43 52 49T30 61Q30 68 85 293T146 528Q161 560 198 560Q218 560 240 545T262 501Q262 496 260 486Q259 479 173 263T84 45T79 43Z"></path></g></g><g data-mml-node="mo" transform="translate(3963.9,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（k’为利用索引后的单次查询耗时，通常远小于N）。只有当 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="10.827ex" height="2.156ex" role="img" focusable="false" viewBox="0 -759 4785.3 953"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path></g><g data-mml-node="mo" transform="translate(973.2,0)"><path data-c="2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path></g><g data-mml-node="mi" transform="translate(1973.4,0)"><path data-c="1D444" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path></g><g data-mml-node="mo" transform="translate(2986.7,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="msup" transform="translate(3986.9,0)"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g><g data-mml-node="mo" transform="translate(554,363) scale(0.707)"><path data-c="2032" d="M79 43Q73 43 52 49T30 61Q30 68 85 293T146 528Q161 560 198 560Q218 560 240 545T262 501Q262 496 260 486Q259 479 173 263T84 45T79 43Z"></path></g></g></g></g></svg></mjx-container> 明显小于 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="6.564ex" height="2.032ex" role="img" focusable="false" viewBox="0 -704 2901.4 898"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(1110.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="mi" transform="translate(2110.4,0)"><path data-c="1D444" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path></g></g></g></svg></mjx-container> 时，索引才是划算的，否则可能得不偿失。这个比较过程就是权衡。在题解时一定要反思：<strong>“用预处理换取查询O(1)到底值不值得？”</strong>。当查询不算多或预处理开销过高时，就要慎重，避免为了微小的查询优化而做大量无用功。</p>
+<p>题目往往会给出数据范围提示你做这种权衡。例如：“查询次数高达10万次”暗示你必须预处理，而“只查询一次，但数据100万规模”也许暗示不需要重索引而用别的算法。<strong>灵活权衡</strong>并选取<strong>最优策略</strong>，是高水平解题的体现。</p>
+<h2 id="通用代码模板与工程化技巧"><a href="#通用代码模板与工程化技巧" class="headerlink" title="通用代码模板与工程化技巧"></a>通用代码模板与工程化技巧</h2><p>掌握了设计理念和算法，还需要能将其快速实现为可靠的代码。这一节提供一些C++为主的工程技巧和常用编码范式，帮助实现倒排索引解法：</p>
+<ul>
+<li><strong>哈希表 vs 数组 vs 有序容器</strong>： 构建索引映射时，选择合适的数据结构很重要。经验提示：“有时键数量较少没必要哈希。如果键值从0开始且连续，可以用数组存；如果键值较大不连续但数量不多，可用vector排序加lower_bound维护有序性。” 也就是说：<ul>
+<li>当键域稠密且范围可承受，用<strong>数组或静态数组</strong>直接作为映射（键值直接当下标）最快速，无哈希开销。例如LeetCode“两数之和”用大小适当的数组反转映射值到索引，比unordered_map更快。</li>
+<li>当键数量很少（例如 &lt;1000）时，用<strong>排序动态数组+二分查找</strong>的方式即可满足要求，实现简单且在这种规模下性能足够，避免哈希的常数消耗。</li>
+<li>当键数量大且分布稀疏，用<strong>哈希表</strong>（如unordered_map）或<strong>平衡树</strong>（如map）才是必要的，以获得均摊近似O(1)或O(log N)的插入查找性能<br>  总之，小规模数据结构选用简单方式，只有在需要时才上复杂结构。这既是<strong>性能优化</strong>也是<strong>代码精简</strong>的体现。</li>
+</ul>
+</li>
+<li><strong>状态压缩与位集</strong>： 如果问题中每个对象可能涉及多种属性，而属性总数不大，可以考虑用一个<strong>位掩码</strong>表示对象的属性集合，从而实现快速比较和索引。例如有题要求判断一个物品是否同时具备属性A、B、C，可为每个物品预计算一个位掩码（某位为1表示有相应属性）。查询时将A,B,C对应位设1得到掩码mask_q，然后只需检查物品的mask &amp; mask_q == mask_q即可判断包含关系。更妙的是，可以预先把某些固定组合作为键建索引：比如属性组合只有几十种可能，则用组合掩码作为倒排索引键，直接映射到具有该组合的物品列表，查询时按组合键查找完全匹配。这利用了<strong>状态压缩</strong>思想，将属性集合转换为整数进行高效处理。需要注意的是，当属性种类很多或组合数极大时，此法会失去优势，但在<strong>小域多属性筛选</strong>类问题中非常有用。</li>
+<li><strong>版本号数组</strong>技巧： 在需要反复清空或复用标记数组的情况下，“版本号”方法可以做到O(1)清空。具体做法是维护一个与数组等长的version数组和一个全局current_version计数。每次要重置标记数组时，将current_version++，并在标记操作时写入当前版本号。判断某元素是否标记过，通过比对version[idx]是否等于current_version。如果不等则视为未标记。这避免了真的遍历数组清零。在实际工程中，可用于快速移除上次查询的痕迹。例如在倒排索引求交集时，用一个静态数组记录候选出现次数，每次查询开始增版本号，每当某文档ID出现一次就将计数数组对应位置写入当前版本号并累计次数，这样查询结束后不用清理数组，下次判断时不同版本号自然视为0初始状态。这种技巧对于<strong>大数组频繁初始化</strong>的场景非常管用，可以极大减少时间消耗。</li>
+<li><strong>固定窗口匹配预处理</strong>： 如果题目涉及在大文本或序列中查找<strong>固定长度</strong>的模式多次，可以考虑预处理所有长度为L的窗口内容建立索引。例如，给定一篇长文本和若干长度为L的查询字符串，朴素做法对每个查询滑窗检查文本，成本高。我们可以预先计算文本中所有长度L子串的哈希值，用哈希表或unordered_set存储这些哈希。查询时计算查询串的哈希，在集合中O(1)即可判断是否存在。这等价于为每个可能的长度L串建立一个倒排“存在索引”。对于查找位置，可将哈希映射到<strong>起始位置列表</strong>。这种方法在<strong>固定窗口长度</strong>或<strong>有限几种长度</strong>的情况下十分有效，将每次查询由O(N)降为均摊O(1)。它背后的原理是倒排索引的思想：用子串内容作为键，记录出现位置的列表供查询。一旦窗口长度变化较多或需要复杂匹配关系，则需考虑更通用的算法（如后缀数组、Aho-Corasick自动机等），那超出本文范畴。</li>
+<li><strong>模板代码与范式</strong>： 常见的倒排索引题可以总结出一些模板化解法。比如：<ul>
+<li><strong>简单哈希索引模板</strong>： 使用unordered_map&lt;Key, vector<int>&gt; index;读入数据构建索引，然后针对每个查询，根据查询条件拼装需要访问的键列表，从index取出向量并处理（交并集等）。这个模板适用于键不是很多、中等规模，代码清晰易写。</int></li>
+<li><strong>多列表交集模板</strong>： 当需要求多个有序列表交集时，可套用归并思想的模板。可参考POJ 4093题解中提供的方法，将所有需要出现的列表按长度排序，然后两两交集累积，或用小顶堆每次取最小值比较。写成函数后复用在不同题目的多集合求交。</li>
+<li><strong>多字段查询的结构体法</strong>： 若每个查询或数据涉及多个字段（例如同时按姓名和年龄查找），可以把关键字段组合成一个结构体键进行索引或排序。这是工程实现上的技巧，将多条件合并处理，避免嵌套索引带来的复杂性。</li>
+<li><strong>利用标志数组优化查找</strong>： 在某些需要快速判断“某元素是否在一集合中”的情况下，如果元素范围有限，可以用布尔数组或bitset标志法代替set或查找。甚至可以结合前述版本号技巧做到无需清空地复用。例如求两个列表的交集，一个简单实用的方法是将短列表元素全部标记到bool数组，再遍历长列表筛选标记过的元素输出。</li>
+</ul>
+</li>
+</ul>
+<p>工程化技巧千千万，归根结底是为了<strong>快速正确地实现</strong>算法。在比赛中编写倒排索引解法，要注意<strong>边界和细节</strong>：例如索引构建要避免漏掉空列表情况、输出要按要求排序、注意内存是否需要提前分配（如用reserve减少扩容开销）等等。这些细节可能决定代码是否能通过大数据测试。良好的模板和经验可以让你在考场上游刃有余地套用倒排索引解法。</p>
+<h2 id="题型归类与举一反三"><a href="#题型归类与举一反三" class="headerlink" title="题型归类与举一反三"></a>题型归类与举一反三</h2><p>倒排索引思想在竞赛题中应用广泛，但具体题目各有不同。通过归纳常见题型并分析代表例题，有助于举一反三，提高迁移解题能力。</p>
+<ul>
+<li><strong>单键直接查找类</strong>： 典型特征是给定一个值查询相关信息。这类题可以简单建立“值 -&gt; 位置/对象”的索引。例如著名的 LeetCode <strong>两数之和</strong> 问题，就可视为构建数组值到索引的倒排索引：预存每个数出现的位置，查询时直接看 target-x 是否存在即可返回索引。再如查询电话号码簿，“姓名 -&gt; 电话号”的映射、图论中从节点ID查邻居列表等，都属于单键查找索引，通常用哈希或数组实现。练习：实现一个简单词典查询程序，预处理把每个单词映射到其含义，然后回答查询词的含义。（提示：直接用unordered_map&lt;string, string&gt;构建索引）</li>
+<li><strong>多键交集过滤类</strong>： 这类题目要求找到同时满足多项条件的对象集合，是倒排索引在信息检索中的经典应用。例如<strong>文档检索</strong>题：给出若干关键词，返回同时包含所有关键词的文档ID列表。可以先为每个关键词存储文档列表，然后对查询关键词的列表求交集即可。POJ 4093 <strong>“倒排索引查询”</strong> 就是这样的例子：输入若干倒排列表和查询（指定哪些词要有，哪些不要有），需要输出符合条件的文档。解法是将所有要求出现的词的列表交集，再从中减去要求不出现词的并集，利用索引快速完成。练习：设计一个图书检索系统，每本书有若干标签，查询给出一些标签，要求返回同时拥有这些标签的书籍。（提示：为每个标签预存书籍集合，查询时依次取交集）</li>
+<li><strong>多条件任意匹配类</strong>： 有时查询不是严格的AND条件，而是OR或至少匹配k个条件。比如“找出至少含有3个指定关键词的文档”。这类可用倒排索引的变种做<strong>计数合并</strong>：遍历所有相关倒排列表，用一个计数器记录每个文档命中多少条件，最后筛选计数≥k的文档。这里<strong>版本号数组</strong>技巧派上用场：用一个数组count[]记录文档命中的词数，每处理一个关键词列表，就对其中的文档ID执行count[id]++。处理完所有查询词后，再遍历count数组或记录的ID看哪些≥k。由于需要多次初始化count，可以用版本号优化清零。这个套路在竞赛经常出现于“至少几个条件满足”筛选问题中。</li>
+<li><strong>模式匹配索引类</strong>： 除了精确匹配，有些题的查询是一个模式（字符串模式、通配符、正则等）要在数据中匹配。倒排索引思想同样适用，但通常需要特殊处理。例如<strong>前缀匹配</strong>查询，可以建立前缀树(Trie)作为索引；<strong>通配符</strong>（如“abc”匹配包含子串abc的字符串），可将模式分段，对每段建立索引，比如为所有字符串建立子串-&gt;字符串ID的倒排索引，再组合查询段的交集。但这种通用子串索引可能规模庞大，不如采用更专门算法（如Suffix Array/Automaton）。<strong>多模式串搜索</strong>问题（给定很多模式串，在文本中找到所有出现）是典型反向索引场景——把所有模式预处理为一个Aho-Corasick自动机（相当于构造Trie树加失败指针，实现查询模式到出现模式的快速查找），然后一次遍历文本即可触发所有模式出现的位置。这实质上是将<strong>查询模式索引化</strong>，提升匹配速度。练习：给定一本文章和一个含若干关键词的敏感词列表，找出文章中出现了哪些敏感词。（提示：用Aho-Corasick构建敏感词索引自动机，AC自动机本质上是Trie的倒排结构，可在O(文本长度+总模式长度)时间内完成匹配。）</li>
+<li><strong>双向索引匹配类</strong>： 一些复杂题目既可以从数据方向也可以从查询方向索引，需要权衡。例如<strong>拼图游戏</strong>中的放置问题：一个题目提供棋盘和若干拼图块，要检测拼图块能放的位置。可以有两种思路：按<strong>棋盘位置索引</strong>可能放入的拼图，或按<strong>拼图形状索引</strong>棋盘位置。哪种高效取决于拼图和棋盘参数（如拼图种类多少、棋盘尺寸等）。选错方向可能导致索引膨胀30倍之多，不划算。高难度题常考察选取最优索引方向并结合<strong>强剪枝</strong>。这提醒我们碰到新题时，不要局限于单向思维，考虑是否倒过来更简洁。</li>
+</ul>
+<p>上述分类并不穷尽，但涵盖了常见倒排索引题型。关键是掌握<strong>底层共性</strong>：识别问题中的 <strong>“键-值”结构</strong> 和 <strong>重复查询模式</strong>，合理设计索引键，以及如何将多个索引结果<strong>合并运算</strong>得到答案。一旦形成这种思维模型，即使题目背景变化、表述复杂，也能抽象出倒排索引的解法原型。</p>
+<h2 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h2><ol>
+<li>   <strong>LeetCode 1. 两数之和</strong> – 给定一个数组和目标和，找出两数使其和为目标。提示：先遍历数组将每个值映射到索引，查询时只需O(1)查是否存在 target - x[10]（可用哈希表或直接数组映射）。</li>
+<li>   <strong>POJ 4093. 倒排索引查询</strong> – 输入若干词的倒排文档列表，再给出多行查询（每行规定某些词必须有或无）。输出满足条件的文档编号。提示：将每个查询分成<strong>wanted集合</strong>（所有必须出现词的文档交集）和<strong>not_wanted集合</strong>（所有禁止词的文档并集），结果为wanted - not_wanted。利用倒排索引快速求交并集。</li>
+<li>   <strong>Substring 存在查询</strong> – 给定一个长度为N的大写字母串，以及Q个长度为L的查询串，判断每个查询串是否是原串的子串。提示：预处理原串所有长度L子串的哈希到集合，查询时计算哈希一比对即可，复杂度O(N + Q)。这使用了固定窗口倒排索引思想，将子串内容作为键索引出现过的位置。</li>
+</ol>
+<p>通过以上练习并对照提示思考，相信读者可以逐步体会倒排索引在不同场景下的应用精髓。练习中每道题目侧重一点：1考查基本哈希索引，2涉及多列表运算，3运用窗口索引加速字符串匹配。举一反三，触类旁通，将能够从零开始逐步熟练掌握倒排索引类问题的解题方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>倒排索引是一种威力强大的工具，从搜索引擎到算法题处处可见其身影。掌握通用识别技巧，可以快速判断题目是否适用该模型；明确核心设计维度，能理清索引构建方案；选对索引方向和优化策略，则往往事半功倍；加之合理运用工程化技巧，使实现高效可靠。通过对典型题型的练习，读者应当已经建立了解决倒排索引问题的清晰思路。今后再遇到类似挑战，记住先问自己：“能否预处理出一个<strong>从特征到候选</strong>的映射，让查询变简单？” 如果答案是肯定的，倒排索引或许就是你的制胜法宝。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
+<style>
+  /* 作用域：仅影响 #comments-app */
+  #comments-app {
+    --c-bg: #fff;
+    --c-text: #222;
+    --c-sub: #6b7280;
+    --c-border: #e5e7eb;
+    --c-accent: #3b82f6;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
+    margin-top: 2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app { --c-bg:#111318; --c-text:#e8e8e8; --c-sub:#a5a5a5; --c-border:#30363d;
+      --shadow:0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35); }
+  }
+  #comments-app, #comments-app * { box-sizing: border-box; }
+
+  /* 外层大卡片 */
+  #comments-app .wrap {
+    max-width: 860px; width: 100%; margin: 0 auto;
+    background: var(--c-bg); border: 1px solid var(--c-border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; overflow: hidden;
+  }
+
+  /* 顶部标题 */
+  #comments-app .title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 2px 0 16px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--c-text);
+  }
+  #comments-app .title::before{
+    content:""; width:8px; height:20px; border-radius:4px; background: var(--c-accent);
+  }
+
+  /* 内部分区：上下两张卡：列表卡 + 表单卡 */
+  #comments-app .sections { display: grid; gap: 16px; }
+  #comments-app .card {
+    background: color-mix(in srgb, var(--c-bg) 98%, #000 2%);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    #comments-app .card { background: color-mix(in srgb, var(--c-bg) 94%, #fff 6%); }
+  }
+
+  /* 仅列表卡的列表样式 */
+  #comments-app .list { display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 12px 14px; background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark){ #comments-app .item{ background: rgba(255,255,255,.03);} }
+  #comments-app .meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size:.86rem; margin-bottom:6px; }
+  #comments-app .meta .author { color: var(--c-text); font-weight:600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height:1.7; }
+
+  /* 表单卡：提示条 + 表单 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px; border: 1px solid var(--c-border);
+    border-radius: 12px; background: rgba(107,114,128,.08);
+    color: var(--c-sub); margin-bottom: 12px;
+  }
+  /* 没文字时自动隐藏，杜绝“空白横条” */
+  #comments-app .alert:empty { display: none !important; }
+
+  /* 表单栅格（12栅格） */
+  #comments-app .form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px; align-items: start;
+  }
+  #comments-app .col-6  { grid-column: span 6 / span 6; }
+  #comments-app .col-12 { grid-column: span 12 / span 12; }
+
+  #comments-app input[type="text"],
+  #comments-app textarea {
+    width: 100%;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg); color: var(--c-text);
+    border-radius: 12px; padding: 12px 14px; font-size:.95rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  #comments-app textarea { min-height: 140px; resize: vertical; max-width:100%; line-height:1.6; }
+  #comments-app input:focus, #comments-app textarea:focus {
+    border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  }
+
+  #comments-app .actions {
+    grid-column: span 12 / span 12;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  #comments-app .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    background: var(--c-accent); color:#fff; border:1px solid transparent;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+    transition: transform .06s, filter .15s;
+  }
+  #comments-app .btn:hover{ filter:brightness(1.05); }
+  #comments-app .btn:active{ transform: translateY(1px); }
+
+  /* 小屏优化：表单单列、按钮全宽 */
+  @media (max-width: 720px){
+    #comments-app .col-6 { grid-column: span 12 / span 12; }
+    #comments-app .btn { width: 100%; }
+  }
+</style>
+
+<div id="comments-app">
+  <div class="wrap">
+    <div class="title">评论</div>
+
+    <div class="sections">
+      <!-- 列表卡 -->
+      <section class="card list-card">
+        <div id="comments-list" class="list">
+          <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+        </div>
+      </section>
+
+      <!-- 表单卡 -->
+      <section class="card form-card">
+        <div id="comment-msg" class="alert"></div>
+
+        <form id="comment-form" class="form" novalidate>
+          <input class="col-12" type="hidden" name="post" />
+          <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+          <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+          <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+          <div class="actions">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+            <button type="submit" class="btn">提交</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Turnstile -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+(function () {
+  'use strict';
+  const API_BASE = '/api';
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
+
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#comments-list');
+  const form   = $('#comment-form');
+  const msg    = $('#comment-msg');
+  if (!form || !listEl || !msg) return;
+
+  form.querySelector('input[name="post"]').value = postId;
+
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+
+  const showMsg = (text) => {
+    msg.textContent = text || '';
+    // :empty 会自动隐藏，这里不强制 display
+    if (!text) return;
+  };
+
+  const itemTpl = (it) => {
+    const t = new Date(it.created_at);
+    const time = isNaN(t) ? '' : t.toLocaleString();
+    const safeAuthor = escapeHTML(it.author || '匿名');
+    const authorHtml = it.website
+      ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
+      : safeAuthor;
+    return `
+      <div class="item">
+        <div class="meta"><span class="author">${authorHtml}</span><span>${escapeHTML(time)}</span></div>
+        <div class="content">${it.content}</div>
+      </div>`;
+  };
+
+  async function loadComments(page = 1) {
+    showMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const list = Array.isArray(data.list) ? data.list : [];
+      listEl.innerHTML = list.length
+        ? list.map(itemTpl).join('')
+        : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
+    } catch {
+      showMsg('评论加载失败，请稍后重试。');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    let token = fd.get('cf-turnstile-response');
+    if (!token && window.turnstile && window.turnstile.getResponse) {
+      token = window.turnstile.getResponse();
+    }
+    const payload = {
+      post: fd.get('post'),
+      author: fd.get('author') || '匿名',
+      website: fd.get('website') || '',
+      content: fd.get('content') || '',
+      turnstileToken: token || ''
+    };
+    if (!payload.content.trim()) { showMsg('内容不能为空。'); return; }
+
+    showMsg('提交中…');
+    try {
+      const resp = await fetch(`${API_BASE}/comments`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(()=> ({}));
+
+      if (resp.ok && data.ok) {
+        showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
+        form.reset();
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+        if (data.status !== 'pending') loadComments();
+      } else {
+        showMsg('提交失败：' + (data.error || resp.status));
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      }
+    } catch {
+      showMsg('网络异常，请稍后再试。');
+    }
+  });
+
+  loadComments();
+})();
+</script>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"><i class="fa fa-tag"></i> 数据结构</a>
+              <a href="/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/" rel="tag"><i class="fa fa-tag"></i> 倒排索引</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/10/11/%E5%A4%8F%E5%A4%A9%E6%B0%B8%E4%B8%8D%E5%91%8A%E5%88%AB/" rel="prev" title="夏天永不告别">
+                  <i class="fa fa-angle-left"></i> 夏天永不告别
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ziyoeng Zoeng</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">123k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">7:26</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.0/canvas-nest.umd.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 在 body 背后挂一个画布
+    new CanvasNest(document.body, {
+      color: '120,160,255', // 线颜色（RGB）
+      opacity: 1,         // 透明度 0~1
+      zIndex: -1,           // 置于背景
+      count: 150,             // 点数量
+      dist: 4000,   // 连线距离加大
+      radius: 120,  // 鼠标作用范围扩大
+    })
+  })
+</script>
+
+</body>
+</html>
