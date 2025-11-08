@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="区间的动态分配与释放">
+<meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/index.html">
+<meta property="og:site_name" content="勿忘羊心">
+<meta property="og:description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-08T14:50:00.000Z">
+<meta property="article:modified_time" content="2025-11-08T15:50:46.881Z">
+<meta property="article:author" content="Ziyoeng Zoeng">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="倒排索引">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/","path":"2025/11/08/区间的动态分配与释放/","title":"区间的动态分配与释放"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>区间的动态分配与释放 | 勿忘羊心</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="stylesheet" href="/css/prism-vs.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">勿忘羊心</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-算法"><a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="section"><i class="fa fa-code fa-fw"></i>算法</a></li><li class="menu-item menu-item-随笔"><a href="/categories/%E9%9A%8F%E7%AC%94/" rel="section"><i class="fa fa-pen fa-fw"></i>随笔</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF%E4%B8%8E%E5%B8%B8%E8%A7%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">问题背景与常见应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AE%B2%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">常用数据结构讲解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%A2%98%E5%9E%8B%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">不同题型策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%AE%BA%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">方法论总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98%E8%AE%B2%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">例题讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9A%E5%8C%BA%E9%97%B4%E6%8F%92%E5%85%A5%E4%B8%8E%E5%90%88%E5%B9%B6"><span class="nav-number">5.1.</span> <span class="nav-text">示例1：区间插入与合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B2%EF%BC%9A%E4%BA%8C%E7%BB%B4%E8%AF%8D%E6%B1%87%E8%A1%A8"><span class="nav-number">5.2.</span> <span class="nav-text">示例2：二维词汇表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B3%EF%BC%9A%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.3.</span> <span class="nav-text">示例3：文件存储系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B4%EF%BC%9A%E7%BA%BF%E6%80%A7%E5%9F%8E%E5%B8%82%E5%BB%BA%E8%AE%BE"><span class="nav-number">5.4.</span> <span class="nav-text">示例4：线性城市建设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B5%EF%BC%9A%E5%9C%B0%E4%B8%8B%E5%9F%8E%E5%BB%BA%E8%AE%BE%E4%B8%8E%E5%8A%A8%E6%80%81%E8%B7%AF%E5%BE%84%E6%8E%A2%E7%B4%A2"><span class="nav-number">5.5.</span> <span class="nav-text">示例5：地下城建设与动态路径探索</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E4%B8%8E%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.</span> <span class="nav-text">常见错误与优化建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89%E8%AE%AD%E7%BB%83"><span class="nav-number">7.</span> <span class="nav-text">举一反三训练</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ziyoeng Zoeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.wuwangyangxin.com/2025/11/08/%E5%8C%BA%E9%97%B4%E7%9A%84%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E4%B8%8E%E9%87%8A%E6%94%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ziyoeng Zoeng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="区间的动态分配与释放 | 勿忘羊心">
+      <meta itemprop="description" content="这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          区间的动态分配与释放
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-11-08 22:50:00 / 修改时间：23:50:46" itemprop="dateCreated datePublished" datetime="2025-11-08T22:50:00+08:00">2025-11-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>12k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>43 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">这篇文章系统梳理了“区间占用与释放”类问题的通用模型、经典数据结构、主要策略及方法论，并通过多种代表性题型展示如何在动态区间管理中进行分配、合并、查询与优化。内容涵盖内存与文件系统分配机制、二维与多维空间抽象、区间连通建图等核心技巧，为理解和解决各类动态区间管理问题提供了完整框架与实践范式。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>区间的动态分配与释放本质上是在模拟计算机内存管理系统。</p>
+</blockquote>
+<h2 id="问题背景与常见应用场景"><a href="#问题背景与常见应用场景" class="headerlink" title="问题背景与常见应用场景"></a>问题背景与常见应用场景</h2><p>“区间占用与释放”类问题指的是在一个连续空间（如内存地址、磁盘空间、土地长度等）上<strong>动态分配和释放区间</strong>的场景。在这些问题中，我们需要根据一定规则将某些区间标记为“占用”，再根据操作将它们释放并恢复为空闲。这类问题广泛存在于计算机系统和实际工程中：</p>
+<ul>
+<li><strong>内存管理</strong>：操作系统的动态内存分配（如malloc/free）会维护空闲内存块列表。当程序请求内存时，系统需在空闲区中找到合适的一块分配出去，用完后再释放回来。这涉及<strong>首次适配</strong>、<strong>最佳适配</strong>、<strong>最坏适配</strong>等策略，不同策略影响碎片化程度和分配效率。</li>
+<li><strong>文件存储</strong>：文件系统中，如果采用连续存储策略，一个文件需占用连续的磁盘扇区。当新增文件或扩展文件时，需要在磁盘空闲区寻找能够容纳文件大小的连续扇区；删除文件时释放其占用区间。例如经典的FAT文件系统就涉及将文件划分成若干片段存放并记录链表。例题“File Storage”模拟了这样的过程，需要按地址升序找到第一个够大的空闲段存放文件，并允许一个文件分成最多30个片段存储。</li>
+<li><strong>建筑堆叠</strong>：在一些模拟类题目中，会出现将物体（建筑、箱子等）堆叠到有限空间中的情境。例如“Line City Construction”题中，在一块狭长土地上按规则放置不同长度的建筑，占用一段连续土地，并在移除建筑时合并腾出的空地；又如“Underground City Construction”题中，在地下洞穴中不断掉落箱子，各箱子占据洞穴的一层空间且有宽度，会形成上下左右相邻的结构，需要模拟<strong>箱子落下占用空间</strong>以及<strong>人在箱子之间移动</strong>（这部分可抽象为区间的图连通问题）。这些都是<strong>空间管理</strong>的实例，将物理空间抽象为一维或二维的区间占用模型。</li>
+</ul>
+<p>简言之，此类问题的共同点是<strong>维护一个动态的“空闲区间”集合</strong>，支持<strong>占用（分配）<strong>和</strong>释放</strong>操作，并可能附带一些查询功能。在占用时通常要按照某种策略选择一个空闲区间来使用，释放时则将该区间归还并与相邻空闲段合并。正因其重要性，这类问题在竞赛和工程中都很常见——从操作系统的内存/磁盘管理，到模拟现实场景的堆叠或调度，都可以抽象为区间占用模型。</p>
+<h2 id="常用数据结构讲解"><a href="#常用数据结构讲解" class="headerlink" title="常用数据结构讲解"></a>常用数据结构讲解</h2><p>要高效地维护区间的占用与释放，选择合适的数据结构至关重要。根据问题规模和操作类型的不同，常用的数据结构包括：</p>
+<ul>
+<li><strong>线段树</strong>：线段树适用于需要在数组或区间上进行快速查询和更新的情况。例如在“箱子下落”这类需要快速获取某一段区间的高度最大值并更新一段区间值的问题中，可以使用线段树实现区间最大查询和区间更新。线段树的查询和更新平均是对数级别 O(log N)，适合空间较大且操作频繁的情况。不过实现相对复杂，占用内存也较多。在一些场景下，可以用<strong>树状数组</strong>或<strong>平衡二叉树</strong>替代部分线段树功能。</li>
+<li><strong>分块（块状数组 / sqrt decomposition）</strong>：分块技术通过将数据按块拆分，维护每块的汇总信息，加速跨块查询。它常被用于<strong>空间或维度较大但局部操作较简单</strong>的情况。例如在“Vocab Sheet”词汇表题中，我们有数万行但每行最多60个单词这个强上限，于是可以把行分成页，每页包含固定数量的行（如128行），维护每页内最大空闲长度。这样写单词时，先快速跳过不可能容纳的整页，再在页内逐行线性查找，等于实现了一种二级跳跃搜索，加速了定位空闲位置。这种 <strong>“页-Max -&gt; 行-Max -&gt; 空段”</strong> 的两级索引正是分块思想的体现。分块还经常用于处理<strong>部分可独立的维度</strong>或<strong>懒更新</strong>场景，除了懒标记修改外，也可维护每块的最大值、最小值、计数等聚合信息。实现难度比线段树低，且在一些<strong>超大规模N</strong>但<strong>每块元素有限</strong>的情况下非常高效。然而，需要注意块边界条件，例如空闲区间跨越块边界时可能被错误地视为两段，处理不好会导致统计错误。</li>
+<li><strong>堆（优先队列）</strong>：堆适合需要反复<strong>取出最优/最差值</strong>的情形。例如<strong>小根堆</strong>常用于“首次适配”策略：总是取起始地址最小的空闲块来分配；<strong>大根堆</strong>则可用于“最坏适配”策略：总是取最大的空闲块来分配，使剩余碎片尽可能大而少（如Line City题中要求选择<strong>最长</strong>空闲段）。堆操作是 O(log N)，维护单一关键字的最值十分方便。但堆不能直接支持按任意位置删除，故在<strong>任意释放</strong>操作中需要配合其他结构辅助（例如延迟删除标记，或同时维护一个哈希/集合来支持删除）。</li>
+<li><strong>有序集合/映射（平衡二叉树，如C++的set/map）</strong>：平衡BST适合维护<strong>动态区间集合</strong>，支持按区间的起点或终点排序遍历。常用做法是将<strong>空闲区间按起始位置</strong>存入集合，以便释放时方便找到相邻区间合并，或<strong>同时按长度排序</strong>存入另一集合以支持按大小选取最优段。C++ std::set提供对数时间的插入、删除、前趋后继查找，非常方便实现诸如“找到左侧相邻区间”“找到最小大于X的区间”等操作。我们的例题“Line City Construction”初始解法就用了两个set分别按长度和起点维护空闲段，以及一个按起点的set维护已建建筑，以处理建筑移除时的合并。尽管红黑树常数较大，在数据量很小的场景下不如数组直接遍历，但对于<strong>无法预知上限</strong>或<strong>需要多种顺序检索</strong>的情况，仍是不二选择。一些场景下可以改用<strong>跳表</strong>或<strong>B+树</strong>，但思想类似。</li>
+<li><strong>时间戳去重技巧</strong>：这是一种辅助技术，常用于<strong>查询操作需要统计涉及多个元素的属性</strong>时避免重复计算。例如在文件存储问题中，我们可能需要查询某一地址区间内有多少不同文件碎片。如果直接逐段检查可能重复计数同一文件片段。利用时间戳去重法，可以维护一个全局timestamp和一个哈希表，将每次查询标记为不同时间戳，扫描区间段时标记每个文件ID上次计数时间，如果不是本次则计数并更新时间戳。这样无需额外集合即可在一次遍历中得到<strong>不同ID计数</strong>。时间戳去重常与区间扫描或分块结合，在多个题目中都有应用。需要注意线程安全（竞赛题通常不涉及多线程）和时间戳溢出（一般用整数足够）。</li>
+</ul>
+<p>上述数据结构各有所长，应根据题目<strong>数据规模</strong>和<strong>操作需求</strong>合理选型。实际解题中，往往多种结构组合使用：例如空闲区间用堆选取，已占用区间用set维护，额外查询用哈希时间戳等等，实现<strong>职责分离，各司其职</strong>。接下来我们将结合策略和案例具体说明。</p>
+<h2 id="不同题型策略"><a href="#不同题型策略" class="headerlink" title="不同题型策略"></a>不同题型策略</h2><p>针对区间占用类问题，不同题目往往要求不同的“选择策略”和处理侧重点。以下列出几种常见策略及对应场景：</p>
+<ul>
+<li><strong>首次适配（First Fit）</strong>：从低地址（或空间起点）开始，找到第一个足够大的空闲区就用它。这是经典内存分配策略之一，实现在代码上通常是<strong>空闲区按起点排序</strong>，每次分配时从头遍历或用最小堆取起点最小空闲段。优点是实现简单，倾向利用低地址区域；缺点是会在低地址处留下很多零碎小洞，造成碎片。我们的“File Storage”题就要求按地址从小到大存文件，即首次适配策略：每次add(file)时取当前<strong>起点最小</strong>的空闲段分配，若空间不够则拆分文件存多段。为高效实现，我们使用小根堆来管理空闲段，保证每次 pop 出的都是起始最小段。</li>
+<li><strong>最佳适配（Best Fit）</strong>：每次选择<strong>刚好能满足需求且剩余最小</strong>的空闲区，使浪费最少。实现上通常是将空闲区按大小排序（如用set按长度排序）。Best Fit可降低即时碎片率，但每次可能留下很多非常小的零头，而且由于需要全局搜索最小可用段，查找成本较高。Best Fit适合在乎碎片最小化且可以容忍查找开销的场景，pro考试中暂未出现。</li>
+<li><strong>最坏适配（Worst Fit）</strong>：每次选择<strong>最大的</strong>空闲区来分配。这样大块被分走后剩下的空间仍比较大，不至于变成难利用的小碎片。Worst Fit本质上是一种<strong>优先使用最长区间</strong>的策略。例题“Line City Construction”的规则就近似Worst Fit：总是找<strong>最长</strong>的空闲段放入建筑，如有多个同样最长则选最靠左的。该题要求建筑放在空段中央（尽量均分左右空隙），实际上等价于每次从最大空白段中间切走一块。这一策略优点是保留较多中大型空闲段，减少碎片数量；缺点是可能让大任务无地可放。实现上通常用<strong>大根堆或set按长度降序</strong>维护空闲段，每次取出最大段。</li>
+<li><strong>区间图连通</strong>：有些题目并不关注如何选择空闲段分配，而是关注<strong>已占用区间之间的关系</strong>。典型情形是将区间（或其端点）抽象为图的节点，根据邻接或重叠关系建立边，进而解决连通性、路径等问题。例如“Underground City”中，每个箱子占据洞穴某一行的一段区间，相邻箱子左右贴合则水平连通，上下叠放且出口对齐则垂直连通。题目要求判断两箱子之间最少经过几个出口可互通，即在这个<strong>区间连接图</strong>上求最短路径。本质上这是一个<strong>图搜索</strong>问题。解法是对每个箱子建立节点，利用集合快速查找<strong>同一行相邻</strong>箱子和<strong>上下行垂直重叠</strong>箱子。然后用BFS寻找两节点最短路径（因每步权重相同），或若权重不同则Dijkstra。<strong>区间连通</strong>类题目考查我们如何从区间状态构造图模型并高效检索邻接关系。</li>
+<li><strong>跳跃搜索</strong>：当数据规模巨大、线性扫描代价高时，需要跳跃式查找空位。例如在“Vocab Sheet”词汇纸题中，有N行但每行最多M=60个单词，我们可以按“页”跳跃：先定位拥有足够大空闲段的行范围，再在行内找具体空位。这是<strong>多级索引</strong>或<strong>跳表思想</strong>的应用，将一次可能的线性搜索拆解为跳跃+局部扫描的结合。另一例子是跳表数据结构，它在有序链表上建立多级前向指针，实现元素查找的跳跃前进。同理，我们在区间管理中可以维护<strong>全局信息</strong>（如“哪一页有足够空闲”）来迅速跳转到可能的候选，再细查。这种策略尤其适用于<strong>数据量大但局部问题简单</strong>的情况，可大幅降低查询开销。</li>
+</ul>
+<p>需要强调的是，具体题目常常将以上策略混合使用。例如文件存储题综合了首次适配和允许分段；地下城题结合了空间占用（箱子堆叠）和区间连通（箱子路径）。在解题时，首先应读懂题目规则，判断<strong>核心要求属于哪种策略</strong>，然后选择合适的数据结构实现之。</p>
+<h2 id="方法论总结"><a href="#方法论总结" class="headerlink" title="方法论总结"></a>方法论总结</h2><p>经过对多种题目的分析，我们可以总结出一套解决区间占用与释放问题的一般方法论：</p>
+<ul>
+<li><strong>建模与独立性分析</strong>：首先将实际问题抽象成区间模型，理清哪些维度或要素可以独立处理。若问题是多维的，考虑能否<strong>降维</strong>处理——例如词汇表问题将二维的纸面拆成按行独立的一维问题，每行分别处理。独立性强的维度可以分而治之（分行、分页等）；不能独立的则需统一考虑。如文件存储问题由于“首次适配”涉及整体地址顺序，不适合按块分开处理。</li>
+<li><strong>确定优先级策略</strong>：搞清楚空闲区间选择的优先规则，是按地址、小/大、还是其他组合？<strong>排序关键字的数量</strong>决定数据结构选择：如果只有一个排序依据，用单一的全局结构（堆或有序表）即可；如果有<strong>两级或多级关键字</strong>（如词汇表按行号再列号），则需要分层索引或多结构配合。经验：单键排序-&gt;全局堆/树，多键排序-&gt;分层索引+局部结构。</li>
+<li><strong>操作频率与热路径</strong>：分析各种操作的频率，针对<strong>热点操作优化</strong>。如果“写入/分配”操作远多于“删除”操作，那么我们应尽量简化分配过程为O(1)或摊销常数，把复杂合并等工作推迟到删除时再做。反之亦然。如果某类查询复杂且调用频繁，考虑为它专门维护索引结构，加快查询。例如文件存储题中，count查询需要统计区间内文件种类，为此引入一个按已占用段排序的set和时间戳去重，实现查询高效且与分配逻辑互不干扰。</li>
+<li><strong>利用边界条件与上界</strong>：充分利用题目给出的<strong>最大值约束</strong>来优化。若某结构中的元素个数有明确上限，比如“每行最多60个单词”或“每文件最多30段”这种<strong>强上界</strong>，就可以采用简单结构（数组、vector）线性处理，避免为了理论最坏情况去上平衡树。这些上界保证了线性操作的次数有限，遍历也很快，实际运行更优。反之，如果没有上界，才需要考虑更复杂的数据结构如平衡树/跳表等。</li>
+<li><strong>Fail-Fast 策略</strong>：在执行复杂操作前，先做<strong>快速失败检查</strong>，以免徒耗时间。比如文件存储在正式分配前就检查剩余总空间是否足够，不够就直接返回失败，无需尝试分段写入再回滚。又比如词汇表可以预先维护每页最大空闲长度，如果所需长度大于当前所有页的最大空闲，则立即判定无法写入。这种“先判是否可能，再具体操作”的思想可以避免不必要的计算，大幅提升性能和代码可靠性。</li>
+<li><strong>正确维护状态</strong>：对于每次占用或释放操作，都要<strong>及时更新</strong>相关结构的信息。例如维护每行最大空闲长度和每页最大空闲长度数组，每当某行空闲段变化时更新之；维护全局剩余空间变量，在文件增加或删除时增减。在实现中可以引入辅助函数封装这些更新动作，保证不遗漏。对于释放合并操作，要特别小心相邻区间合并条件，必要时检查前后区间是否连续并做合并。缺少合并会导致所谓<strong>内存碎片</strong>无法再利用的bug。</li>
+</ul>
+<p>以上方法论可以指导我们从宏观上设计解法。归纳起来就是：<strong>抽象模型，分清维度；确定规则，对应结构；优化热path，利用边界；维护状态，及时更新</strong>。带着这套思路，我们再来看具体例题的分层讲解。</p>
+<h2 id="例题讲解"><a href="#例题讲解" class="headerlink" title="例题讲解"></a>例题讲解</h2><p>下面通过从基础到复杂的一系列例题，演示如何应用上述思想解决区间占用与释放类问题。每个例题会包含问题描述简述、解题思路分析和关键代码片段（均为C++11实现）。</p>
+<h3 id="示例1：区间插入与合并"><a href="#示例1：区间插入与合并" class="headerlink" title="示例1：区间插入与合并"></a>示例1：区间插入与合并</h3><p><strong>问题描述</strong>：维护一个一维空间0~N-1，支持两种操作：build(L)在当前空闲空间中放入一个长度为L的占用段并返回其起始位置；demolish(X)移除以地址X开头的占用段并返回其长度。如果build找不到可用空位则返回-1，如果demolish给定地址没有建筑则返回-1。</p>
+<p>这是区间动态分配问题的最简化模型，抽象自内存分区管理。可以用它演练<strong>首次适配</strong>或<strong>最坏适配</strong>策略。</p>
+<p><strong>解题思路</strong>：我们选择按照<strong>最坏适配</strong>（最长空段）策略分配，使得每次都利用最大的空闲段。具体步骤：</p>
+<ul>
+<li>用一个set<blank>按空闲段长度降序、起点升序排序维护所有空闲区；用一个set<int>维护已占用段的起始地址（建筑地址），以及一个哈希表记录每个占用段长度，方便拆除时查询。</int></blank></li>
+<li><strong>build(L)</strong>: 每次从set<blank>取出长度最大且最左的空闲段。如果该段长度小于L，则无可用空间返回-1；否则计算建筑应放的位置。按照规则“居中放置”：令空段长度为len，则左侧剩余left = (len - L) / 2（下取整），右侧剩余right = len - L - left（保证右边比左边多至多一格）。建筑起点 = 空段起点 + left。然后将原空闲段从集合删除，插入建筑地址到starts集合，并记录长度。最后，根据left和right情况，将左侧空隙和右侧空隙重新作为空闲段插入集合。</blank></li>
+<li><strong>demolish(X)</strong>: 查找starts集合中是否存在X，没有则返回-1。有则取出对应建筑长度L，删除该建筑（地址从starts去除，记录中删除）。计算该建筑腾出的空闲段[newBlank] = [X, X+L-1]。然后需要检查[newBlank]能否与前后相邻空闲段合并：利用starts集合找到前一个建筑的末尾和后一个建筑的起点，从而确定前后空闲的边界。若[newBlank]正好挨着某左侧空闲段，则合并；挨着右侧空闲段也合并。合并后插入空闲集合。返回L。</li>
+</ul>
+<p>这种解法的数据结构和操作与模拟内存分区非常类似，代码实现也相对简单直观。初版实现用到了三个集合维护状态，但随后通过精简合并，发现其实只需维护两个集合：一个存建筑起点（用于邻居查找），一个存空闲段（用于选最大段）即可。下面贴出优化后的核心代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;set&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Blank</span> { <span class="type">int</span> l, r; };             <span class="comment">// 空闲段 [l, r]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ByBest</span> {                        <span class="comment">// 比较：长段优先，左端优先</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> Blank&amp; a, <span class="type">const</span> Blank&amp; b)</span> <span class="type">const</span> </span>{</span><br><span class="line">        <span class="type">int</span> lenA = a.r - a.l + <span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> lenB = b.r - b.l + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (lenA != lenB) <span class="keyword">return</span> lenA &gt; lenB;</span><br><span class="line">        <span class="keyword">return</span> a.l &lt; b.l;</span><br><span class="line">    }</span><br><span class="line">};</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> N;</span><br><span class="line"><span class="type">static</span> set&lt;<span class="type">int</span>&gt; starts;                <span class="comment">// 已占用段起点集合</span></span><br><span class="line"><span class="type">static</span> unordered_map&lt;<span class="type">int</span>,<span class="type">int</span>&gt; lenMap;  <span class="comment">// 起点-&gt;长度 映射</span></span><br><span class="line"><span class="type">static</span> set&lt;Blank, ByBest&gt; gaps;        <span class="comment">// 空闲段集合（按长度/位置排序）</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">(<span class="type">int</span> N_)</span> </span>{</span><br><span class="line">    N = N_;</span><br><span class="line">    starts.<span class="built_in">clear</span>();</span><br><span class="line">    lenMap.<span class="built_in">clear</span>();</span><br><span class="line">    gaps.<span class="built_in">clear</span>();</span><br><span class="line">    gaps.<span class="built_in">insert</span>({<span class="number">0</span>, N<span class="number">-1</span>});             <span class="comment">// 初始一个整段空闲</span></span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">build</span><span class="params">(<span class="type">int</span> L)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span> (gaps.<span class="built_in">empty</span>()) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">auto</span> it = gaps.<span class="built_in">begin</span>();           <span class="comment">// 最大且最左空闲段</span></span><br><span class="line">    <span class="type">int</span> l = it-&gt;l, r = it-&gt;r;</span><br><span class="line">    <span class="type">int</span> span = r - l + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (span &lt; L) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    gaps.<span class="built_in">erase</span>(it);</span><br><span class="line">    <span class="comment">// 计算建筑放置的起点，使左右空隙差&lt;=1</span></span><br><span class="line">    <span class="type">int</span> usable = span;</span><br><span class="line">    <span class="keyword">if</span> (L % <span class="number">2</span> == <span class="number">1</span>) --usable;         <span class="comment">// 若L奇数，则可让右侧比左侧多一格</span></span><br><span class="line">    <span class="type">int</span> addr = l + usable/<span class="number">2</span> - L/<span class="number">2</span>;</span><br><span class="line">    <span class="comment">// 更新空闲段集合：移除已占用部分，左右剩余空段插回</span></span><br><span class="line">    <span class="keyword">if</span> (addr &gt; l) gaps.<span class="built_in">insert</span>({l, addr<span class="number">-1</span>});</span><br><span class="line">    <span class="keyword">if</span> (addr + L &lt;= r) gaps.<span class="built_in">insert</span>({addr+L, r});</span><br><span class="line">    <span class="comment">// 记录建筑信息</span></span><br><span class="line">    starts.<span class="built_in">insert</span>(addr);</span><br><span class="line">    lenMap[addr] = L;</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">demolish</span><span class="params">(<span class="type">int</span> addr)</span> </span>{</span><br><span class="line">    <span class="keyword">auto</span> it = starts.<span class="built_in">find</span>(addr);</span><br><span class="line">    <span class="keyword">if</span> (it == starts.<span class="built_in">end</span>()) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="type">int</span> L = lenMap[addr];</span><br><span class="line">    <span class="comment">// 确定合并边界：左边界il，右边界ir</span></span><br><span class="line">    <span class="type">int</span> il = (it == starts.<span class="built_in">begin</span>() ? <span class="number">0</span> : *<span class="built_in">prev</span>(it) + lenMap[*<span class="built_in">prev</span>(it)]);</span><br><span class="line">    <span class="type">int</span> ir = (it == <span class="built_in">prev</span>(starts.<span class="built_in">end</span>()) ? N : *<span class="built_in">next</span>(it));</span><br><span class="line">    <span class="comment">// 从空闲集合中移除相邻段，并合并</span></span><br><span class="line">    gaps.<span class="built_in">erase</span>({il, addr<span class="number">-1</span>});</span><br><span class="line">    gaps.<span class="built_in">erase</span>({addr+L, ir<span class="number">-1</span>});</span><br><span class="line">    gaps.<span class="built_in">insert</span>({il, ir<span class="number">-1</span>});</span><br><span class="line">    <span class="comment">// 移除建筑</span></span><br><span class="line">    lenMap.<span class="built_in">erase</span>(addr);</span><br><span class="line">    starts.<span class="built_in">erase</span>(it);</span><br><span class="line">    <span class="keyword">return</span> L;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中，ByBest比较器实现了长度优先、地址次之的排序，以满足Longest Empty + 左端优先要求；build函数计算插入位置时，用了一点算术技巧，直接根据段长奇偶调整左右平衡。demolish则巧妙地利用starts集合，通过prev和next找到相邻建筑边界，从gaps中移除旧的左右空闲段，再插入合并后的新空闲段，省去了维护一个按起点排序的空闲集合的麻烦。这样实现不仅逻辑清晰，而且非常高效，在N很大（如100百万）时依然能快速响应每个操作。</p>
+<h3 id="示例2：二维词汇表"><a href="#示例2：二维词汇表" class="headerlink" title="示例2：二维词汇表"></a>示例2：二维词汇表</h3><p><strong>问题描述</strong>：有一张N行M列的纸张用于写单词，每次调用writeWord(id, length)要求在纸上写入一个长度为length的新单词，返回其所写位置（行、列）；填词规则是在<strong>字典序</strong>最小的位置找空位写入，即优先找行号小的行，行内再找列号小的空段。如果一行写满60个单词则不再写入新词。eraseWord(id)则根据单词id清除其占据空间（空出一个段）。需要实现上述操作序列。</p>
+<p><strong>解题分析</strong>：本质是一个二维的区间分配问题：每行可以看作长度M的一维空闲段集，写词相当于在某行的空白处占用一个长=length的段。题目特殊之处在于<strong>二维字典序优先</strong>和<strong>每行最多60词</strong>的约束。</p>
+<p>解法思路：</p>
+<ul>
+<li><strong>独立分解</strong>：由于各行之间互不影响，我们可以将问题拆成N个独立的“一行写字”子问题，然后再加一层结构维护行的顺序。这样大幅降低复杂度。</li>
+<li><strong>数据结构</strong>：对于每一行，用一个vector<seg>保存当前行的空闲段列表，按起始列升序排列；由于每行最多60段空闲，使用数组顺序查找非常快。全局维护两个数组：rowMax[row]记录该行当前最大空闲段长度，pageMax[page]记录每页（比如128行一页）中最大空闲段长度，用于跳跃搜索。</seg></li>
+<li><strong>writeWord(id, len)</strong>：先检查是否<strong>剩余空间不足</strong>或者全局最大空闲段&lt;M，若是则直接fail-fast返回-1。否则通过两级索引寻找：先找到第一个page使pageMax &gt;= len，再在该页内找到第一个row使rowMax &gt;= len。在该行的vector<seg>中顺序扫描找到首个长度&gt;=len的空闲段并取其起始位置作为书写位置。将该空闲段按需求截断/移除并在vector中更新左右剩余空段。随后更新该行的rowMax，以及对应页的pageMax。最后记录下单词id对应的行、列、长度以备删除操作使用。</seg></li>
+<li><strong>eraseWord(id)</strong>：根据记录定位单词所在行及起始列，长度L。将该区间标记为空：插入回该行的空闲段列表中，并与相邻空段合并（需要检查新段左右相邻段是否连续）然后更新rowMax和pageMax。如果id不存在则返回-1。</li>
+</ul>
+<p><strong>性能优化</strong>：由于行内段数很少，我们采用vector顺序操作而非复杂树结构，实际效率更高。为了进一步优化writeWord搜索，我们利用<strong>页分块</strong>思想，每128行为一页，维护pageMax使我们很快跳到有空位的大致区域。写入操作频繁而删除相对较少，我们选择让eraseWord做稍复杂的段合并和max更新，而writeWord只需考虑当前行局部更新即可，将大部分重算压力留给删除（不过本题删除也不算昂贵）。另外，我们用一个数组mid2word直接存储id对应信息，因为id是从1连续增长的，可用数组替代哈希以提升访问速度。这些优化使得即使有5万次写入、5000次删除操作，也能高效执行。</p>
+<p>通过该题，我们练习了<strong>二维问题一维化</strong>处理、<strong>多级索引跳跃搜索</strong>以及<strong>小数据量下勇于顺序遍历</strong>的思想。正如题目提示所言，有时API描述会暗示算法（如提示剪纸成册，暗示分页思想），解题时需仔细领会。总体来说，该题综合运用了<strong>分块</strong>和<strong>字典序优先</strong>等技巧，是区间管理与排序的巧妙结合。</p>
+<h3 id="示例3：文件存储系统"><a href="#示例3：文件存储系统" class="headerlink" title="示例3：文件存储系统"></a>示例3：文件存储系统</h3><p><strong>问题描述</strong>：有长度为N的存储空间（地址1~N）。支持操作：add(id, size) 添加一个文件id（不会重复）大小为size，要求采用<strong>首次适配</strong>策略从低地址开始寻找空闲区放置文件。如果一个连续空闲区放不下整个文件，则允许把文件切分存储在多个不连续片段中，但每个文件最多分成30段。返回文件存储的起始地址（最低的那一段地址）。remove(id)删除文件并释放其占据的所有空间。另有一个count(A, B)查询区间[A,B]内存储了多少个不同文件。</p>
+<p><strong>解题分析</strong>：这是经典的<strong>动态内存分区</strong>模型，要求首次适配且支持文件碎片，以及区间查询。解决方案需要精细管理空闲段、已占用段以及高效回答查询。</p>
+<p><strong>设计要点</strong>：</p>
+<ul>
+<li><strong>空闲区管理</strong>：用<strong>小根堆</strong>按起始地址维护所有空闲段，以便每次add能快速取到当前最左的空闲段。初始时整段[1,N]为空闲，之后动态更新。</li>
+<li><strong>文件存储表示</strong>：我们用一个全局数组pool存储所有已占用片段的信息（结构体包含起始s、结束e、所属文件id、下一片段指针等），相当于内存分配表。用unordered_map&lt;int,int&gt; mid2idx记录每个文件id对应在pool中第一片段的索引，实现文件-&gt;片段链表的索引。这样移除文件时，可以沿链表遍历所有片段释放。</li>
+<li><strong>已占用段管理</strong>：用一个set&lt;idx, sortByStart&gt;按起始地址排序存放所有已占用片段的索引，以支持count(A,B)查询和方便释放合并。这样我们可以通过有序遍历找到给定区间内有哪些片段覆盖，并据此计算文件种类数。</li>
+<li><strong>新增文件 (add)</strong>：先fail-fast检查：若当前总剩余空闲空间remainSpace &lt; size则直接返回-1。否则重复以下直到文件全部存完：从空闲堆取出最前面的空闲段blank。如果blank长度&gt;=剩余文件大小，则整段文件可存在这里；否则将blank整个用来存文件的一部分（文件将跨段）。每用掉一个空闲段，就从堆中取出、更新空闲段结构并插入pool一个对应已占用片段。若一个空闲段有剩余空间（大于用掉的部分），需要将残余部分重新压回堆。通过循环，文件可能用多个空闲段存储，记得维护片段链表next指针串联它们，以及在mid2idx登记文件起始片段索引。最后，将文件的每个片段索引插入files set中，并返回文件存放的最低地址（可在插入第一个片段时记录)。</li>
+<li><strong>删除文件 (remove)</strong>：通过mid2idx找到文件的首个片段索引，遍历链表依次取出每段，将这些段从files set移除，计算其起始和结束地址。每释放一段，就尝试与相邻空闲段合并：可以维护一个set<blankbystart>按地址存空闲段或直接利用已占用段集合找到前后相邻段边界（可参考示例1的做法）。合并空闲段后，将新空闲段推入小根堆中以供后续分配。释放完所有片段后，从mid2idx删除该文件记录。</blankbystart></li>
+<li><strong>区间查询 (count(A,B))</strong>：利用已占用段的files set，我们可以用下限/上限找到所有与区间[A,B]有交集的已占用段索引。然后遍历这些片段，统计其中不同的文件id数量。为避免重复计数同一文件的多个片段，我们应用<strong>时间戳去重</strong>：维护一个哈希seen[id]记录文件id上次查询时的标记，如果不是本次查询则计入并标记。由于每文件至多30段，遍历片段数量有限，配合时间戳方法可在线性时间内完成查询。</li>
+</ul>
+<p>小结：该题解法充分体现了<strong>职责分离</strong>原则——空闲段用堆管理分配，已占用段用有序集合管理查询，不同文件计数用哈希时间戳统计，各部分互不干扰。同时，利用“剩余总空间”和“最大片段长度”等条件提前判定无法存储，避免了不必要的分配尝试。值得注意的是，我们起初曾尝试用“分块”思想按地址将空间划分若干段分别管理，但发现行不通：因为首次适配需要全局最小地址优先，无法像词汇表那样自然划分维度。错误的设计导致实现复杂且性能不佳，后来我们简化为上述方案，才使逻辑清晰高效。这提醒我们：<strong>算法设计需贴合问题特性</strong>，不恰当的套路反而适得其反。</p>
+<h3 id="示例4：线性城市建设"><a href="#示例4：线性城市建设" class="headerlink" title="示例4：线性城市建设"></a>示例4：线性城市建设</h3><p><strong>问题描述</strong>：一块长度为N的平地可建若干建筑。建筑有一定长度mLength，占据连续的mLength个单元格，建筑地址定义为其最左侧单元格的地址。建造规则：每次选取当前土地上<strong>最长</strong>的空闲段，如果有多个则选最左的那个。如果选中的空闲段长度小于建筑长度，则无法建造；若足够长，则将建筑建在该空闲段的<strong>中央</strong>位置，如果左右剩余空地长度不等，则保证右侧比左侧多一格。建造完成返回建筑地址。另有拆除操作demolish(addr)，移除以该地址为起点的建筑并返回其长度。拆除后该建筑占据的位置变为空闲，若与相邻空闲段相连则合并。若给定地址上没有建筑则返回-1。</p>
+<p><strong>解题思路</strong>：这其实就是<strong>最坏适配</strong>策略的内存分配问题，正如我们在示例1中实现的那样。可以复用非常类似的数据结构和步骤：维护空闲段集合按长度排序，维护建筑集合按地址排序用于合并。构造建筑时从空闲集合取最大段，计算中点放置，更新空闲集合；拆除时合并左右空隙。</p>
+<p>在初版实现中，我们使用了三个集合维护状态，并很快发现可以简化（详见示例1）。优化后的方案在性能和代码量上都有显著提升，核心代码我们已经在示例1给出，此处不再赘述。Line City题的解法重点不在新算法，而在对数据结构灵活运用和代码精简优化。初始版本代码约260行，在理清关系后精简到不到150行，却更高效。这说明良好的数据结构设计不仅提升性能，也能降低实现复杂度。</p>
+<p>本题还有一处值得一提：尽管N最大可达1e8，但我们并不需要真的维护一个那么长的数组或布尔标记。通过存储空闲段的区间范围，程序实际维护的区间数远小于N，每次操作复杂度取决于当前空闲段数而非N。即使不断插入移除，区间总数也不会超过操作次数级别（2万左右）。因此算法实际运行非常快，充分体现了区间抽象的优势。</p>
+<h3 id="示例5：地下城建设与动态路径探索"><a href="#示例5：地下城建设与动态路径探索" class="headerlink" title="示例5：地下城建设与动态路径探索"></a>示例5：地下城建设与动态路径探索</h3><p><strong>问题描述</strong>：一个宽mW、高mH的巨大洞穴，要通过掉落箱子的方式建造地下城。每个箱子高度1、宽度不等，从洞穴顶部某列丢下，箱子会向下掉落直到<strong>碰到洞底</strong>或<strong>落在另一个箱子顶</strong>上才停下。这样箱子会堆叠形成若干层。每个箱子有唯一ID，以及<strong>左右两个水平出口</strong>（箱子最左和最右边）和<strong>两个垂直出口</strong>（箱子内部指定位置）。人可以从箱子内部通过这些出口移动：水平出口允许左右移动到相邻单元格，垂直出口允许上下移动到相邻单元格。若相邻位置有另一个箱子，则可进入该箱子；否则就是空洞无法通过。题目要求模拟一系列操作：dropBox(id, len, exitA, exitB, col)将一个宽len的新箱子从col列掉落，返回它最终所在的行号；explore(idA, idB)询问从箱子A到箱子B最少经过几个出口可以到达，若无法到达返回-1。</p>
+<p><strong>解题要点</strong>：这题包含两个子问题——<strong>箱子掉落堆叠</strong>（区间占用）和<strong>箱子间路径</strong>（区间图连通）。</p>
+<ol>
+<li><strong>箱子掉落</strong>：可以将洞穴按列看作mW列高度值。每次掉落箱子，相当于在某一段列区间[col, col+len-1]上寻找当前最高的障碍。具体做法是维护一个数组height[c]表示每列目前堆到的高度，初始为0（洞底）。当新箱子宽len从col掉下时，需要找到该范围内各列的最高高度的最大值Hmax，则新箱子将落在Hmax之上，即其底部行号 = Hmax。因此箱子最终所在行 = Hmax，而且会将col..col+len-1这些列的高度都抬高到Hmax+1（箱子高度1）。这就需要对数组height的一个区间做<strong>查询最大</strong>以及<strong>区间更新赋值</strong>。mW最大可达20万，箱子投放最多1万次，因此单次操作必须高效。可选方案：<strong>线段树</strong>实现区间最大查询和区间更新，或<strong>分块数组</strong>（sqrt分解）实现。同类问题在竞技场中很常见。例如这里我们用分块实现：预先将20万列分成若干块，每块开方长度（如sqrt(200k)≈447），维护每块内高度数组及块的最大值。当有箱子掉落时，我们跨块查询col所在区间的最大高度Hmax，然后再跨块更新该区间高度为Hmax+1。这样平均每次操作约扫描两个块和少量内部元素，速度足够。而实现也相对简单，只需注意块数计算上取整等细节。</li>
+<li><strong>路径探索</strong>：可以将每个箱子视为图中的节点，箱子之间存在边则表示人可以直接通过一个出口移动过去。根据规则，<strong>水平移动</strong>要求两个箱子在同一行且<strong>相邻</strong>（紧贴无空隙）；<strong>垂直移动</strong>要求在正上方/下方有箱子重叠且双方在该重叠处都有垂直出口。我们需要根据当前箱子堆叠情况建立这些连边。具体实现时：<ul>
+<li><strong>水平邻接</strong>：我们为每行维护一个按起点排序的集合，每次插入新箱子时加入对应行集合。若该箱子与左邻或右邻箱子地址正好相连（prev或next检查），则双方水平连通。</li>
+<li><strong>垂直邻接</strong>：可以通过列高度或直接通过行集合来判断。简单方法：当箱子掉落到行H时，看它覆盖的每列，在其下方H-1行是否有箱子覆盖同一列（即这列高度在箱子落下前的高度）[9]。但考虑更高效的：对新箱子，在其落地后，<strong>仅检查它的两个垂直出口位置</strong>（相对于箱子左端的列偏移exitA, exitB）。对于每一个出口位置计算全局列坐标c = col + exitPos。如果该位置上方有箱子（行H+1）且那个箱子也在该列有垂直出口，则上下连通；如果下方有箱子（行H-1）且该箱子在该列有垂直出口，则上下连通。为了快速找到“指定列上某行是否有箱子”，我们可以对每行的有序集合用二分：找到start &lt;= c的箱子，再检验其end是否&gt;= c，若是则该箱覆盖此列。这样即可找到上下相邻的箱子。</li>
+</ul>
+</li>
+<li>构图完毕后，explore(A,B)就是问图中节点A到B的最短路径长度。由于每一步（跨一个出口）代价相同，可以用<strong>BFS</strong>求最少边数。我们通常在每次查询重新跑BFS（因为箱子图会变化，预处理所有对最短路径不可行）。箱子总数最多1万，边数受限于行内相邻和上下重叠关系，也较稀疏，BFS 10次以10000节点是可以接受的。</li>
+</ol>
+<p>为优化BFS，我们可以使用<strong>visited数组+时间戳</strong>方法避免每次初始化庞大visited数组的开销：维护一个全局静态数组visited[10001]记录访问时间戳，每次BFS过程中标记节点访问为当前查询编号，以判重。这样不必清空数组，只需比较整数大小即可判断是否已访问。由于BFS不存在路径松弛，不会出现像Dijkstra那样的过期节点问题，每个节点只入队一次即可。若用优先队列进行加权搜索，则可在出队时判断节点是否过期并跳过，但BFS场景简单得多，入队时判重足矣。</p>
+<p>综上，地下城题将<strong>区间高度管理</strong>和<strong>区间连接图</strong>两部分结合考察，难度较高但各部分思路独立清晰。我们需要警惕的一点是：<strong>箱子下落时不能简单按箱子本身高度去判断碰撞</strong>。最初可能有人想到看每列当前高度是否有“空隙”允许箱子通过，但实际上如果下面有低矮箱子，上面丢个更宽的箱子也不会穿过间隙落到更下面——因为下方某列已被占据导致整箱受阻。因此正确做法是始终取区间列高的最大值作为判定。这一细节在题面长文的提示中有所暗示，也在我们的解法中通过区间最大值查询得到验证。</p>
+<h2 id="常见错误与优化建议"><a href="#常见错误与优化建议" class="headerlink" title="常见错误与优化建议"></a>常见错误与优化建议</h2><p>在解决区间占用与释放问题时，初学者容易犯一些错误，下面总结几条并给出相应的优化建议：</p>
+<ul>
+<li><strong>忘记合并空闲段</strong>：实现释放操作时，常见疏忽是释放后不检查相邻空闲段是否相连，导致空闲列表出现两个可合并的段而算法仍视为分离。这样会降低空间利用率，甚至可能让后续分配错判无空间。务必在release/demolish时，利用有序结构找到前后相邻空闲段并合并。</li>
+<li><strong>部分分配未彻底回滚</strong>：当需要将一个请求分多段分配时，如果中途发现空间不足，应当回滚之前的分配或一开始就fail-fast。否则会出现系统记录已减少了一部分空闲但最终却返回失败的错误状态。正确做法是在add前检查全局条件，如剩余空间、最大可用段是否满足要求，不满足直接返回错误。这种fail-fast思想可以避免复杂的回滚逻辑。</li>
+<li><strong>不当的数据结构选择</strong>：有时为了追求<strong>理论最优复杂度</strong>会直接套用平衡树或线段树，但忽略了数据规模结构。例如每行只有寥寥几十个元素，用vector遍历可能比set更快；又或者总文件段数有限，简单循环也未尝不可。要学会根据<strong>实际数据分布</strong>权衡：元素个数有<strong>强上界</strong>时，O(n)可能比O(log n)实测更优。过早优化不如先写出清晰正确的解，再根据瓶颈调整结构。</li>
+<li><strong>频繁动态分配造成开销</strong>：很多语言频繁new/delete会显著拖慢速度。在C++中尽量预分配足够大的数组或使用对象池避免频繁分配小对象。例题中我们多次采用静态数组或预留vector容量来优化，如文件片段pool一次性分配50007大小，避免后续realloc；词汇表每行vector提前reserve(128)容量等。</li>
+<li><strong>未考虑极端边界</strong>：如第一个或最后一个区间的合并，全部空间用尽再分配，或全部清空再释放等边界情况，都需要仔细处理。调试时建议设计这些边界测试用例验证逻辑正确。例如Line City中拆除最左或最右建筑时，合并空闲要处理null边界（我们用三元运算简化了判断）；又如文件存储在完全无空闲时若再add必须返回-1。</li>
+<li><strong>图搜索优化不当</strong>：处理连通类问题时，滥用Dijkstra或广度优先不标记，会导致重复访问过多节点。应根据边权选择算法，并在<strong>入队或出堆</strong>及时标记/检查已访问避免死循环。同时注意 BFS 队列和 DFS 递归的内存峰值，必要时可以限制节点状态大小或采用邻接表而非邻接矩阵存图。</li>
+</ul>
+<p>最后，调试和优化可以借助输出日志或可视化手段理解程序行为。例如打印每次操作后的空闲段列表，或对连接图做小规模可视化，能帮助发现合并是否正确、连通关系是否遗漏。及时发现上述常见错误并修正，将使你的程序更加健壮高效。</p>
+<h2 id="举一反三训练"><a href="#举一反三训练" class="headerlink" title="举一反三训练"></a>举一反三训练</h2><p>区间占用与释放类问题变化多端，但万变不离其宗。掌握以上方法后，可以尝试将其<strong>类推</strong>到其他类似情境：</p>
+<ul>
+<li><strong>应用背景泛化</strong>：不局限于内存和磁盘，很多资源调度都可建模为区间管理。如日程安排中的时间段预定、会议室占用管理、停车场车位分配等，都可以用类似的空闲段查找和回收机制解决。练习时，可尝试设计“预约系统”类问题，应用first-fit或best-fit策略安排时间段。</li>
+<li><strong>增删查综合问题</strong>：如果新问题在增删之外增加了查询需求，例如查询最大空闲段长度、查询某点属于哪个区间等，我们可以扩展维护的数据。例如额外维护一个全局最大空闲长度值，或用有序集合快速二分找到包含某点的区间。训练时可以在现有代码上加入一些查询操作，检验你的结构是否支持。</li>
+<li><strong>更高维度扩展</strong>：本次例题涉及一维和二维。若扩展到三维甚至更高，可以考虑分多维数据结构或者降维处理。例如三维空间分配，可先按Z轴切片成多个二维平面，各平面内再用我们的方法。在图形学中的<strong>空间划分</strong>（如八叉树）也是类似思想，将高维问题拆解。平时可尝试一些简单3D场景（如立体存储柜的空间分配）。</li>
+<li><strong>尝试不同数据结构实现</strong>：为了加深理解，可以用多种数据结构实现相同功能并比较。例如用map替代set+自定义比较器、用priority_queue配合延迟删除替代set管理空闲段，或尝试用<strong>跳表</strong>来维护区间集合等等。通过实现对比，会理解各结构的优劣和使用细节。</li>
+<li><strong>参考操作系统经典算法</strong>：操作系统教材中的<strong>Buddy内存分配算法</strong>是一种特殊的分块策略，将区间大小限制为2的幂，并通过按伙伴合并/拆分来管理内存碎片。尝试实现buddy算法模拟内存分配，可以训练你对特殊策略的掌握。另一个方向，研究STL和boost库中的内存池、allocator实现，也能获取灵感。</li>
+</ul>
+<p>通过这些举一反三的练习，你将能够一眼看出新问题是否可抽象为“区间占用”模型，从而调动你已经掌握的套路快速建模、选结构并编码实现。关键在于<strong>融会贯通</strong>：不拘泥于表象，用系统的视角拆解问题，找到区间管理的影子并应用相应的方法。相信经过系统的学习和反复实践，你一定能在竞赛和实际开发中游刃有余地应对此类问题！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
+<style>
+  /* 作用域：仅影响 #comments-app */
+  #comments-app {
+    --c-bg: #fff;
+    --c-text: #222;
+    --c-sub: #6b7280;
+    --c-border: #e5e7eb;
+    --c-accent: #3b82f6;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
+    margin-top: 2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app { --c-bg:#111318; --c-text:#e8e8e8; --c-sub:#a5a5a5; --c-border:#30363d;
+      --shadow:0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35); }
+  }
+  #comments-app, #comments-app * { box-sizing: border-box; }
+
+  /* 外层大卡片 */
+  #comments-app .wrap {
+    max-width: 860px; width: 100%; margin: 0 auto;
+    background: var(--c-bg); border: 1px solid var(--c-border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; overflow: hidden;
+  }
+
+  /* 顶部标题 */
+  #comments-app .title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 2px 0 16px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--c-text);
+  }
+  #comments-app .title::before{
+    content:""; width:8px; height:20px; border-radius:4px; background: var(--c-accent);
+  }
+
+  /* 内部分区：上下两张卡：列表卡 + 表单卡 */
+  #comments-app .sections { display: grid; gap: 16px; }
+  #comments-app .card {
+    background: color-mix(in srgb, var(--c-bg) 98%, #000 2%);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    #comments-app .card { background: color-mix(in srgb, var(--c-bg) 94%, #fff 6%); }
+  }
+
+  /* 仅列表卡的列表样式 */
+  #comments-app .list { display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 12px 14px; background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark){ #comments-app .item{ background: rgba(255,255,255,.03);} }
+  #comments-app .meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size:.86rem; margin-bottom:6px; }
+  #comments-app .meta .author { color: var(--c-text); font-weight:600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height:1.7; }
+
+  /* 表单卡：提示条 + 表单 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px; border: 1px solid var(--c-border);
+    border-radius: 12px; background: rgba(107,114,128,.08);
+    color: var(--c-sub); margin-bottom: 12px;
+  }
+  /* 没文字时自动隐藏，杜绝“空白横条” */
+  #comments-app .alert:empty { display: none !important; }
+
+  /* 表单栅格（12栅格） */
+  #comments-app .form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px; align-items: start;
+  }
+  #comments-app .col-6  { grid-column: span 6 / span 6; }
+  #comments-app .col-12 { grid-column: span 12 / span 12; }
+
+  #comments-app input[type="text"],
+  #comments-app textarea {
+    width: 100%;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg); color: var(--c-text);
+    border-radius: 12px; padding: 12px 14px; font-size:.95rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  #comments-app textarea { min-height: 140px; resize: vertical; max-width:100%; line-height:1.6; }
+  #comments-app input:focus, #comments-app textarea:focus {
+    border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  }
+
+  #comments-app .actions {
+    grid-column: span 12 / span 12;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  #comments-app .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    background: var(--c-accent); color:#fff; border:1px solid transparent;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+    transition: transform .06s, filter .15s;
+  }
+  #comments-app .btn:hover{ filter:brightness(1.05); }
+  #comments-app .btn:active{ transform: translateY(1px); }
+
+  /* 小屏优化：表单单列、按钮全宽 */
+  @media (max-width: 720px){
+    #comments-app .col-6 { grid-column: span 12 / span 12; }
+    #comments-app .btn { width: 100%; }
+  }
+</style>
+
+<div id="comments-app">
+  <div class="wrap">
+    <div class="title">评论</div>
+
+    <div class="sections">
+      <!-- 列表卡 -->
+      <section class="card list-card">
+        <div id="comments-list" class="list">
+          <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+        </div>
+      </section>
+
+      <!-- 表单卡 -->
+      <section class="card form-card">
+        <div id="comment-msg" class="alert"></div>
+
+        <form id="comment-form" class="form" novalidate>
+          <input class="col-12" type="hidden" name="post" />
+          <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+          <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+          <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+          <div class="actions">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+            <button type="submit" class="btn">提交</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Turnstile -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+(function () {
+  'use strict';
+  const API_BASE = '/api';
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
+
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#comments-list');
+  const form   = $('#comment-form');
+  const msg    = $('#comment-msg');
+  if (!form || !listEl || !msg) return;
+
+  form.querySelector('input[name="post"]').value = postId;
+
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+
+  const showMsg = (text) => {
+    msg.textContent = text || '';
+    // :empty 会自动隐藏，这里不强制 display
+    if (!text) return;
+  };
+
+  const itemTpl = (it) => {
+    const t = new Date(it.created_at);
+    const time = isNaN(t) ? '' : t.toLocaleString();
+    const safeAuthor = escapeHTML(it.author || '匿名');
+    const authorHtml = it.website
+      ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
+      : safeAuthor;
+    return `
+      <div class="item">
+        <div class="meta"><span class="author">${authorHtml}</span><span>${escapeHTML(time)}</span></div>
+        <div class="content">${it.content}</div>
+      </div>`;
+  };
+
+  async function loadComments(page = 1) {
+    showMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const list = Array.isArray(data.list) ? data.list : [];
+      listEl.innerHTML = list.length
+        ? list.map(itemTpl).join('')
+        : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
+    } catch {
+      showMsg('评论加载失败，请稍后重试。');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    let token = fd.get('cf-turnstile-response');
+    if (!token && window.turnstile && window.turnstile.getResponse) {
+      token = window.turnstile.getResponse();
+    }
+    const payload = {
+      post: fd.get('post'),
+      author: fd.get('author') || '匿名',
+      website: fd.get('website') || '',
+      content: fd.get('content') || '',
+      turnstileToken: token || ''
+    };
+    if (!payload.content.trim()) { showMsg('内容不能为空。'); return; }
+
+    showMsg('提交中…');
+    try {
+      const resp = await fetch(`${API_BASE}/comments`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(()=> ({}));
+
+      if (resp.ok && data.ok) {
+        showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
+        form.reset();
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+        if (data.status !== 'pending') loadComments();
+      } else {
+        showMsg('提交失败：' + (data.error || resp.status));
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      }
+    } catch {
+      showMsg('网络异常，请稍后再试。');
+    }
+  });
+
+  loadComments();
+})();
+</script>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 算法</a>
+              <a href="/tags/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95/" rel="tag"><i class="fa fa-tag"></i> 倒排索引</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/11/08/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/" rel="prev" title="倒排索引的设计与实现">
+                  <i class="fa fa-angle-left"></i> 倒排索引的设计与实现
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ziyoeng Zoeng</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">134k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">8:09</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.0/canvas-nest.umd.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 在 body 背后挂一个画布
+    new CanvasNest(document.body, {
+      color: '120,160,255', // 线颜色（RGB）
+      opacity: 1,         // 透明度 0~1
+      zIndex: -1,           // 置于背景
+      count: 150,             // 点数量
+      dist: 4000,   // 连线距离加大
+      radius: 120,  // 鼠标作用范围扩大
+    })
+  })
+</script>
+
+</body>
+</html>
