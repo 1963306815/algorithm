@@ -28,7 +28,7 @@
 <meta property="og:description" content="这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-08T14:50:00.000Z">
-<meta property="article:modified_time" content="2025-11-08T16:52:48.231Z">
+<meta property="article:modified_time" content="2025-11-09T04:06:48.713Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
@@ -291,7 +291,7 @@ mjx-container[display="true"] + br {
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -302,7 +302,7 @@ mjx-container[display="true"] + br {
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -365,7 +365,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-11-09 00:52:48" itemprop="dateModified" datetime="2025-11-09T00:52:48+08:00">2025-11-09</time>
+      <time title="修改时间：2025-11-09 12:06:48" itemprop="dateModified" datetime="2025-11-09T12:06:48+08:00">2025-11-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -493,7 +493,7 @@ mjx-container[display="true"] + br {
 <li><strong>箱子掉落</strong>：可以将洞穴按列看作mW列高度值。每次掉落箱子，相当于在某一段列区间[col, col+len-1]上寻找当前最高的障碍。具体做法是维护一个数组height[c]表示每列目前堆到的高度，初始为0（洞底）。当新箱子宽len从col掉下时，需要找到该范围内各列的最高高度的最大值Hmax，则新箱子将落在Hmax之上，即其底部行号 = Hmax。因此箱子最终所在行 = Hmax，而且会将col..col+len-1这些列的高度都抬高到Hmax+1（箱子高度1）。这就需要对数组height的一个区间做<strong>查询最大</strong>以及<strong>区间更新赋值</strong>。mW最大可达20万，箱子投放最多1万次，因此单次操作必须高效。可选方案：<strong>线段树</strong>实现区间最大查询和区间更新，或<strong>分块数组</strong>（sqrt分解）实现。同类问题在竞技场中很常见。例如这里我们用分块实现：预先将20万列分成若干块，每块开方长度（如sqrt(200k)≈447），维护每块内高度数组及块的最大值。当有箱子掉落时，我们跨块查询col所在区间的最大高度Hmax，然后再跨块更新该区间高度为Hmax+1。这样平均每次操作约扫描两个块和少量内部元素，速度足够。而实现也相对简单，只需注意块数计算上取整等细节。</li>
 <li><strong>路径探索</strong>：可以将每个箱子视为图中的节点，箱子之间存在边则表示人可以直接通过一个出口移动过去。根据规则，<strong>水平移动</strong>要求两个箱子在同一行且<strong>相邻</strong>（紧贴无空隙）；<strong>垂直移动</strong>要求在正上方/下方有箱子重叠且双方在该重叠处都有垂直出口。我们需要根据当前箱子堆叠情况建立这些连边。具体实现时：<ul>
 <li><strong>水平邻接</strong>：我们为每行维护一个按起点排序的集合，每次插入新箱子时加入对应行集合。若该箱子与左邻或右邻箱子地址正好相连（prev或next检查），则双方水平连通。</li>
-<li><strong>垂直邻接</strong>：可以通过列高度或直接通过行集合来判断。简单方法：当箱子掉落到行H时，看它覆盖的每列，在其下方H-1行是否有箱子覆盖同一列（即这列高度在箱子落下前的高度）[9]。但考虑更高效的：对新箱子，在其落地后，<strong>仅检查它的两个垂直出口位置</strong>（相对于箱子左端的列偏移exitA, exitB）。对于每一个出口位置计算全局列坐标c = col + exitPos。如果该位置上方有箱子（行H+1）且那个箱子也在该列有垂直出口，则上下连通；如果下方有箱子（行H-1）且该箱子在该列有垂直出口，则上下连通。为了快速找到“指定列上某行是否有箱子”，我们可以对每行的有序集合用二分：找到start &lt;= c的箱子，再检验其end是否&gt;= c，若是则该箱覆盖此列。这样即可找到上下相邻的箱子。</li>
+<li><strong>垂直邻接</strong>：可以通过列高度或直接通过行集合来判断。简单方法：当箱子掉落到行H时，看它覆盖的每列，在其下方H-1行是否有箱子覆盖同一列（即这列高度在箱子落下前的高度）。但考虑更高效的：对新箱子，在其落地后，<strong>仅检查它的两个垂直出口位置</strong>（相对于箱子左端的列偏移exitA, exitB）。对于每一个出口位置计算全局列坐标c = col + exitPos。如果该位置上方有箱子（行H+1）且那个箱子也在该列有垂直出口，则上下连通；如果下方有箱子（行H-1）且该箱子在该列有垂直出口，则上下连通。为了快速找到“指定列上某行是否有箱子”，我们可以对每行的有序集合用二分：找到start &lt;= c的箱子，再检验其end是否&gt;= c，若是则该箱覆盖此列。这样即可找到上下相邻的箱子。</li>
 </ul>
 </li>
 <li>构图完毕后，explore(A,B)就是问图中节点A到B的最短路径长度。由于每一步（跨一个出口）代价相同，可以用<strong>BFS</strong>求最少边数。我们通常在每次查询重新跑BFS（因为箱子图会变化，预处理所有对最短路径不可行）。箱子总数最多1万，边数受限于行内相邻和上下重叠关系，也较稀疏，BFS 10次以10000节点是可以接受的。</li>
@@ -801,6 +801,9 @@ mjx-container[display="true"] + br {
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E6%97%B6%E9%97%B4%E6%8E%A8%E8%BF%9B%E7%B1%BB/" rel="next" title="系统模拟题-时间推进类">
+                  系统模拟题-时间推进类 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -832,14 +835,14 @@ mjx-container[display="true"] + br {
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">134k</span>
+    <span title="站点总字数">151k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">8:09</span>
+    <span title="站点阅读时长">9:07</span>
   </span>
 </div>
 <div class="busuanzi-count">
