@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="这篇文章系统解析了“动态匹配类系统模拟”问题的核心模型、事件机制与数据结构设计，并通过多类型场景展示在实时匹配、资源分配与状态演化中的通用策略与实现范式，为构建高效可靠的动态匹配系统提供结构化的方法论框架。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统模拟题-动态匹配类">
+<meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/index.html">
+<meta property="og:site_name" content="勿忘羊心">
+<meta property="og:description" content="这篇文章系统解析了“动态匹配类系统模拟”问题的核心模型、事件机制与数据结构设计，并通过多类型场景展示在实时匹配、资源分配与状态演化中的通用策略与实现范式，为构建高效可靠的动态匹配系统提供结构化的方法论框架。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-09T04:56:00.000Z">
+<meta property="article:modified_time" content="2025-11-09T06:10:12.961Z">
+<meta property="article:author" content="Ziyoeng Zoeng">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="系统设计">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://www.wuwangyangxin.com/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://www.wuwangyangxin.com/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/","path":"2025/11/09/系统模拟题-动态匹配类/","title":"系统模拟题-动态匹配类"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>系统模拟题-动态匹配类 | 勿忘羊心</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="stylesheet" href="/css/prism-vs.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">勿忘羊心</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-算法"><a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="section"><i class="fa fa-code fa-fw"></i>算法</a></li><li class="menu-item menu-item-投稿"><a href="/categories/%E6%8A%95%E7%A8%BF/" rel="section"><i class="fa fa-inbox fa-fw"></i>投稿</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E5%9E%8B%E7%9A%84%E5%85%B1%E6%80%A7%E4%B8%8E%E6%8A%BD%E8%B1%A1%E5%BB%BA%E6%A8%A1%E6%96%B9%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">题型的共性与抽象建模方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">算法组件详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%BA%8F%E5%8C%B9%E9%85%8D%E9%80%BB%E8%BE%91"><span class="nav-number">2.1.</span> <span class="nav-text">偏序匹配逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81-Top-K-%E5%A0%86%E7%BB%B4%E6%8A%A4"><span class="nav-number">2.2.</span> <span class="nav-text">动态 Top-K 堆维护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%87%92%E6%83%B0%E5%88%A0%E9%99%A4"><span class="nav-number">2.3.</span> <span class="nav-text">懒惰删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%B0%E6%80%A7%E4%BC%A0%E6%92%AD"><span class="nav-number">2.4.</span> <span class="nav-text">惰性传播</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E5%BC%8F%E6%9B%B4%E6%96%B0%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6"><span class="nav-number">2.5.</span> <span class="nav-text">链式更新传播机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%95%B0%E7%BC%93%E5%AD%98%E4%BC%98%E5%8C%96"><span class="nav-number">2.6.</span> <span class="nav-text">分数缓存优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">解题策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E8%AE%B2%E8%A7%A3%EF%BC%9A%E7%BB%8F%E5%85%B8%E6%A0%B7%E9%A2%98%E5%89%96%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">案例讲解：经典样题剖析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AD%A6%E9%99%A2%E5%BD%95%E5%8F%96%E6%A8%A1%E6%8B%9F"><span class="nav-number">4.1.</span> <span class="nav-text">样例一：学院录取模拟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B%E4%BA%8C%EF%BC%9A%E5%AD%A6%E6%A0%A1%E5%88%86%E9%85%8D%E6%A8%A1%E6%8B%9F"><span class="nav-number">4.2.</span> <span class="nav-text">样例二：学校分配模拟</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%8D%E7%94%9F%E9%A2%98%E4%B8%8E%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89"><span class="nav-number">5.</span> <span class="nav-text">衍生题与举一反三</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E5%AE%9E%E6%88%98%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.</span> <span class="nav-text">总结与实战建议</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ziyoeng Zoeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.wuwangyangxin.com/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ziyoeng Zoeng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="系统模拟题-动态匹配类 | 勿忘羊心">
+      <meta itemprop="description" content="这篇文章系统解析了“动态匹配类系统模拟”问题的核心模型、事件机制与数据结构设计，并通过多类型场景展示在实时匹配、资源分配与状态演化中的通用策略与实现范式，为构建高效可靠的动态匹配系统提供结构化的方法论框架。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系统模拟题-动态匹配类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-11-09 12:56:00 / 修改时间：14:10:12" itemprop="dateCreated datePublished" datetime="2025-11-09T12:56:00+08:00">2025-11-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>11k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>41 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">这篇文章系统解析了“动态匹配类系统模拟”问题的核心模型、事件机制与数据结构设计，并通过多类型场景展示在实时匹配、资源分配与状态演化中的通用策略与实现范式，为构建高效可靠的动态匹配系统提供结构化的方法论框架。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>系统模拟题偶尔也会考这种类型，修改时局部更新+链式传递，查询API一般O(1)给出，而不是在查询时再模拟。</p>
+</blockquote>
+<h2 id="题型的共性与抽象建模方式"><a href="#题型的共性与抽象建模方式" class="headerlink" title="题型的共性与抽象建模方式"></a>题型的共性与抽象建模方式</h2><p><strong>动态匹配类系统模拟题</strong>指的是一类涉及“动态”加入或移除参与者、并在<strong>多轮匹配</strong>过程中维护一种资源分配的模拟问题。这类问题常见于以下场景：</p>
+<ul>
+<li><strong>志愿填报/学院录取</strong>：如高考志愿填报模拟或大学录取模拟，每个考生希望进入尽可能“靠前”的学校，每个学校有名额限制，会按照考生成绩择优录取。当有新考生加入或某考生放弃录取时，需要动态更新录取结果。</li>
+<li><strong>学校分配</strong>：如按距离为学生分配学校的模拟，每个学生按优先级（例如与最远学校距离）排序，依序分配到最近的尚有空位的学校。新生加入或学生退出时，可能引发一系列“学位腾出-重新分配”的链式变化。</li>
+<li><strong>资源匹配</strong>：广义的资源匹配包括任务调度、服务器分配、志愿者分配等场景：资源/任务有容量或数量限制，新元素到来或移除需重新匹配。</li>
+</ul>
+<p>这些问题的<strong>核心特征</strong>可以抽象为：<strong>全局偏序约束 + 局部贪心决策 + 链式反应</strong>。全局偏序约束意味着匹配过程存在一个整体的优先规则或顺序，如<strong>院校编号优先</strong>（编号小的学校优先录取）或<strong>学生优先级</strong>（分数或距离值高者优先）。局部贪心指每个单位（学校、资源等）在其轮次<strong>尽可能“贪心”地选择</strong>最佳匹配（如学校录取成绩最高的前N人，或学生选最近的学校），但在全局上这种局部决策会串联成复杂的效果。由于容量限制等原因，一个元素被分配可能<strong>排挤</strong>另一个元素，从而引发<strong>全局连锁反应</strong>：被挤出的元素转而寻求下一个可匹配对象，可能又造成进一步的挤出。这种“多轮匹配+连锁更新”正是动态匹配系统的典型特征。</p>
+<p><strong>抽象建模：通常可将问题建模为一种双边匹配</strong>：一侧是“申请者”（如学生、任务），另一侧是“接受者”（如学校、服务器），每一对有某种“适配度”（如分数或距离）。模型具有以下要素：</p>
+<ul>
+<li><strong>优先级关系（偏序）</strong>：确定匹配顺序的规则。例如学生按成绩排名，学校按编号顺序处理，或预定义的优先值排序。偏序保证了匹配的方向性：高优先级的一侧决定了低优先级一侧的去向，不会出现后来的单位反抢先前单位的匹配。</li>
+<li><strong>容量/配额：每个接受方有容量上限，每个申请者至多占用一个名额。这类似多对一的匹配</strong>（如学院可收N个学生）。</li>
+<li><strong>偏好或评分机制</strong>：决定匹配质量的度量。例如学院根据五科加权总分给学生打分、学生根据距离远近排序学校。可以将评分看作接受方对申请者的“偏好”，而申请者通常有统一的偏好顺序（如都想去编号最小的学院）。</li>
+<li><strong>动态操作</strong>：<strong>允许add</strong>（加入）和<strong>remove</strong>（移除）操作，要求在每次操作后高效更新匹配结果，而不是每次从头静态计算。还可能包括查询操作（如suggest()或status()）用于返回当前匹配状态。</li>
+</ul>
+<p>抽象而言，这类问题可以映射为<strong>动态稳定匹配或动态最大匹配</strong>问题。以学院录取为例，可认为考生都偏好排名最高的学校，学校偏好总分高的考生，这实际上构成一种<strong>稳定匹配</strong>：没有“学生-学校”对会私下更青睐彼此而违背当前分配。动态情况下，我们需要维护这种匹配的稳定性，每次增删都可能触发一系列<strong>链式调整</strong>以恢复稳定状态。</p>
+<h2 id="算法组件详解"><a href="#算法组件详解" class="headerlink" title="算法组件详解"></a>算法组件详解</h2><p>动态匹配类问题求解的关键，在于设计合适的数据结构和算法机制，实现对上述抽象模型的高效维护。本节将逐一讲解常用的算法组件和思想：</p>
+<h3 id="偏序匹配逻辑"><a href="#偏序匹配逻辑" class="headerlink" title="偏序匹配逻辑"></a>偏序匹配逻辑</h3><p><strong>偏序匹配逻辑</strong>指按照预定的全局顺序或优先关系，分层次地执行匹配。偏序决定了匹配过程的方向性和不可逆性：</p>
+<ul>
+<li>在学院录取模型中，<strong>学校编号的先后</strong>构成偏序：编号小的学校先挑人，后面的学校只能在前面学校挑剩的考生中录取。这意味着，一旦某考生被前面的学校录取，他就不会再考虑后面的学校；反之，后面的学校若录取了某考生，仍可能因前面学校后来出现空位而被“抢走”该考生。但<strong>不会出现</strong>后面学校去抢已经在前面学校就读的学生的情况，因为偏序保证前面优先。</li>
+<li>在学校分配模型中，<strong>学生优先级</strong>（由与最远学校的距离确定）构成偏序：高优先级学生先分配，低优先级学生后分配。这样高优先级学生占据了尽可能好的（最近的）学校后，低优先级学生只能退而求其次。高优先级学生的加入可能导致低优先级学生被迫换到更差的选择，但反过来低优先级学生无权影响已分给高优先级学生的匹配。</li>
+</ul>
+<p>维护偏序关系的一个重要思想是：<strong>在任意时刻，匹配结果都满足偏序约束</strong>。实现时，可通过在算法中严格按照偏序次序处理匹配。例如，针对学院录取，按学校1,2,3…顺序模拟录取过程；针对按学生优先的，则每次操作中按需调整<strong>优先级最高</strong>的学生及其连锁影响。偏序逻辑使问题复杂度降低，因为它<strong>减少了搜索空间</strong>：系统只需考虑“向后”或“向前”的单向传播，而不会产生冲突的回流。例如，在学院录取中，如果一个学生已经被学院A录取，那么对于任何比A编号大的学院B，不用考虑将该学生调配回B；只有当A出现空位时，才会从B“取人”。这种<strong>单向性</strong>保障了我们在更新匹配时可以<strong>有方向地传播变化</strong>（详见2.5节）。</p>
+<h3 id="动态-Top-K-堆维护"><a href="#动态-Top-K-堆维护" class="headerlink" title="动态 Top-K 堆维护"></a>动态 Top-K 堆维护</h3><p>在匹配过程中，经常需要维护某个集合中的<strong>前K大（或前K小）元素</strong>，特别是当我们有容量限制时，每个接受方需要知道当前已接收的对象中“最差”的是哪一个，以及未接收对象中“最好”的是哪一个，以决定是否进行替换。这可以通过堆（heap）这种数据结构高效实现。</p>
+<p><strong>双堆方案</strong>：常用的是为每个接受者（如每个学校）维护两个堆：</p>
+<ul>
+<li><strong>已录取堆（Min-Heap，小根堆）：存放当前已匹配到该接受者的所有申请者，以“匹配评价”（如分数、优先级）为键，按照最差优先</strong>排序——堆顶是该校录取的最差的那个学生。这样我们可以在 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 时间取得<strong>当前录取名单中最弱的成员</strong>，方便与新申请者比较；插入或删除的调整为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.766ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3874.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path></g><g data-mml-node="mo" transform="translate(3485.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.011ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 889 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path></g></g></g></svg></mjx-container>为容量）。</li>
+<li><strong>候选堆（Max-Heap，大根堆）：存放有意向但未被录取的申请者（“候补”）。按照最佳优先</strong>排序——堆顶是尚未录取到该校的候选者中最优秀的一个。当已录取者有人退出或被挖走时，我们从候选堆顶取出最优候选来填补空缺。大根堆保证每次取的都是目前能提升录取质量的最佳候选。</li>
+</ul>
+<p>这种设计类似“冒尖法则”：已录取堆保存着“天花板”，候选堆保存着“地板”。例如在学院录取问题里，对每个学院：已录取堆顶是当前录取分数最低的学生，候选堆顶是未录取进来但分数最高的候选学生。如果候选堆顶的分数高于已录取堆顶，那说明可以通过替换提升录取名单质量。在<strong>添加新申请者</strong>时，我们将其与该接受方的最差已录取比较，决定是直接录取还是列为候补；在<strong>出现空位</strong>时，则从候补堆提取顶尖者补位。通过双堆维护，我们有效地将每次调整的代价限制在对数级，并<strong>避免遍历所有申请者列表</strong>。</p>
+<h3 id="懒惰删除"><a href="#懒惰删除" class="headerlink" title="懒惰删除"></a>懒惰删除</h3><p>由于申请者和接受方都在动态变化，我们需要支持从堆中删除任意元素（例如某学生被移除系统，或某学生从候选转正录取）。标准堆并不擅长删除堆中非顶元素，但<strong>懒惰删除</strong>是一种常用技巧：<strong>不立即删除无效元素，而是在取出时再检查其有效性</strong>。具体做法包括：</p>
+<ul>
+<li>当某申请者不再有效（例如被删除，或已经匹配到别处，不应再作为候选），我们可以在其对应的数据结构中做一个标记（如设valid=false或更新一个版本号）。但是我们<strong>不从堆中马上移除</strong>它，以避免 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.844ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2141 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1752,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 的代价。</li>
+<li>每次从堆顶取元素（例如尝试取候选堆的最佳候选时），执行一次<strong>懒惰检查</strong>：如果堆顶元素已无效，就弹出并继续检查下一个，直到找到有效元素为止。这样，删除的开销被摊销到后续取出的操作中，而且只针对堆顶元素检查，使成本很低。</li>
+</ul>
+<p>懒惰删除在本类问题中非常重要。例如学院录取的实现中，当一个学生被别的学院录取或被删除时，他可能仍留存在其他学院的候选堆中。通过valid标记和在弹出时检查if (!valid)，我们确保不会错误地填补一个已无效的学生。又如学校分配问题里，nextwant候选堆里可能堆积了许多已经改变主意或被删除的学生，取出时需要验证其状态和意愿是否仍然适配当前学校。这种惰性处理策略显著减少了复杂的同步操作，使我们的数据结构维护更简单、稳健。</p>
+<h3 id="惰性传播"><a href="#惰性传播" class="headerlink" title="惰性传播"></a>惰性传播</h3><p><strong>惰性传播</strong>是指<strong>延迟执行某些传播性更新</strong>，在需要时才真正处理，从而减少频繁无效的全局更新。针对动态匹配问题，惰性传播的应用体现在：当某个元素的匹配状态发生变化时，我们<strong>只在必要时</strong>将影响传播给相关的其他对象，而不是即时更新所有可能受影响者。</p>
+<p>具体体现在两种情形：</p>
+<ul>
+<li><strong>加入新申请者时的传播：例如在学院录取中，过去的天真做法可能会让新学生在未被前一所学院录取时，就直接加入所有后续学院的候选列表。但实际上这是不必要的。更好的方式是惰性地逐步传播</strong>：让新学生从学院1开始尝试录取，若被淘汰再推进到学院2，如此链式调用，不提前把他放到过多的候选堆里。这样传播是“按需”的：只在学生确实无法进入更好的学院时，才将其作为候选考虑下一个学院。</li>
+<li><strong>占位意向的提前登记：惰性传播有时体现在预先记录意向、等待触发。例如学校分配问题中，每个学生一旦被分配到某学校，我们会将他对更好学校的意向</strong>加入那些学校的候选池(nextwant)中，但并不立即处理。只有当某学校出现空位时（触发remove操作链），才从候选池中找出适合的候选学生来转入。这个机制保证了我们不需要在每次添加/删除时重新为所有学生计算最优调动，而是<strong>等空位出现时，快速筛选有意向者</strong>来填补。因为学生的意向在平时以懒方式登记着，一旦需要用时直接取即可，这也是一种延迟更新的策略。</li>
+</ul>
+<p>惰性传播的好处在于：<strong>降低无效更新频率</strong>。大部分时候系统处于稳定匹配，无需更动；当一个局部发生变化时，我们才触发与之相关的传播，并且通常传播的链会很有限（由偏序保证单向性）。在实现上，经常结合懒惰删除和双堆结构——例如上例中nextwant堆可能积累多条“过期”的意向记录，但通过懒惰删除在使用时过滤掉，维护成本低廉。</p>
+<h3 id="链式更新传播机制"><a href="#链式更新传播机制" class="headerlink" title="链式更新传播机制"></a>链式更新传播机制</h3><p><strong>链式更新</strong>是动态匹配的灵魂所在：一个事件（新增或删除）可能引发<strong>一连串连续的匹配变动</strong>。算法需设计机制，高效地沿着链传递这些更新，而不遗漏或重复。</p>
+<p><strong>链式更新的两种典型情况</strong>：</p>
+<ul>
+<li><strong>新增触发的正向链：当新增一个申请者时，他按照偏序尝试进入匹配。如果挤掉了某个已有匹配者，那么被挤掉者将继续寻找下一匹配目标，引发下一轮挤出</strong>。这个过程类似多米诺骨牌，一直向“后方”传播直到所有接受方都稳定。比如学院录取中，新考生可能挤掉原本在某校垫底的学生，被挤掉的学生再去下一所学院竞争，又可能挤掉别处的垫底者……直至某人找到空位或最后一所学院拒绝他。我们的算法通过递归或循环实现这一链：每当发生替换，就对被替换者调用下一匹配的插入处理。伪代码示意如下：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">insertStudent</span><span class="params">(<span class="type">int</span> stuId, <span class="type">int</span> collegeId)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span> (collegeId &gt;= totalColleges) {</span><br><span class="line">        <span class="comment">// 没有更后面的学院了，链条止步</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    }</span><br><span class="line">    College &amp;col = colleges[collegeId];</span><br><span class="line">    <span class="keyword">if</span> (col.currentSize &lt; col.capacity) {</span><br><span class="line">        <span class="comment">// 未满，直接录取</span></span><br><span class="line">        col.<span class="built_in">accept</span>(stuId);</span><br><span class="line">    } <span class="keyword">else</span> {</span><br><span class="line">        Student worst = col.<span class="built_in">getWorstAccepted</span>(); <span class="comment">// 查看当前最差录取者</span></span><br><span class="line">        <span class="keyword">if</span> (col.<span class="built_in">isBetter</span>(worst, stuId)) {</span><br><span class="line">            <span class="comment">// 新学生不如最差录取者 -&gt; 进候补，尝试下一个学院</span></span><br><span class="line">            col.candidates.<span class="built_in">push</span>(stuId);</span><br><span class="line">            <span class="built_in">insertStudent</span>(stuId, collegeId + <span class="number">1</span>);</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            <span class="comment">// 新学生更优秀 -&gt; 替换录取</span></span><br><span class="line">            col.<span class="built_in">remove</span>(worst);</span><br><span class="line">            col.<span class="built_in">accept</span>(stuId);</span><br><span class="line">            <span class="comment">// 被替换的学生作为候补</span></span><br><span class="line">            col.candidates.<span class="built_in">push</span>(worst);</span><br><span class="line">            <span class="comment">// 被替换学生继续尝试下一学院</span></span><br><span class="line">            <span class="built_in">resetAssignment</span>(worst); <span class="comment">// 标记其当前无分配</span></span><br><span class="line">            <span class="built_in">insertStudent</span>(worst.id, collegeId + <span class="number">1</span>);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>上述逻辑正是链式正向传播的体现：每次替换触发下一跳的尝试。由于偏序，学生只会<strong>从更好资源向更差资源流动</strong>，不会出现环路，链传播在有限步骤后必定结束。</p>
+<ul>
+<li><strong>删除触发的逆向链：当移除一个申请者时，他腾出的名额可能让更差资源上的人有机会“向前晋升”。这在偏序上体现为从后面的接受方向前补位</strong>。实现机制通常是：当某接受方出现空位，检查其候选堆顶是否有想来的其他申请者，如果有且符合条件，就把该申请者调过来，占据空位；此举会在那个申请者原先所属的接受方产生新的空位，于是继续向后传播。这样空位沿着链一路传递下去，直到某个接受方没有合适候选来填补为止，链条结束。</li>
+</ul>
+<p>用学院录取例子说明：假设学院A空出1个名额，它会看看有没有在别的学院就读但更想来A的学生（候选堆）。如果找到了，比如学生X目前在学院B就读但更愿意来A，那就把X调到A。那么学院B少了一个人，就产生空位，再看看B的候选人中是否有更想来B的人（可能从C来）……以此类推。这个过程最终会使某个学院的空位无人可补（可能是最后一所，或某一段链末端），这时链式更新结束。</p>
+<p>算法上，可以采用<strong>循环处理空位</strong>的方式实现逆向链。例如伪代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> vacatedCol = collegeId; <span class="comment">// 初始空位所在学院</span></span><br><span class="line"><span class="keyword">while</span> (vacatedCol != <span class="number">-1</span>) {</span><br><span class="line">    College &amp;col = colleges[vacatedCol];</span><br><span class="line">    <span class="keyword">if</span> (!col.candidates.<span class="built_in">empty</span>()) {</span><br><span class="line">        Student cand = col.candidates.<span class="built_in">top</span>();</span><br><span class="line">        col.candidates.<span class="built_in">pop</span>();</span><br><span class="line">        <span class="keyword">if</span> (cand.<span class="built_in">isValid</span>() &amp;&amp; cand.currentCollege != <span class="number">-1</span> </span><br><span class="line">            &amp;&amp; cand.<span class="built_in">prefers</span>(col) ) { </span><br><span class="line">            <span class="comment">// 候选有效且确实更想来此学院</span></span><br><span class="line">            <span class="type">int</span> fromCol = cand.currentCollege;</span><br><span class="line">            colleges[fromCol].<span class="built_in">remove</span>(cand);</span><br><span class="line">            col.<span class="built_in">accept</span>(cand);</span><br><span class="line">            vacatedCol = fromCol; <span class="comment">// 空位转移到cand原来的学院</span></span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            <span class="comment">// 候选无效或条件不符，跳过继续取下一个</span></span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        }</span><br><span class="line">    } <span class="keyword">else</span> {</span><br><span class="line">        <span class="comment">// 无候选，链结束</span></span><br><span class="line">        vacatedCol = <span class="number">-1</span>;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>这里通过vacatedCol传递空位，在循环中不断尝试用候选人填补并将空位后移。每个学生只会被调动一次，链不会无限延长。需要注意在循环中处理<strong>惰性清理</strong>，跳过无效候选。</p>
+<p>通过链式更新机制，算法能够以接近<strong>局部调整</strong>的代价完成复杂的全局匹配重新配置。每次add或erase操作实测只需几十或几百次对比/移动，就能调整数万考生的匹配状态，效率远高于每次从头排序匹配。</p>
+<h3 id="分数缓存优化"><a href="#分数缓存优化" class="headerlink" title="分数缓存优化"></a>分数缓存优化</h3><p><strong>分数（或距离等评分）的缓存</strong>是提升性能的重要措施，尤其当匹配评分计算复杂或需要重复计算时。在学院录取问题中，每个学生有多个科目成绩，每个学院有不同科目权重，要算总分。如果每次比较都临时计算总分，会非常耗时。<strong>预计算和缓存</strong>可以极大减少开销：</p>
+<ul>
+<li><strong>预计算矩阵</strong>：可以维护一个二维数组score[studentId][collegeId]存储每个学生对每所学院的评分。一旦学生加入（提供了5科成绩），我们用各学院的权重计算出该学生对每个学院的总分并保存下来。后续无论是堆比较、插入还是候选检查，都直接访问这个预计算值，而不需要每次重复算5科加权和。缓存分数不重复计算往往能带来数倍的性能提升。</li>
+<li><strong>懒更新评分</strong>：在有些问题，评分可能动态变化（例如资源负载变化影响匹配评分）。一般题目中评分规则固定，所以预计算有效。如果评分需动态更新，可以考虑懒更新或按需重算：例如记录一个时间戳或版本号，只有在真正比较时发现缓存过期才重算。</li>
+</ul>
+<p>同样，在学校分配问题中，距离计算也是重复操作。一个学生位置确定后，可一次性计算出他与所有学校的曼哈顿距离并排序保存，作为他的偏好表。这样比较谁离某学校更远或寻找学生对某学校的喜好顺序时，可直接查表。利用这些缓存避免了大量重复的几何距离计算和排序操作，对应大数据量下的性能瓶颈，效果显著。</p>
+<p>综上，这些算法组件相互配合：偏序逻辑和链式传播保证正确性和最小化影响范围，双堆维护和懒删除/传播保证各步操作高效，而缓存优化进一步降低常数时间。下面，我们以两个经典例题为例，展示如何将以上思想应用于实际解题。</p>
+<h2 id="解题策略"><a href="#解题策略" class="headerlink" title="解题策略"></a>解题策略</h2><p>在考试环境中，面对动态匹配类模拟题，建议遵循以下解题策略：</p>
+<ol>
+<li><strong>抽象建模，识别偏序：首先仔细阅读题意，抽象出主体对象</strong>（如学生–学校、任务–服务器）及其交互规则。明确整体匹配流程是否存在天然的顺序或优先级（偏序）。一旦识别出偏序关系（如按编号顺序依次分配，或按全局优先级高者先匹配），便可推断出<strong>匹配只能沿一个方向调整</strong>的性质，这对设计算法非常关键。</li>
+<li><strong>设计数据结构</strong>：根据模型选择合适的数据结构来维护状态。通常包括：<ul>
+<li><strong>主存储</strong>：记录每个对象当前的匹配情况（如每个学生当前在哪所学校，每个学校当前有哪些学生）。</li>
+<li><strong>优先队列/堆</strong>：维护可快速选择极值的结构。如前文所述，双堆常用于维护每个接受方的录取和候补名单。也可能用单个堆/平衡树全局维护未匹配对象的优先级（按偏序选下一个分配对象）。</li>
+<li><strong>映射/索引</strong>：如哈希表或数组下标，用于通过ID快速找到对象数据（例如通过学生ID找到其成绩或当前状态），便于更新和查询。</li>
+<li>此外，要考虑<strong>数据规模</strong>和操作上限，选择能够支撑高频动态操作的数据结构。比如元素数十万级时，std::priority_queue、std::set性能都需要评估，有时需要自建更轻量的堆或树结构以优化常数时间。</li>
+</ul>
+</li>
+<li><strong>逐层推进构建匹配：按照偏序顺序，逐步建立匹配。初始可以视为系统空、无匹配；随着add操作，一个新元素按照规则从最优先的选择开始尝试匹配，借助局部数据结构</strong>（如对应接受方的堆）决定能否插入或需要传递给下一个选择。当处理add时，要格外注意：<ul>
+<li><strong>避免全局重算：不要每加一个元素就重新对所有已有元素排序分配。应充分利用当前已有的匹配结果</strong>，只对受影响部分进行调整（通常就是新元素自己以及被他挤出的链）。</li>
+<li><strong>维护好状态</strong>：更新相关对象的状态，例如新学生被录取则标记其当前学院ID，被挤出的学生标记为未匹配再去下一个等等。</li>
+<li><strong>边界处理</strong>：包括最后一层无人可收留的情况（例如新学生被所有学院拒绝，则其最终未被录取，suggest应返回-1）、中间某环节恰好有空位直接插入的情况等等，要确保代码逻辑覆盖这些分支。</li>
+</ul>
+</li>
+<li><strong>惰性处理无效数据</strong>：考场上实现懒删除/懒更新时，应仔细考虑标记条件和检验条件。常见技巧：</li>
+</ol>
+<ul>
+<li>用一个布尔或时间戳标记删除的对象，在检查堆顶时验证。如果对每个堆顶都要检查太多条件，可以把验证逻辑抽成函数，保持代码整洁。</li>
+<li>有些情况下，用<strong>减容量技巧</strong>处理删除更方便：当某学院已录取的人被抢走或被删除时，其可录取容量临时加1；当发现某学院堆顶录取者已无效（已被抢走或删除），就减少该学院当前录取人数上限1（相当于承认以前录取名单里有一个空位被删除占用）。这样可以暂时“吞掉”无效数据的影响。这种非常规技巧需要理解透彻才能在考场正确使用。</li>
+</ul>
+<ol start="5">
+<li><strong>优化热点，避免无效计算</strong>：在实现中定位性能热点，典型如：<ul>
+<li>分数/距离计算是否频繁，是否需要缓存。</li>
+<li>堆操作是否过多？例如是否向不必要的堆插入了太多元素：如之前提到，不要让每个新学生一下子进入所有候选堆，要让他<strong>被拒绝时再进入下一个</strong>。</li>
+<li>数据结构操作是否能降级：如发现priority_queue无法高效删除中间元素，可以换成懒删除+辅助结构，或者用两棵堆彼此平衡等办法。甚至可以自己实现精简堆来减少内存和比较开销。</li>
+</ul>
+</li>
+<li><strong>测试小样例，模拟手算</strong>：在正式提交前，一定用小规模数据演练算法过程，验证链式反应是否正确。例如手动跟随几个add/remove操作，看数据结构变化是否与预期一致。很多动态匹配算法的错误源于链更新顺序或条件判断不严，模拟可以发现并修正。</li>
+<li><strong>保持代码清晰结构</strong>：动态匹配题代码较长，考场编写要注重模块化和注释，以防日后调试困难。可以将init, add, remove, query分别实现，并把通用操作（如推入堆、弹出堆顶验证）封装。清晰的结构不仅减少错误，也有助于debug。</li>
+</ol>
+<p>总之，在考试环境下解这类题需要<strong>严谨的逻辑推演</strong>和<strong>成熟的数据结构应用</strong>。合理利用偏序和惰性技巧，往往能把看似复杂的全局调整拆解为<strong>一系列局部操作</strong>，从而在时限内完成。</p>
+<h2 id="案例讲解：经典样题剖析"><a href="#案例讲解：经典样题剖析" class="headerlink" title="案例讲解：经典样题剖析"></a>案例讲解：经典样题剖析</h2><p>下面通过两个经典例题，结合具体操作序列，详细分析动态匹配的过程、算法状态演进及堆结构变化。</p>
+<h3 id="样例一：学院录取模拟"><a href="#样例一：学院录取模拟" class="headerlink" title="样例一：学院录取模拟"></a>样例一：学院录取模拟</h3><p><strong>问题概述</strong>：该题模拟一个多学院录取推荐系统。有 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.378ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 1051 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g></g></g></svg></mjx-container> 所学院，每所最多录取 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.009ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 888 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g></g></svg></mjx-container> 名学生，每个学生有5科成绩；每所学院有各科的权重，按加权总分择优录取。<strong>录取原则</strong>遵循偏序：学院按编号从小到大依次“招收”学生。在模拟中：</p>
+<ul>
+<li>学院1先从所有考生中录满N人（成绩高者优先，平分则学号小优先），然后学院2在剩余未被前面学院录取的考生中录满N人，以此类推。</li>
+<li>一旦考生被某低编号学院录取，他不再参与后续学院的录取。最终每个考生只会被录取到编号<strong>最小</strong>的可能学院，否则无人录取。</li>
+<li>动态操作包括：add(id, scores) 添加考生、erase(id) 移除考生、suggest(id) 查询某考生当前被哪所学院录取（返回学院编号或-1）。</li>
+</ul>
+<p><strong>算法回顾</strong>：正如前文分析，我们利用<strong>双堆+链式更新</strong>实现。每个学院维护：</p>
+<ul>
+<li>in小根堆（已录取），堆顶是当前最差录取生。</li>
+<li>candidate大根堆（候选），堆顶是候补中最优秀生。</li>
+</ul>
+<p>新增考生时，从学院1开始尝试用insert函数递归分配；移除考生时，通过erase调用链式remove逐级腾空补位。</p>
+<p>此例演示了算法如何动态维护匹配：新增过程中，局部替换伴随insert将影响向后传播；删除过程中，空位伴随remove将影响向前回溯。<strong>堆结构</strong>在其中发挥了重要作用，例如学院1始终通过比较in堆顶与新学生分数决定是否替换；每当空位出现，通过候选堆顶发现最优候补来填补。懒惰删除也可见一斑：比如很多被删除或已转移的学生依然留在某些候选堆，但因valid=false，在堆顶检查时被跳过。</p>
+<h3 id="样例二：学校分配模拟"><a href="#样例二：学校分配模拟" class="headerlink" title="样例二：学校分配模拟"></a>样例二：学校分配模拟</h3><p><strong>问题概述</strong>：该题模拟在一个二维平面上为学生分配学校的位置问题。共有 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.009ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 888 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g></g></svg></mjx-container> 所学校，每所学校可容纳 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.719ex" height="1.645ex" role="img" focusable="false" viewBox="0 -705 760 727"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D436" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q484 659 454 652T382 628T299 572T226 479Q194 422 175 346T156 222Q156 108 232 58Q280 24 350 24Q441 24 512 92T606 240Q610 253 612 255T628 257Q648 257 648 248Q648 243 647 239Q618 132 523 55T319 -22Q206 -22 128 53T50 252Z"></path></g></g></g></svg></mjx-container> 名学生，每所学校有坐标。学生动态加入或删除，每个学生有唯一ID和坐标。分配规则：</p>
+<ol>
+<li><strong>学生优先级</strong>：由学生与最远学校的曼哈顿距离决定。距离值越大，优先级越高；若相同距离则ID小者优先。可以理解为离学校分布“边缘”越远的学生更需要优先满足就近入学。</li>
+<li><strong>就近分配：按照优先级顺序，给每个学生分配最近的有空位的学校。若最近的学校已满，则该学生尝试次近的学校，如此下去直到找到空位</strong>。若距离相等则视为并列最近，优先选ID小的学校。</li>
+<li><strong>动态调整：每当有学生加入或删除，会重新按照上述规则调整。特别地，优先级可能改变（删除可能让某些学生变成更远的“边缘”），需要相应调整分配。这调整是局部的</strong>（并非所有学生重新分配，而是涉及一个链式变化）。</li>
+</ol>
+<p><strong>算法与数据结构</strong>：和上一题不同，这里偏序在学生一侧（按优先级高到低），匹配时按距离选择学校。我们的维护方法：</p>
+<ul>
+<li><strong>每个学校</strong>维护：<ul>
+<li>beenassigned小根堆：存已分配到该校的学生，按<strong>优先级键</strong>排序（优先级低者在顶）。这里优先级键可定义为 (学生的最远校距离, -studentID)，这样数值越大优先级越高，堆顶是当前校内<strong>优先级最低</strong>的学生，即距离没那么远且ID大的。</li>
+<li>nextwant大根堆：存目前不在该校但<strong>更想来该校</strong>的学生候选，按优先级键排序（优先级高者在顶）。这些学生都是暂时在别的学校就读，但这所学校对他们来说比现有学校更近（更优先）。这个堆起到当空位出现时筛选调动对象的作用。</li>
+</ul>
+</li>
+<li><strong>每个学生</strong>存：<ul>
+<li>assign_school当前所在学校ID（若未分配则-1）。</li>
+<li>distances数组：按升序列出该学生到所有学校的距离以及学校ID。相当于该学生对学校的距离偏好列表，从最近到最远。</li>
+<li>由于优先级由最远距离决定，我们也可额外存储学生的“priority value”=到最远学校距离，方便比较大小。</li>
+</ul>
+</li>
+<li><strong>全局</strong>：<ul>
+<li>哈希或map记录学生ID映射到内部结构索引，便于重用和查找。</li>
+<li>当前不需要全局堆因学生调配由事件触发链完成。</li>
+</ul>
+</li>
+</ul>
+<p><strong>新增 (add) 逻辑</strong>：当新学生加入：</p>
+<ol>
+<li>计算该学生与每所学校的距离列表并排序。可得到其最远校距离（优先级）及最近到最远的学校顺序。</li>
+<li>从最近学校开始尝试分配（类似“投递志愿”）。假设当前处理学生为cur：<ul>
+<li>找到cur距离最近的学校，如果该校没满，则直接将cur加入该校。更新学生的assign_school和学校的计数、已分配堆等，并将该学生对所有更近学校（比当前分配的学校）的意向加入那些学校的nextwant堆。这样，如果以后那些更近学校出现空位，会考虑调入cur。</li>
+<li>如果最近学校已满，取出该校beenassigned堆顶的“最弱”学生与cur比较优先级。如果cur优先级更高（更远距离或同距离ID更小），则<strong>顶替</strong>：将堆顶学生踢出该校，把cur加入。被踢出的学生记为evicted，其当前assign_school置为-1，准备让他找<strong>下一个志愿</strong>。</li>
+<li>无论是直接录取还是替换，都在该学生分配后执行pushBetterChoicesToNextwant：将其对所有更近学校的意向加入候选堆。</li>
+<li>如果cur未能顶替（说明cur优先级不如堆顶最差生），则当前学校无法插入cur，继续尝试下一远的学校（循环继续）。</li>
+<li>如此循环直到找到空位或完成替换链。如果一直到最远学校都满且比不过最差者，按题意其实不会有这种因为总容量足够。但代码中有兜底处理以防万一。</li>
+<li>值得注意的是，当发生替换时，我们<strong>将evicted学生赋给curIdx</strong>，并从他被踢出的学校的下一志愿位置继续尝试分配。这正是<strong>链式正向传播</strong>：新高优学生把低优学生一路踢下去，驱动后者去找下一个能去的学校。</li>
+</ul>
+</li>
+<li>新学生整个add过程的时间主要耗费在：计算距离 O(N) 和在每个学校可能的堆操作。由于每个学生只可能被踢一次，链长度至多N，整体摊销性能是可以接受的。</li>
+</ol>
+<p><strong>删除 (remove) 逻辑</strong>：当删除一个学生时：</p>
+<ol>
+<li>找到该学生原所在学校prevSchool，将其标记为已删除（如removed=true），并将其从原学校移除（实际上做cnt–，assign_school=-1，不从堆直接摘除而通过懒惰策略处理）。</li>
+<li>现在prevSchool有了一个空位，需要看看有没有其他学生想要这个学校。通过检查prevSchool的nextwant堆顶来找到<strong>候选优先级最高</strong>的学生。对堆顶candidate，验证：<ul>
+<li>他必须仍然存在（没被删除）且当前仍在某学校就读。</li>
+<li>而且他的优先级键没有变（比如学生位置若固定则键不变，这里主要看没被重复添加过改变distance数组）。</li>
+<li>最重要：他<strong>确实更偏好当前空位学校</strong>胜过自己的现任学校。具体通过比较在其距离列表中，该校排名是否高于他当前学校排名。</li>
+<li>如果上述都满足，则挑选该学生pick来调动：将他从原学校移出，将他加入prevSchool。同时将pick的更近学校（相对于prevSchool）意向加入nextwant更新，因为他换了学校，可能有更好的学校没去成。</li>
+<li>被他腾出的学校ID成为新的curVac空位，循环继续。</li>
+</ul>
+</li>
+<li>如果nextwant堆没有找到合适人选（可能堆空或都无效或不想来），则链式补位结束。该空位将保持空闲直到新学生来填。</li>
+</ol>
+<p>删除链保证了：只有那些<strong>本可以去更好学校却没去</strong>的学生会被依次调升，最终达到新的稳定状态。例如删除一个远距离高优学生后，以前在偏远学校的某个学生可能现在变成最远的，优先级升高，从而触发他向前调剂。实现借助nextwant堆高效完成这一系列可能的调剂。</p>
+<p>通过此案例我们看到<strong>学校分配</strong>问题中，动态调整也是通过<strong>双堆、懒检查和链式</strong>方法解决的。数据结构细节如cleanAssignedTop、findRankInPref函数在代码中确保堆顶有效及计算学生更喜好程度。链式过程相当复杂，但算法保证每个学生每次操作至多被调动一次或加入/移除一次堆，性能仍然良好。</p>
+<p>两道例题虽然场景不同，但解法思想高度相似：都以<strong>偏序保证方向</strong>，以<strong>堆结构维护极值</strong>，以<strong>懒惰策略处理无效数据</strong>，最后通过<strong>链式反应实现局部到全局的调整</strong>。这也证明了前述通用方法论的适用性。</p>
+<h2 id="衍生题与举一反三"><a href="#衍生题与举一反三" class="headerlink" title="衍生题与举一反三"></a>衍生题与举一反三</h2><p>动态匹配类系统的算法思想具有很强的可拓展性。下面提出几种可能的变体或加强版本，并讨论其基本建模和应对策略：</p>
+<p><strong>变体1：双向偏好稳定匹配的动态维护</strong> – 假设我们有一个经典<strong>稳定婚姻问题</strong>扩展，每个男生和女生都有各自偏好排序，并允许<strong>动态地有人加入或退出</strong>。这比上述例子复杂在于<strong>双边偏好</strong>。建模上可采用 Gale-Shapley 算法的框架：始终维持一个稳定匹配。当有人加入时，可让新加入者按偏好发出提案，可能导致一系列“提案-拒绝”链更新；当有人退出时，失配的一方需要重新寻找匹配。关键在于维护每个人当前在偏好列表的提案进度，以及高效找到下一合适对象。可使用一个<strong>优先队列</strong>存储暂时空闲的一侧的参与者按优先级出列提案。当动态调整时，只局部解配和重匹配必要的部分。由于稳定匹配保证无冲突环存在，增删的影响应当局部传播。处理策略与前述类似：<strong>惰性地</strong>处理被拒者的后续提案，不重新匹配无关对。</p>
+<p><strong>变体2：带权重和收益的任务调度</strong> – 有一组服务器（每台容量处理能力上限不同），一组任务动态到来或结束。每个任务放在某台服务器上有一定<strong>收益</strong>或效率值，不同任务对不同服务器收益不同（类似学院对学生分数不同）。目标是在容量限制下最大化总收益。静态地这是一个<strong>加权二分匹配</strong>或<strong>带容量的指派</strong>问题，可用<strong>Min-Cost Max-Flow</strong>求解。但动态情况下频繁全局流调整代价高。可考虑采用类似<strong>局部调整</strong>策略：每次新任务到来，尝试放入其使增量收益最大的服务器；如果该服务器已满且新任务收益更高，就替换掉目前收益最低的任务（这和学院录取替换最差生类比），被替换任务再寻找次佳服务器，可能继续递归。任务结束则腾出容量，低收益任务可从别处调入弥补。同样需要维护每台服务器一个“收益最低任务堆”和全局或局部的候选列表以快速决定调整链。建模重点在于<strong>评价函数</strong>（收益）和优先级设计，比如全局优先级可以是任务的最大收益潜力。</p>
+<p><strong>变体3：多阶段匹配与周期更新</strong> – 一些系统具有<strong>多层次匹配</strong>，如学生首先分配到某个区，再由区分配到校。如果引入这样两级甚至多级的动态匹配，模型可以层层套用类似思想：先按第一层偏序匹配，如果第二层有调整再反馈给第一层等。这种题目可以分解处理：将一层的匹配结果作为下一层的输入。动态更新时，某层的变动可能引发下层连锁，甚至需要<strong>迭代稳定</strong>。应对策略是<strong>逐层维护</strong>堆结构，并在层与层之间建立触发关系。可以把每层当作单独的匹配问题，用上一节方法维护，当某层出现变动，触发更新下一层，以类似链式方式传递。因为各层偏序各异，可能需要复杂的验证避免死循环。但通常题目设计会给出单方向依赖保证收敛。</p>
+<p><strong>变体4：考虑更多约束的匹配</strong> – 例如在学院录取场景加入学科容量约束（每学院对不同专业方向有名额限制），或者在学校分配中加入公交可达性等复杂规则。此时匹配决策不仅取决于一个评分，还取决于多维约束。建模上可以将每种约束视为匹配的一个层次或引入额外状态。在算法中，可能需要为每个接受方维护多组堆（每种约束一个），或者使用平衡树按多个键排序。当一个元素加入时，需同时考虑多方面能否容纳（比如某学院总容量和专业容量）。<strong>关键策略</strong>仍是<strong>逐步满足约束</strong>：先满足最硬的约束，再在次要约束下调整。举例：学院录取加专业，则先按照总分排队录取，但对违反专业限额的及时调整，把多出的专业考生当作被踢出处理。这种变体难度较高，但如果抓住“逐层过滤”的思想，依然可以构造链式调整过程。</p>
+<p>读者在遇到类似题目时，应学会<strong>举一反三</strong>：抓住匹配的核心偏序和约束，将问题拆解为基本的“局部决策+全局传导”模式。无论是双边稳定匹配、带权匹配，还是多层次匹配，很多都能在这个框架下找到高效解法。</p>
+<h2 id="总结与实战建议"><a href="#总结与实战建议" class="headerlink" title="总结与实战建议"></a>总结与实战建议</h2><p>动态匹配类系统模拟题融合了<strong>数据结构</strong>与<strong>模拟算法</strong>技巧，是考试中偏难的题型之一。本报告通过剖析两道经典例题，总结了其<strong>共性模型</strong>和<strong>解题方法论</strong>：</p>
+<ul>
+<li>利用<strong>偏序</strong>（优先级或顺序规则）理清匹配方向，确保局部调整不会产生反向冲突。</li>
+<li>采用<strong>双堆等数据结构</strong>维护匹配集合的边界，快速获取需要调整的对象（如最差已匹配者、最佳候选者）。</li>
+<li>运用<strong>懒惰删除和惰性传播</strong>，避免即时清理和全局更新，把代价摊到真正需要调整的时刻。</li>
+<li>设计<strong>链式更新</strong>机制，让一次操作的影响沿着匹配序列逐步传递，实现整体匹配的重新稳定。</li>
+<li>加入<strong>缓存优化</strong>等手段降低计算瓶颈。</li>
+</ul>
+<p>面对这类题，心态上要<strong>敢于抽象、善于建模</strong>。很多看似纷繁的场景，都能还原为上述模型的某种变体。实现上则要细心，特别处理好边界条件和数据结构一致性。建议读者在练习时：</p>
+<ul>
+<li><strong>多做模拟推演</strong>：拿纸笔模拟小数据下的匹配过程，体会链式反应。比如本报告例子，建议读者复盘操作序列，验证每步状态变化，这对加深理解很有帮助。</li>
+<li><strong>练习相关题目</strong>：除了本文讲到的例题，可以在在线评测平台寻找关键字“动态匹配”“模拟分配”的题目练习。著名的类似题还有一些招聘匹配、选课系统模拟等。</li>
+<li><strong>温故算法基础</strong>：巩固堆、优先队列的用法，学习Lazy deletion的实现模式，了解稳定匹配等经典算法思想。这些都是解好此类题的基础。</li>
+<li><strong>关注优化细节</strong>：在AC代码基础上尝试优化，例如替换STL容器为定制结构来提高效率。虽然考试未必需要极限优化，但理解这些优化原理会帮助你写出更高效的代码。</li>
+</ul>
+<p>最后，动态匹配题旨在考查<strong>综合思维</strong>和<strong>代码调度能力</strong>。当你掌握了偏序贪心和链式更新的方法论，就能以不变应万变，从容应对各种复杂模拟。希望通过系统学习和不断练习，读者能在实战中游刃有余地解决这类难题，在考场上取得佳绩！</p>
+<p><strong>参考代码示例</strong>：下面附简化的C++11代码片段，演示学院录取问题中核心的链式插入逻辑，供参考学习：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 简化的结构定义</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Student</span> { <span class="type">int</span> id; <span class="type">int</span> college; <span class="type">bool</span> valid; vector&lt;<span class="type">int</span>&gt; score; };</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">College</span> { <span class="type">int</span> id; <span class="type">int</span> capacity; <span class="comment">// 当前容量上限</span></span><br><span class="line">    <span class="comment">// 优先比较：分数高或ID小更优</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">Better</span> { <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&amp;a, <span class="type">const</span> pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&amp;b)</span> <span class="type">const</span> </span>{</span><br><span class="line">            <span class="keyword">return</span> (a.first &lt; b.first) || (a.first == b.first &amp;&amp; a.second &gt; b.second);</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line">    priority_queue&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;, vector&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&gt;, Better&gt; in;       <span class="comment">// 已录取(max-heap按分数低优先级低)</span></span><br><span class="line">    priority_queue&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;, vector&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&gt;, less&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&gt;&gt; candidate; <span class="comment">// 候选(min-heap按分数高优先级高)</span></span><br><span class="line">} colleges[MAXM];</span><br><span class="line">Student students[MAXS];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入学生到指定学院的链式函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">insertToCollege</span><span class="params">(<span class="type">int</span> stuIdx, <span class="type">int</span> colId)</span> </span>{</span><br><span class="line">    <span class="keyword">if</span>(colId &gt;= M) <span class="keyword">return</span>; <span class="comment">// 没有更后学院了，终止</span></span><br><span class="line">    College &amp;col = colleges[colId];</span><br><span class="line">    <span class="comment">// 清理已录取堆顶无效者</span></span><br><span class="line">    <span class="keyword">while</span>(!col.in.<span class="built_in">empty</span>()) {</span><br><span class="line">        <span class="type">int</span> sid = -col.in.<span class="built_in">top</span>().second;</span><br><span class="line">        <span class="keyword">if</span>(!students[sid].valid || students[sid].college != colId) {</span><br><span class="line">            col.in.<span class="built_in">pop</span>(); <span class="keyword">continue</span>;</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">if</span>(col.in.<span class="built_in">size</span>() &lt; col.capacity) {</span><br><span class="line">        <span class="comment">// 名额未满，直接录取</span></span><br><span class="line">        col.in.<span class="built_in">push</span>({students[stuIdx].score[colId], -students[stuIdx].id});</span><br><span class="line">        students[stuIdx].college = colId;</span><br><span class="line">    } <span class="keyword">else</span> {</span><br><span class="line">        <span class="comment">// 已满，取出最差录取者比较</span></span><br><span class="line">        <span class="keyword">auto</span> worst = col.in.<span class="built_in">top</span>(); <span class="comment">// 最小堆顶 = 最差</span></span><br><span class="line">        <span class="type">int</span> worstId = -worst.second;</span><br><span class="line">        <span class="keyword">if</span>(students[stuIdx].score[colId] &lt;= worst.first &amp;&amp; students[stuIdx].id &gt; worstId) {</span><br><span class="line">            <span class="comment">// 新学生不胜于当前最差，进候选等待</span></span><br><span class="line">            col.candidate.<span class="built_in">push</span>({students[stuIdx].score[colId], students[stuIdx].id});</span><br><span class="line">            <span class="comment">// 尝试下一所学院</span></span><br><span class="line">            <span class="built_in">insertToCollege</span>(stuIdx, colId<span class="number">+1</span>);</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            <span class="comment">// 新学生更优秀，替换掉最差</span></span><br><span class="line">            col.in.<span class="built_in">pop</span>();</span><br><span class="line">            col.in.<span class="built_in">push</span>({students[stuIdx].score[colId], -students[stuIdx].id});</span><br><span class="line">            col.candidate.<span class="built_in">push</span>({worst.first, worstId});</span><br><span class="line">            students[stuIdx].college = colId;</span><br><span class="line">            students[worstId].college = <span class="number">-1</span>;</span><br><span class="line">            <span class="comment">// 被替换者去下一学院</span></span><br><span class="line">            <span class="built_in">insertToCollege</span>(worstId, colId<span class="number">+1</span>);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>上述代码片段体现了<strong>局部贪心替换</strong>和<strong>链式传递</strong>，以及利用堆结构筛选对象的做法。实际考试代码还需处理更多细节（如删除操作、懒惰检查等），但核心思想如上。相信通过对算法思想的深入理解和代码实践的反复演练，读者一定可以在动态匹配类难题中取得突破。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
+<style>
+  /* 作用域：仅影响 #comments-app */
+  #comments-app {
+    --c-bg: #fff;
+    --c-text: #222;
+    --c-sub: #6b7280;
+    --c-border: #e5e7eb;
+    --c-accent: #3b82f6;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
+    margin-top: 2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app { --c-bg:#111318; --c-text:#e8e8e8; --c-sub:#a5a5a5; --c-border:#30363d;
+      --shadow:0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35); }
+  }
+  #comments-app, #comments-app * { box-sizing: border-box; }
+
+  /* 外层大卡片 */
+  #comments-app .wrap {
+    max-width: 860px; width: 100%; margin: 0 auto;
+    background: var(--c-bg); border: 1px solid var(--c-border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; overflow: hidden;
+  }
+
+  /* 顶部标题 */
+  #comments-app .title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 2px 0 16px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--c-text);
+  }
+  #comments-app .title::before{
+    content:""; width:8px; height:20px; border-radius:4px; background: var(--c-accent);
+  }
+
+  /* 内部分区：上下两张卡：列表卡 + 表单卡 */
+  #comments-app .sections { display: grid; gap: 16px; }
+  #comments-app .card {
+    background: color-mix(in srgb, var(--c-bg) 98%, #000 2%);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    #comments-app .card { background: color-mix(in srgb, var(--c-bg) 94%, #fff 6%); }
+  }
+
+  /* 仅列表卡的列表样式 */
+  #comments-app .list { display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 12px 14px; background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark){ #comments-app .item{ background: rgba(255,255,255,.03);} }
+  #comments-app .meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size:.86rem; margin-bottom:6px; }
+  #comments-app .meta .author { color: var(--c-text); font-weight:600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height:1.7; }
+
+  /* 表单卡：提示条 + 表单 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px; border: 1px solid var(--c-border);
+    border-radius: 12px; background: rgba(107,114,128,.08);
+    color: var(--c-sub); margin-bottom: 12px;
+  }
+  /* 没文字时自动隐藏，杜绝“空白横条” */
+  #comments-app .alert:empty { display: none !important; }
+
+  /* 表单栅格（12栅格） */
+  #comments-app .form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px; align-items: start;
+  }
+  #comments-app .col-6  { grid-column: span 6 / span 6; }
+  #comments-app .col-12 { grid-column: span 12 / span 12; }
+
+  #comments-app input[type="text"],
+  #comments-app textarea {
+    width: 100%;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg); color: var(--c-text);
+    border-radius: 12px; padding: 12px 14px; font-size:.95rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  #comments-app textarea { min-height: 140px; resize: vertical; max-width:100%; line-height:1.6; }
+  #comments-app input:focus, #comments-app textarea:focus {
+    border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  }
+
+  #comments-app .actions {
+    grid-column: span 12 / span 12;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  #comments-app .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    background: var(--c-accent); color:#fff; border:1px solid transparent;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+    transition: transform .06s, filter .15s;
+  }
+  #comments-app .btn:hover{ filter:brightness(1.05); }
+  #comments-app .btn:active{ transform: translateY(1px); }
+
+  /* 小屏优化：表单单列、按钮全宽 */
+  @media (max-width: 720px){
+    #comments-app .col-6 { grid-column: span 12 / span 12; }
+    #comments-app .btn { width: 100%; }
+  }
+</style>
+
+<div id="comments-app">
+  <div class="wrap">
+    <div class="title">评论</div>
+
+    <div class="sections">
+      <!-- 列表卡 -->
+      <section class="card list-card">
+        <div id="comments-list" class="list">
+          <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+        </div>
+      </section>
+
+      <!-- 表单卡 -->
+      <section class="card form-card">
+        <div id="comment-msg" class="alert"></div>
+
+        <form id="comment-form" class="form" novalidate>
+          <input class="col-12" type="hidden" name="post" />
+          <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+          <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+          <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+          <div class="actions">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+            <button type="submit" class="btn">提交</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Turnstile -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+(function () {
+  'use strict';
+  const API_BASE = '/api';
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
+
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#comments-list');
+  const form   = $('#comment-form');
+  const msg    = $('#comment-msg');
+  if (!form || !listEl || !msg) return;
+
+  form.querySelector('input[name="post"]').value = postId;
+
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+
+  const showMsg = (text) => {
+    msg.textContent = text || '';
+    // :empty 会自动隐藏，这里不强制 display
+    if (!text) return;
+  };
+
+  const itemTpl = (it) => {
+    const t = new Date(it.created_at);
+    const time = isNaN(t) ? '' : t.toLocaleString();
+    const safeAuthor = escapeHTML(it.author || '匿名');
+    const authorHtml = it.website
+      ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
+      : safeAuthor;
+    return `
+      <div class="item">
+        <div class="meta"><span class="author">${authorHtml}</span><span>${escapeHTML(time)}</span></div>
+        <div class="content">${it.content}</div>
+      </div>`;
+  };
+
+  async function loadComments(page = 1) {
+    showMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const list = Array.isArray(data.list) ? data.list : [];
+      listEl.innerHTML = list.length
+        ? list.map(itemTpl).join('')
+        : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
+    } catch {
+      showMsg('评论加载失败，请稍后重试。');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    let token = fd.get('cf-turnstile-response');
+    if (!token && window.turnstile && window.turnstile.getResponse) {
+      token = window.turnstile.getResponse();
+    }
+    const payload = {
+      post: fd.get('post'),
+      author: fd.get('author') || '匿名',
+      website: fd.get('website') || '',
+      content: fd.get('content') || '',
+      turnstileToken: token || ''
+    };
+    if (!payload.content.trim()) { showMsg('内容不能为空。'); return; }
+
+    showMsg('提交中…');
+    try {
+      const resp = await fetch(`${API_BASE}/comments`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(()=> ({}));
+
+      if (resp.ok && data.ok) {
+        showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
+        form.reset();
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+        if (data.status !== 'pending') loadComments();
+      } else {
+        showMsg('提交失败：' + (data.error || resp.status));
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      }
+    } catch {
+      showMsg('网络异常，请稍后再试。');
+    }
+  });
+
+  loadComments();
+})();
+</script>
+
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Ziyoeng Zoeng
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://www.wuwangyangxin.com/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/" title="系统模拟题-动态匹配类">https://www.wuwangyangxin.com/2025/11/09/系统模拟题-动态匹配类/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"><i class="fa fa-tag"></i> 数据结构</a>
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i> 系统设计</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E6%97%B6%E9%97%B4%E6%8E%A8%E8%BF%9B%E7%B1%BB/" rel="prev" title="系统模拟题-时间推进类">
+                  <i class="fa fa-angle-left"></i> 系统模拟题-时间推进类
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ziyoeng Zoeng</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">162k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">9:49</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.0/canvas-nest.umd.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 在 body 背后挂一个画布
+    new CanvasNest(document.body, {
+      color: '120,160,255', // 线颜色（RGB）
+      opacity: 1,         // 透明度 0~1
+      zIndex: -1,           // 置于背景
+      count: 150,             // 点数量
+      dist: 4000,   // 连线距离加大
+      radius: 120,  // 鼠标作用范围扩大
+    })
+  })
+</script>
+
+</body>
+</html>

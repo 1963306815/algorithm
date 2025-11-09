@@ -28,7 +28,7 @@
 <meta property="og:description" content="这篇文章系统总结了“区间动态分配与释放”问题的模型、数据结构与关键策略，并以多类典型题展示区间分配、合并、查询与连通建模的方法，为各类动态区间管理任务提供结构化的高密度解题框架。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-08T14:50:00.000Z">
-<meta property="article:modified_time" content="2025-11-09T04:06:48.713Z">
+<meta property="article:modified_time" content="2025-11-09T06:03:12.401Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
@@ -291,7 +291,7 @@ mjx-container[display="true"] + br {
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -365,7 +365,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-11-09 12:06:48" itemprop="dateModified" datetime="2025-11-09T12:06:48+08:00">2025-11-09</time>
+      <time title="修改时间：2025-11-09 14:03:12" itemprop="dateModified" datetime="2025-11-09T14:03:12+08:00">2025-11-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -418,14 +418,14 @@ mjx-container[display="true"] + br {
 <li><strong>文件存储</strong>：文件系统中，如果采用连续存储策略，一个文件需占用连续的磁盘扇区。当新增文件或扩展文件时，需要在磁盘空闲区寻找能够容纳文件大小的连续扇区；删除文件时释放其占用区间。例如经典的FAT文件系统就涉及将文件划分成若干片段存放并记录链表。例题“File Storage”模拟了这样的过程，需要按地址升序找到第一个够大的空闲段存放文件，并允许一个文件分成最多30个片段存储。</li>
 <li><strong>建筑堆叠</strong>：在一些模拟类题目中，会出现将物体（建筑、箱子等）堆叠到有限空间中的情境。例如“Line City Construction”题中，在一块狭长土地上按规则放置不同长度的建筑，占用一段连续土地，并在移除建筑时合并腾出的空地；又如“Underground City Construction”题中，在地下洞穴中不断掉落箱子，各箱子占据洞穴的一层空间且有宽度，会形成上下左右相邻的结构，需要模拟<strong>箱子落下占用空间</strong>以及<strong>人在箱子之间移动</strong>（这部分可抽象为区间的图连通问题）。这些都是<strong>空间管理</strong>的实例，将物理空间抽象为一维或二维的区间占用模型。</li>
 </ul>
-<p>简言之，此类问题的共同点是<strong>维护一个动态的“空闲区间”集合</strong>，支持<strong>占用（分配）<strong>和</strong>释放</strong>操作，并可能附带一些查询功能。在占用时通常要按照某种策略选择一个空闲区间来使用，释放时则将该区间归还并与相邻空闲段合并。正因其重要性，这类问题在竞赛和工程中都很常见——从操作系统的内存/磁盘管理，到模拟现实场景的堆叠或调度，都可以抽象为区间占用模型。</p>
+<p>简言之，此类问题的共同点是<strong>维护一个动态的“空闲区间”集合</strong>，支持<strong>占用（分配）<strong>和</strong>释放</strong>操作，并可能附带一些查询功能。在占用时通常要按照某种策略选择一个空闲区间来使用，释放时则将该区间归还并与相邻空闲段合并。正因其重要性，这类问题在考试和工程中都很常见——从操作系统的内存/磁盘管理，到模拟现实场景的堆叠或调度，都可以抽象为区间占用模型。</p>
 <h2 id="常用数据结构讲解"><a href="#常用数据结构讲解" class="headerlink" title="常用数据结构讲解"></a>常用数据结构讲解</h2><p>要高效地维护区间的占用与释放，选择合适的数据结构至关重要。根据问题规模和操作类型的不同，常用的数据结构包括：</p>
 <ul>
 <li><strong>线段树</strong>：线段树适用于需要在数组或区间上进行快速查询和更新的情况。例如在“箱子下落”这类需要快速获取某一段区间的高度最大值并更新一段区间值的问题中，可以使用线段树实现区间最大查询和区间更新。线段树的查询和更新平均是对数级别 O(log N)，适合空间较大且操作频繁的情况。不过实现相对复杂，占用内存也较多。在一些场景下，可以用<strong>树状数组</strong>或<strong>平衡二叉树</strong>替代部分线段树功能。</li>
 <li><strong>分块（块状数组 / sqrt decomposition）</strong>：分块技术通过将数据按块拆分，维护每块的汇总信息，加速跨块查询。它常被用于<strong>空间或维度较大但局部操作较简单</strong>的情况。例如在“Vocab Sheet”词汇表题中，我们有数万行但每行最多60个单词这个强上限，于是可以把行分成页，每页包含固定数量的行（如128行），维护每页内最大空闲长度。这样写单词时，先快速跳过不可能容纳的整页，再在页内逐行线性查找，等于实现了一种二级跳跃搜索，加速了定位空闲位置。这种 <strong>“页-Max -&gt; 行-Max -&gt; 空段”</strong> 的两级索引正是分块思想的体现。分块还经常用于处理<strong>部分可独立的维度</strong>或<strong>懒更新</strong>场景，除了懒标记修改外，也可维护每块的最大值、最小值、计数等聚合信息。实现难度比线段树低，且在一些<strong>超大规模N</strong>但<strong>每块元素有限</strong>的情况下非常高效。然而，需要注意块边界条件，例如空闲区间跨越块边界时可能被错误地视为两段，处理不好会导致统计错误。</li>
 <li><strong>堆（优先队列）</strong>：堆适合需要反复<strong>取出最优/最差值</strong>的情形。例如<strong>小根堆</strong>常用于“首次适配”策略：总是取起始地址最小的空闲块来分配；<strong>大根堆</strong>则可用于“最坏适配”策略：总是取最大的空闲块来分配，使剩余碎片尽可能大而少（如Line City题中要求选择<strong>最长</strong>空闲段）。堆操作是 O(log N)，维护单一关键字的最值十分方便。但堆不能直接支持按任意位置删除，故在<strong>任意释放</strong>操作中需要配合其他结构辅助（例如延迟删除标记，或同时维护一个哈希/集合来支持删除）。</li>
 <li><strong>有序集合/映射（平衡二叉树，如C++的set/map）</strong>：平衡BST适合维护<strong>动态区间集合</strong>，支持按区间的起点或终点排序遍历。常用做法是将<strong>空闲区间按起始位置</strong>存入集合，以便释放时方便找到相邻区间合并，或<strong>同时按长度排序</strong>存入另一集合以支持按大小选取最优段。C++ std::set提供对数时间的插入、删除、前趋后继查找，非常方便实现诸如“找到左侧相邻区间”“找到最小大于X的区间”等操作。我们的例题“Line City Construction”初始解法就用了两个set分别按长度和起点维护空闲段，以及一个按起点的set维护已建建筑，以处理建筑移除时的合并。尽管红黑树常数较大，在数据量很小的场景下不如数组直接遍历，但对于<strong>无法预知上限</strong>或<strong>需要多种顺序检索</strong>的情况，仍是不二选择。一些场景下可以改用<strong>跳表</strong>或<strong>B+树</strong>，但思想类似。</li>
-<li><strong>时间戳去重技巧</strong>：这是一种辅助技术，常用于<strong>查询操作需要统计涉及多个元素的属性</strong>时避免重复计算。例如在文件存储问题中，我们可能需要查询某一地址区间内有多少不同文件碎片。如果直接逐段检查可能重复计数同一文件片段。利用时间戳去重法，可以维护一个全局timestamp和一个哈希表，将每次查询标记为不同时间戳，扫描区间段时标记每个文件ID上次计数时间，如果不是本次则计数并更新时间戳。这样无需额外集合即可在一次遍历中得到<strong>不同ID计数</strong>。时间戳去重常与区间扫描或分块结合，在多个题目中都有应用。需要注意线程安全（竞赛题通常不涉及多线程）和时间戳溢出（一般用整数足够）。</li>
+<li><strong>时间戳去重技巧</strong>：这是一种辅助技术，常用于<strong>查询操作需要统计涉及多个元素的属性</strong>时避免重复计算。例如在文件存储问题中，我们可能需要查询某一地址区间内有多少不同文件碎片。如果直接逐段检查可能重复计数同一文件片段。利用时间戳去重法，可以维护一个全局timestamp和一个哈希表，将每次查询标记为不同时间戳，扫描区间段时标记每个文件ID上次计数时间，如果不是本次则计数并更新时间戳。这样无需额外集合即可在一次遍历中得到<strong>不同ID计数</strong>。时间戳去重常与区间扫描或分块结合，在多个题目中都有应用。需要注意线程安全（不过考试题通常不涉及多线程）和时间戳溢出（一般用整数足够）。</li>
 </ul>
 <p>上述数据结构各有所长，应根据题目<strong>数据规模</strong>和<strong>操作需求</strong>合理选型。实际解题中，往往多种结构组合使用：例如空闲区间用堆选取，已占用区间用set维护，额外查询用哈希时间戳等等，实现<strong>职责分离，各司其职</strong>。接下来我们将结合策略和案例具体说明。</p>
 <h2 id="不同题型策略"><a href="#不同题型策略" class="headerlink" title="不同题型策略"></a>不同题型策略</h2><p>针对区间占用类问题，不同题目往往要求不同的“选择策略”和处理侧重点。以下列出几种常见策略及对应场景：</p>
@@ -518,7 +518,7 @@ mjx-container[display="true"] + br {
 <li><strong>尝试不同数据结构实现</strong>：为了加深理解，可以用多种数据结构实现相同功能并比较。例如用map替代set+自定义比较器、用priority_queue配合延迟删除替代set管理空闲段，或尝试用<strong>跳表</strong>来维护区间集合等等。通过实现对比，会理解各结构的优劣和使用细节。</li>
 <li><strong>参考操作系统经典算法</strong>：操作系统教材中的<strong>Buddy内存分配算法</strong>是一种特殊的分块策略，将区间大小限制为2的幂，并通过按伙伴合并/拆分来管理内存碎片。尝试实现buddy算法模拟内存分配，可以训练你对特殊策略的掌握。另一个方向，研究STL和boost库中的内存池、allocator实现，也能获取灵感。</li>
 </ul>
-<p>通过这些举一反三的练习，你将能够一眼看出新问题是否可抽象为“区间占用”模型，从而调动你已经掌握的套路快速建模、选结构并编码实现。关键在于<strong>融会贯通</strong>：不拘泥于表象，用系统的视角拆解问题，找到区间管理的影子并应用相应的方法。相信经过系统的学习和反复实践，你一定能在竞赛和实际开发中游刃有余地应对此类问题！</p>
+<p>通过这些举一反三的练习，你将能够一眼看出新问题是否可抽象为“区间占用”模型，从而调动你已经掌握的套路快速建模、选结构并编码实现。关键在于<strong>融会贯通</strong>：不拘泥于表象，用系统的视角拆解问题，找到区间管理的影子并应用相应的方法。</p>
 
     </div>
 
@@ -835,14 +835,14 @@ mjx-container[display="true"] + br {
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">151k</span>
+    <span title="站点总字数">162k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">9:07</span>
+    <span title="站点阅读时长">9:49</span>
   </span>
 </div>
 <div class="busuanzi-count">
