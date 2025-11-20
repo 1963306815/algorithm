@@ -15,20 +15,20 @@
 
 
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+<link rel="stylesheet" href="/lib/@fortawesome/fontawesome-free/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/lib/animate.css/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="这篇文章总结了数据结构的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
+    <meta name="description" content="这篇文章总结了系统设计的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="系统设计中的多重索引、有序结构、单调时间与惰性维护">
 <meta property="og:url" content="https://www.wuwangyangxin.com/2025/09/15/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%A4%9A%E9%87%8D%E7%B4%A2%E5%BC%95%E3%80%81%E6%9C%89%E5%BA%8F%E7%BB%93%E6%9E%84%E3%80%81%E5%8D%95%E8%B0%83%E6%97%B6%E9%97%B4%E4%B8%8E%E6%83%B0%E6%80%A7%E7%BB%B4%E6%8A%A4/index.html">
 <meta property="og:site_name" content="勿忘羊心">
-<meta property="og:description" content="这篇文章总结了数据结构的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
+<meta property="og:description" content="这篇文章总结了系统设计的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-09-15T13:54:14.000Z">
-<meta property="article:modified_time" content="2025-10-08T10:28:46.813Z">
+<meta property="article:modified_time" content="2025-11-20T11:40:09.417Z">
 <meta property="article:author" content="Ziyoeng Zoeng">
 <meta property="article:tag" content="数据结构">
 <meta name="twitter:card" content="summary">
@@ -51,10 +51,10 @@
 
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="/lib/animejs/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
 <script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+  <script src="/lib/hexo-generator-searchdb/dist/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
 <script src="/js/third-party/search/local-search.js" defer></script>
 
 
@@ -71,7 +71,7 @@
 
   
 
-  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"/lib/mathjax/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
 <script src="/js/third-party/math/mathjax.js" defer></script>
 
 
@@ -291,7 +291,7 @@ mjx-container[display="true"] + br {
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -343,7 +343,7 @@ mjx-container[display="true"] + br {
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="系统设计中的多重索引、有序结构、单调时间与惰性维护 | 勿忘羊心">
-      <meta itemprop="description" content="这篇文章总结了数据结构的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
+      <meta itemprop="description" content="这篇文章总结了系统设计的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -365,7 +365,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-10-08 18:28:46" itemprop="dateModified" datetime="2025-10-08T18:28:46+08:00">2025-10-08</time>
+      <time title="修改时间：2025-11-20 19:40:09" itemprop="dateModified" datetime="2025-11-20T19:40:09+08:00">2025-11-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -402,7 +402,7 @@ mjx-container[display="true"] + br {
     </span>
 </div>
 
-            <div class="post-description">这篇文章总结了数据结构的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。</div>
+            <div class="post-description">这篇文章总结了系统设计的基础原语与工程实践技巧，涵盖分桶、多重索引、惰性更新、时间戳与版本化等思想，并通过组合模式展示在资源分配、队列调度、过期处理等应用。同时提供决策树、练习、案例与C++模板，帮助读者掌握数据结构的设计与实现要点。</div>
         </div>
       </header>
 
@@ -419,10 +419,10 @@ mjx-container[display="true"] + br {
 <p><strong>设计与数据结构</strong>：桶通常可以设计为容器数组（如 <code>vector&lt;list&lt;int&gt;&gt;</code> 代表简单链表桶，或 <code>vector&lt;set&lt;Item&gt;&gt;</code> 代表每桶内维护有序集合）。如果是多重键分组（例如类别和公司），可以用嵌套结构（如 <code>buckets[category][company]</code>），或者将组合键扁平化（例如将每个 <code>(c, p)</code> 映射为单一索引）。桶索引通常可由数据直接得出（当键是数值且范围较小时），若键范围大或非数值，则需要哈希或离散化。</p>
 <p><strong>示例</strong>：在一个商品目录中，可以定义 <code>multiset&lt;int&gt; priceSet[6][6];</code>（假设有 5 个类别和 5 个制造商，采用 1-base 索引，忽略 0）。当添加商品时，将价格插入到对应的 <code>priceSet[cat][manu]</code>。若要对某个类别和制造商进行打折，只需操作对应桶即可。</p>
 <p><strong>复杂度影响</strong>：假设每个桶平均有 <code>m</code> 个元素，总共有 <code>B</code> 个桶，则针对单个桶的操作复杂度是 <code>O(m)</code>，而不是 <code>O(m * B)</code>。对于需要跨多个桶的查询，可以从相关桶中合并部分结果（通常查询本身会限制相关桶的数量，例如只查询一个类别时仅涉及该类别的所有桶）。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>插入和删除时必须确保操作在正确的桶中进行（若键发生变化，要从旧桶中移除）。  </li>
-<li>需要处理空桶情况（部分操作可能需要对此做特殊处理）。  </li>
+<li>插入和删除时必须确保操作在正确的桶中进行（若键发生变化，要从旧桶中移除）。</li>
+<li>需要处理空桶情况（部分操作可能需要对此做特殊处理）。</li>
 <li>避免过度稀疏的分桶（例如上千个大多为空的桶），否则会增加内存开销和迭代成本。在这种情况下，可以考虑用哈希表来存储仅有元素的桶。</li>
 </ul>
 <p><strong>代码示例（分桶实现）</strong>：假设商品按类型（1-5）和品牌（1-5）分类，需要存储它们的价格。可以用二维数组的集合来维护每个桶内的有序价格：</p>
@@ -441,10 +441,10 @@ mjx-container[display="true"] + br {
 <li><strong>懒复制与失效标记</strong>：不直接修改，而是标记旧元素为无效，然后插入一个带有新值的元素。这通常配合惰性删除策略使用（见 1.5 节）。</li>
 </ol>
 <p><strong>不适用场景</strong>：如果只需要获取堆顶元素，且不会删除非堆顶元素，用 <code>priority_queue</code> 更简单。如果数据规模小或变化极少，有时按需排序即可（不过大多数这类问题操作太多，不适合每次重排）。如果顺序是按插入（队列）或简单索引（数组），专门的数据结构可能更高效。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>比较器必须在元素自身比较时返回 <code>false</code>，且保持一致性。错误的比较器会导致运行时错误或逻辑漏洞（例如元素无法找到，因为树结构错乱）。  </li>
-<li>当多个元素可能在排序键上相同，一定要用唯一标识作为最后的兜底比较。  </li>
+<li>比较器必须在元素自身比较时返回 <code>false</code>，且保持一致性。错误的比较器会导致运行时错误或逻辑漏洞（例如元素无法找到，因为树结构错乱）。</li>
+<li>当多个元素可能在排序键上相同，一定要用唯一标识作为最后的兜底比较。</li>
 <li>内存管理也需注意：若 <code>set</code> 存储的是指针，对象必须在指针生命周期内存在（可以用静态数组或 <code>new</code> 分配，直到结束才释放；或者直接存对象，让 <code>set</code> 管理其生命周期，但要付出拷贝代价）。</li>
 </ul>
 <p><strong>代码示例（有序集合的使用）</strong>：假设我们管理带有优先级和 ID 的任务，需要快速获取或删除最高优先级任务。可以这样写：</p>
@@ -455,15 +455,15 @@ mjx-container[display="true"] + br {
 <p><strong>适用场景</strong>：当存在大量批量更新、并且更新对所有元素的变化是统一的、频繁出现时，可以采用这种方式。结构必须在相对差异保持不变的情况下仍然有序。典型信号是操作描述为“将这一组所有值减少 M”或“将所有到期时间增加 D 天”。如果每次都对元素逐个修改，效率会非常低（例如 1000 个元素，5000 次批量减值操作 = 500 万次更新）。此时只需在该组上累积维护一个 <code>lazyDelta</code> 即可。</p>
 <p><strong>工作原理</strong>：假设我们有一组元素及其值。维护一个初始为 0 的整数 <code>offset</code>。当需要统一加上 <code>+k</code> 时，只需执行 <code>offset += k</code>，而不必修改各个元素的存储值。元素的实际值在需要时才计算：<code>实际值 = 存储值 + offset</code>（或减去 offset，取决于实现）。主要有两种实现方式：</p>
 <ol>
-<li><strong>存储基准值，查询时加偏移</strong>：元素只存原始值，排序基于原始值（因为加同一常数不影响相对顺序）。在需要实际值时再加上 <code>offset</code>。  </li>
+<li><strong>存储基准值，查询时加偏移</strong>：元素只存原始值，排序基于原始值（因为加同一常数不影响相对顺序）。在需要实际值时再加上 <code>offset</code>。</li>
 <li><strong>插入时应用偏移</strong>：插入新元素时，把当前偏移加到存储值上，使集合始终是“基准值 + 插入时偏移”的有序状态。查询时再减去累计偏移即可得到真实值。</li>
 </ol>
 <p>两种方式都能保证一致性。如果插入发生在偏移多次变化之后，需要保证能正确还原实际值。一种稳健方法是为每个元素存储它插入时的偏移基准，或者始终用“当前全局偏移 - 元素存储基准”的差值来解释。</p>
 <p><strong>示例</strong>：在电商场景中，假设类别 2 的所有商品统一打折 $5。若我们维护 <code>priceBuckets[2][brand]</code> 里存的是基准价格，只需记录 <code>offset[2] -= 5</code>，而不更新集合中的每个价格。之后在查询或比较时，真实价格 = 存储价格 + <code>offset[2]</code>。如果 <code>offset</code> 足够大，使得某些商品实际价格 ≤ 0，就应当将它们移除。此时只需检查桶中最小值，若它实际 ≤ 0，就删除并继续检查，直到所有值都大于 0（因为统一平移后，如果最小值仍 &gt; 0，其他一定也 &gt; 0）。</p>
 <p><strong>不适用场景</strong>：如果更新是针对单个元素或不均匀的（每个元素变化不同），此方法无效。若每次偏移后都需要访问并更新所有元素，惰性的优势也会减弱（不过通常可以推迟到必要事件发生时才更新，例如删除实际值 ≤ 0 的元素）。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>输出或使用值时必须记得加上偏移！很容易忘记而错误使用了存储值。  </li>
+<li>输出或使用值时必须记得加上偏移！很容易忘记而错误使用了存储值。</li>
 <li>插入新元素时要保证与已有元素一致：若存储的是基准值，比较器中无需引入偏移；若存储的是带偏移值，则插入时必须加上当前偏移以保持有序。</li>
 </ul>
 <p><strong>代码示例（带惰性偏移的有序集合）</strong>：以下伪代码展示了一个支持全体元素惰性减值（类似统一打折）的容器：</p>
@@ -471,27 +471,27 @@ mjx-container[display="true"] + br {
 
 <p>在该实现中，<code>LazyBag</code> 在插入时记录的是“实际值 - 当前偏移”。当执行 <code>addOffset(-5)</code> 时，表示所有真实值都整体减少 5，但我们无需触动集合中的任何元素，只需更新 <code>offset</code>。这样，即使有 1000 个元素，只需 <code>O(1)</code> 时间完成全局更新；真正访问或删除时，才支付检查和调整的开销。</p>
 <h3 id="单调时间与批处理事件"><a href="#单调时间与批处理事件" class="headerlink" title="单调时间与批处理事件"></a>单调时间与批处理事件</h3><p><strong>定义与应用场景</strong>：当问题涉及一系列基于时间的事件（例如在某个时刻发生或持续一段时间的事情）时，一个常见的优化是利用“时间只会向前推进（单调递增）”这一特性来批量处理事件。与其逐时刻模拟，或在任意时间点进行高开销操作，不如在查询到来时一次性处理截至该时刻的所有事件。许多 oj 题目明确保证输入中的时间是递增的，正是为了使用这种模式。</p>
-<p><strong>适用场景</strong>：当题目描述中明确指出操作中的时间 <code>mTime</code> 严格递增或非递减时，这是强烈信号提示可以用此技巧。常见场景包括：  </p>
+<p><strong>适用场景</strong>：当题目描述中明确指出操作中的时间 <code>mTime</code> 严格递增或非递减时，这是强烈信号提示可以用此技巧。常见场景包括：</p>
 <ul>
-<li>车辆停放 L 单位时间后过期被拖走；  </li>
-<li>下载随时间推进直到被查询；  </li>
+<li>车辆停放 L 单位时间后过期被拖走；</li>
+<li>下载随时间推进直到被查询；</li>
 <li>延时任务在截止时间到达时自动失效。</li>
 </ul>
 <p>核心思想是维护一个全局 <code>currentTime</code>，并只在查询到来时推进系统状态，而不是持续模拟。</p>
-<p><strong>方法</strong>：维护一个全局变量 <code>currentTime</code>。对每个到来的操作（时间为 <code>t</code>）：  </p>
+<p><strong>方法</strong>：维护一个全局变量 <code>currentTime</code>。对每个到来的操作（时间为 <code>t</code>）：</p>
 <ol>
-<li><strong>计算时间差</strong>：<code>dt = t - currentTime</code>（因为时间单调，dt ≥ 0）。  </li>
-<li><strong>推进进行中的过程</strong>：所有与时间相关的进程前进 dt，例如下载进度增加 <code>rate * dt</code>，剩余持续时间减少 dt，或让所有到期时间 ≤ t 的元素过期。  </li>
-<li><strong>移除或标记完成事件</strong>：例如，从小根堆中弹出所有到期时间 ≤ t 的事件。  </li>
+<li><strong>计算时间差</strong>：<code>dt = t - currentTime</code>（因为时间单调，dt ≥ 0）。</li>
+<li><strong>推进进行中的过程</strong>：所有与时间相关的进程前进 dt，例如下载进度增加 <code>rate * dt</code>，剩余持续时间减少 dt，或让所有到期时间 ≤ t 的元素过期。</li>
+<li><strong>移除或标记完成事件</strong>：例如，从小根堆中弹出所有到期时间 ≤ t 的事件。</li>
 <li><strong>更新全局时间</strong>：<code>currentTime = t</code>，然后处理当前操作本身的影响。</li>
 </ol>
 <p>这样保证系统状态始终与当前查询时间一致，而不必连续模拟每个时间片。</p>
 <p><strong>示例</strong>：考虑停车场问题，若车辆停放超过 L 小时会被拖走。我们维护一个小根堆（或 <code>std::set</code>），存储即将拖车的时间。在每个新操作（车辆进入、离开、查询）到来时，将时间推进到该操作时刻，然后不断移除所有到期时间 ≤ 当前时间的车辆（表示它们已被拖走）。直到堆顶时间在未来为止。这就是“批量事件处理”：一次性完成自上次处理后到现在所有的过期拖车。</p>
 <p><strong>常用数据结构</strong>：通常使用小根堆或按事件时间排序的容器来高效获取下一个事件。每个事件（例如车辆的拖车时间、下载的完成时刻）只会被插入和移除一次。利用时间单调性，每个事件最多处理一次，因此整体复杂度是 <code>O(E log E)</code>（E = 事件总数），这在大多数场景下都是可接受的。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>避免事件被重复处理或漏处理。要保证每个修改状态的函数，都先调用时间推进逻辑，否则系统状态会“落后”。  </li>
-<li>处理同时刻事件时，注意一致性：通常只要在推进到该时刻前处理完所有事件即可。有些题目会规定“在 T 时刻的新增或删除操作”发生在 T 时刻的过期处理之后，具体要依题意决定。  </li>
+<li>避免事件被重复处理或漏处理。要保证每个修改状态的函数，都先调用时间推进逻辑，否则系统状态会“落后”。</li>
+<li>处理同时刻事件时，注意一致性：通常只要在推进到该时刻前处理完所有事件即可。有些题目会规定“在 T 时刻的新增或删除操作”发生在 T 时刻的过期处理之后，具体要依题意决定。</li>
 <li>若事件会触发其他事件，要保证处理顺序的合理性。</li>
 </ul>
 <p><strong>代码示例（时间推进模式）</strong>：</p>
@@ -499,51 +499,48 @@ mjx-container[display="true"] + br {
 
 <p>该骨架展示了通用思路。实际应用中，推进进行中的过程可能涉及遍历活跃任务（例如为每个下载任务增加进度 = 速率 × dt）。如果活跃任务过多，这会导致每次推进 O(N)，因此更常见的做法是只在事件到期时触发，从而避免每次推进时扫描所有任务。核心洞见是：在上一次处理时间与当前时间之间，除了显式模拟的事件之外“什么都没发生”，这比逐时刻模拟要高效得多。</p>
 <h3 id="惰性删除与版本控制（延迟清理）"><a href="#惰性删除与版本控制（延迟清理）" class="headerlink" title="惰性删除与版本控制（延迟清理）"></a>惰性删除与版本控制（延迟清理）</h3><p><strong>定义与应用场景</strong>：惰性删除指的是当元素失效时，不立即将其从数据结构中移除，而是先做标记，等到访问时再跳过。版本控制是一种方法，用于跟踪元素的更新，以便识别过期实例。这些技巧常用于优先队列或缓存中，因为在这些结构里删除任意元素往往困难或代价高昂，或者当同一元素存在于多个结构的多个引用时。</p>
-<p><strong>适用场景</strong>：当元素的键值频繁变化，或逻辑上已被移除但仍残留在某个队列中时，就会用到这种模式。常见信号包括：  </p>
+<p><strong>适用场景</strong>：当元素的键值频繁变化，或逻辑上已被移除但仍残留在某个队列中时，就会用到这种模式。常见信号包括：</p>
 <ul>
-<li>需要在堆里实现 <code>decrease-key</code> 操作（C++ STL 不直接支持）；  </li>
+<li>需要在堆里实现 <code>decrease-key</code> 操作（C++ STL 不直接支持）；</li>
 <li>需要从 <code>priority_queue</code> 中删除一个非堆顶元素。</li>
 </ul>
 <p>此时，与其实现复杂的堆操作或在堆中线性搜索，不如插入一个新条目（带更新后的键），并标记旧条目为过期。当旧条目浮到堆顶时，再通过版本号或标记来识别并丢弃。同理，如果元素有多个引用，而某个引用变旧了，只需标记为失效，而不是立刻更新所有引用。</p>
-<p><strong>示例</strong>：  </p>
+<p><strong>示例</strong>：</p>
 <ul>
-<li><strong>带更新的优先队列</strong>：假设我们有一个按截止时间排序的 <code>priority_queue</code>。若某个任务的截止时间变更，我们直接压入一个新条目。旧条目依然存在但已错误，我们在任务记录中维护最新版本号或标志。当旧条目浮到堆顶时，比较其版本与当前版本，不匹配则丢弃，继续处理下一个。  </li>
-<li><strong>邻接表中的边删除</strong>：若要从邻接表中删除一条边，直接搜索并删除可能是 <code>O(N)</code>。更简单的方法是给这条边加一个 <code>isRemoved</code> 标志（或维护一个全局“已删除边”的集合），在遍历时跳过即可。随着时间推移，被删除的边会累积，但如果删除操作有限，开销可接受。  </li>
+<li><strong>带更新的优先队列</strong>：假设我们有一个按截止时间排序的 <code>priority_queue</code>。若某个任务的截止时间变更，我们直接压入一个新条目。旧条目依然存在但已错误，我们在任务记录中维护最新版本号或标志。当旧条目浮到堆顶时，比较其版本与当前版本，不匹配则丢弃，继续处理下一个。</li>
+<li><strong>邻接表中的边删除</strong>：若要从邻接表中删除一条边，直接搜索并删除可能是 <code>O(N)</code>。更简单的方法是给这条边加一个 <code>isRemoved</code> 标志（或维护一个全局“已删除边”的集合），在遍历时跳过即可。随着时间推移，被删除的边会累积，但如果删除操作有限，开销可接受。</li>
 <li><strong>有序集合中的过期元素</strong>：在 <code>set</code> 中，通常可以直接通过迭代器删除元素。但在某些场景里，插入新元素比删除旧元素更容易，那么就可以保留旧元素，并在访问时忽略。惰性删除更多见于堆或数组，而不是 <code>set</code>。</li>
 </ul>
-<p><strong>实现方法</strong>：常见的做法是维护一个并行的数据结构（如 <code>unordered_map&lt;Id, bool&gt;</code> 用于记录活跃状态，或 <code>vector&lt;int&gt;</code> 用于记录版本号）。每次元素更新时，就增加它的版本或标记其不活跃。在从主结构取出元素时，对照这个辅助结构判断其是否过期。  </p>
+<p><strong>实现方法</strong>：常见的做法是维护一个并行的数据结构（如 <code>unordered_map&lt;Id, bool&gt;</code> 用于记录活跃状态，或 <code>vector&lt;int&gt;</code> 用于记录版本号）。每次元素更新时，就增加它的版本或标记其不活跃。在从主结构取出元素时，对照这个辅助结构判断其是否过期。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Node</span> { </span><br><span class="line">    <span class="type">int</span> id;      <span class="comment">// 节点的唯一 ID</span></span><br><span class="line">    <span class="type">int</span> key;     <span class="comment">// 节点的关键值（用于堆排序）</span></span><br><span class="line">    <span class="type">int</span> version; <span class="comment">// 节点版本号（用于判定是否是最新的）</span></span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局数组：currentVersion[id] 存储对应 id 的最新版本号</span></span><br><span class="line">vector&lt;<span class="type">int</span>&gt; currentVersion; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 大根堆（priority_queue 默认是 max-heap），按 key 值排序</span></span><br><span class="line">priority_queue&lt;Node&gt; pq; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入一个节点</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">pushNode</span><span class="params">(<span class="type">int</span> id, <span class="type">int</span> key)</span> </span>{</span><br><span class="line">    Node n{id, key, currentVersion[id]};</span><br><span class="line">    pq.<span class="built_in">push</span>(n);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取堆顶的最新节点（跳过过期的旧版本）</span></span><br><span class="line"><span class="function">Node <span class="title">topValid</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="comment">// 不断弹出堆顶，直到找到有效节点</span></span><br><span class="line">    <span class="keyword">while</span> (!pq.<span class="built_in">empty</span>()) {</span><br><span class="line">        Node n = pq.<span class="built_in">top</span>();</span><br><span class="line">        <span class="keyword">if</span> (n.version != currentVersion[n.id]) {</span><br><span class="line">            <span class="comment">// 说明是旧版本，丢弃</span></span><br><span class="line">            pq.<span class="built_in">pop</span>();</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        }</span><br><span class="line">        <span class="comment">// 找到有效的最新节点</span></span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    }</span><br><span class="line">    <span class="comment">// 如果堆为空，返回特殊标记（或抛出异常）</span></span><br><span class="line">    <span class="keyword">return</span> Node{<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>};</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <p>在这段伪代码中，每当更新元素时（例如修改键），就执行 <code>currentVersion[id]++</code>，并插入新条目。旧条目仍留在堆中，但带有旧版本号。<code>topValid()</code> 会保证忽略所有版本不匹配的过期条目。</p>
 <p>另一种方式是用布尔标记数组：如果某元素被删除，就令 <code>removed[id] = true</code>。当该元素浮到堆顶时，如果发现 <code>removed[id] = true</code>，则跳过即可。这种方式在每个元素只会删除一次时尤为简洁。</p>
 <p><strong>复杂度与内存</strong>：惰性删除通常会在数据结构中保留一些冗余条目。一个真实元素可能对应多个排队条目（如堆中的多个版本）。这种冗余一般受限于更新次数，因此总的额外推入次数 ≤ 总更新操作数，通常可接受。但若在大规模元素集上频繁更新，要注意内存开销。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>忘记跳过过期条目会导致错误结果（使用了旧数据）。因此，每次从堆顶取元素时必须做有效性检查。  </li>
+<li>忘记跳过过期条目会导致错误结果（使用了旧数据）。因此，每次从堆顶取元素时必须做有效性检查。</li>
 <li>必须保证惰性条目最终会被清理。如果某元素不断更新，但从未被弹出，旧版本会无限积累。在 oj 场景中，操作数有限，最终总会清理干净；但在长期运行的系统里，可能需要定期清理机制。</li>
 </ul>
 <p><strong>现实类比</strong>：惰性删除就像货架上的过期食品：你不会每过期一件就立刻清理货架，而是留在那里并贴一个“取用前检查保质期”的提示。这样节省了即时清理的工作，但代价是每次取用时要多做一次检查。只要过期频率相对较低，这就是高效的方式。</p>
 <h3 id="通过删除计数维护排名（动态重编号）"><a href="#通过删除计数维护排名（动态重编号）" class="headerlink" title="通过删除计数维护排名（动态重编号）"></a>通过删除计数维护排名（动态重编号）</h3><p><strong>定义与应用场景</strong>：一些系统会为元素分配连续编号（排名、ID），要求即使有元素被删除，编号仍应从 1 开始并保持连续。典型例子是排队系统：每个新来的人拿到下一个号码，但如果有人离开，后面的人票面上的号码并不会物理改变——然而在逻辑上，题目可能要求报告时所有人都重新编号。若每次删除都重新分配号码，开销是 <code>O(n)</code>，不可接受。更高效的办法是：为每个元素保留不可变的插入序号（原始位置），然后通过记录在它之前被删除的数量，来实时计算它的当前排名。</p>
 <p><strong>适用场景</strong>：当操作包含“删除此订单，并压缩队列号码”，或查询“ID 为 X 的人现在排在第几位”时，就需要排名维护。核心是高效支持两类操作：删除某个元素、查询某元素当前排名。都需要优于 <code>O(n)</code> 的复杂度。</p>
-<p><strong>方法</strong>：给每个元素分配一个不可变的插入序号（例如入队时的计数器）。这是它的“原始位置”。再维护一个结构，记录哪些位置被删除。查询排名时，只需计算该元素之前有多少位置被删除，并从原始编号中减去这个数量。  </p>
+<p><strong>方法</strong>：给每个元素分配一个不可变的插入序号（例如入队时的计数器）。这是它的“原始位置”。再维护一个结构，记录哪些位置被删除。查询排名时，只需计算该元素之前有多少位置被删除，并从原始编号中减去这个数量。</p>
 <p>例如：队列初始为 1,2,3,4,5。若编号 3 的人离开，逻辑队列是 1,2,(3 gone),4,5。此时编号 4 的人排名应为 3。计算方式：原始编号 4 - “被删除且 ≤4 的数量（1 个）” = 3。</p>
 <p><strong>可用数据结构</strong>：</p>
 <ul>
-<li><p><strong>树状数组 / Fenwick 树</strong>：建立一个大小为 N 的数组。初始时，<code>bit[i] = 1</code> 表示位置 i 被占用。删除时更新 <code>bit[pos] = 0</code>（或做 <code>-1</code> 更新）。前缀和 <code>bit.query(x)</code> 返回位置 ≤ x 的仍然存在的元素数量，这就是原始编号为 x 的元素在当前队列中的排名。  </p>
-</li>
-<li><p><strong>顺序统计树</strong>：在平衡二叉搜索树的节点中维护子树大小。这样第 k 个元素就是中序遍历的第 k 个节点。要查某元素的排名，只需统计比它小的节点数。C++ 标准库没有直接支持，但可用 <code>ext/pb_ds</code> 的 order_statistics_tree 或手动维护 size 信息。  </p>
-</li>
-<li><p><strong>分块计数</strong>：如果 N 较大（如几百万），也可以用分块数组。用布尔数组 <code>removed[]</code> 标记删除，并维护每块的删除数量。查询时先累加完整块，再在目标块内逐一扫描。复杂度 <code>O(N/B + B)</code>，在 B=1000 时最多约 2000 次检查，若查询不算频繁则可接受。</p>
-</li>
+<li><strong>树状数组 / Fenwick 树</strong>：建立一个大小为 N 的数组。初始时，<code>bit[i] = 1</code> 表示位置 i 被占用。删除时更新 <code>bit[pos] = 0</code>（或做 <code>-1</code> 更新）。前缀和 <code>bit.query(x)</code> 返回位置 ≤ x 的仍然存在的元素数量，这就是原始编号为 x 的元素在当前队列中的排名。</li>
+<li><strong>顺序统计树</strong>：在平衡二叉搜索树的节点中维护子树大小。这样第 k 个元素就是中序遍历的第 k 个节点。要查某元素的排名，只需统计比它小的节点数。C++ 标准库没有直接支持，但可用 <code>ext/pb_ds</code> 的 order_statistics_tree 或手动维护 size 信息。</li>
+<li><strong>分块计数</strong>：如果 N 较大（如几百万），也可以用分块数组。用布尔数组 <code>removed[]</code> 标记删除，并维护每块的删除数量。查询时先累加完整块，再在目标块内逐一扫描。复杂度 <code>O(N/B + B)</code>，在 B=1000 时最多约 2000 次检查，若查询不算频繁则可接受。</li>
 </ul>
 <p><strong>示例实现（树状数组）</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> NMAX = <span class="number">2000000</span>;                <span class="comment">// 最大位置数量（初始容量）</span></span><br><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">BIT</span><span class="params">(NMAX + <span class="number">1</span>, <span class="number">0</span>)</span></span>;      <span class="comment">// 树状数组（Fenwick Tree）</span></span><br><span class="line"><span class="type">int</span> n0 = <span class="number">0</span>;                        <span class="comment">// 当前已使用的位置数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化队列，假设最初有 N 个位置，每个位置上都有人</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">initQueue</span><span class="params">(<span class="type">int</span> N)</span> </span>{</span><br><span class="line">    n0 = N;</span><br><span class="line">    <span class="comment">// 初始化 BIT：BIT[i] 存储最低有效位大小</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= N; ++i) {</span><br><span class="line">        BIT[i] = i &amp; -i;</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在队列末尾新增一个人</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">addPerson</span><span class="params">()</span> </span>{</span><br><span class="line">    n0++;</span><br><span class="line">    <span class="type">int</span> i = n0;</span><br><span class="line">    <span class="comment">// 在 BIT 中对位置 i 增加 1</span></span><br><span class="line">    <span class="keyword">for</span> (; i &lt;= NMAX; i += i &amp; -i) {</span><br><span class="line">        BIT[i] += <span class="number">1</span>;</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除指定位置的人（pos 为该人的原始位置编号）</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">removePerson</span><span class="params">(<span class="type">int</span> pos)</span> </span>{</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = pos; i &lt;= NMAX; i += i &amp; -i) {</span><br><span class="line">        BIT[i] -= <span class="number">1</span>;</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询某个位置 pos 之前（含 pos）共有多少人还在</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">getRank</span><span class="params">(<span class="type">int</span> pos)</span> </span>{</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = pos; i &gt; <span class="number">0</span>; i -= i &amp; -i) {</span><br><span class="line">        sum += BIT[i];</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <p>这里 <code>initQueue(N)</code> 初始化一个 N 人的队列，所有位置标记为存在。<code>addPerson()</code> 表示新加入一人。<code>removePerson(pos)</code> 表示删除原始位置为 <code>pos</code> 的人。<code>getRank(pos)</code> 返回原始编号为 <code>pos</code> 的人当前所在的排名。</p>
-<p><strong>注意事项</strong>：  </p>
+<p><strong>注意事项</strong>：</p>
 <ul>
-<li>每个人保留其原始编号（类似 ID），实际查询时通常需要维护一个映射：<code>ID → 原始编号</code>，这样才能通过 ID 快速查排名。  </li>
-<li>数据结构需覆盖可能的最大位置数（若有人不断加入，编号可能增长）。若题目给定上界（如最多 7 万人），可直接申请静态数组；若无上界，可能需要动态结构或定期坐标压缩。  </li>
+<li>每个人保留其原始编号（类似 ID），实际查询时通常需要维护一个映射：<code>ID → 原始编号</code>，这样才能通过 ID 快速查排名。</li>
+<li>数据结构需覆盖可能的最大位置数（若有人不断加入，编号可能增长）。若题目给定上界（如最多 7 万人），可直接申请静态数组；若无上界，可能需要动态结构或定期坐标压缩。</li>
 <li>树状数组通常是 1-base 索引，要小心初始化与索引偏差问题。</li>
 </ul>
 <p><strong>另一种视角</strong>：本质上，这是维护一个动态序列，使得能快速回答“元素 X 当前是第几位？”的问题。这属于经典的顺序统计问题。识别出这一点，就能在 oj 中迅速想到用 Fenwick 树或顺序统计树来解决。</p>
@@ -585,7 +582,7 @@ mjx-container[display="true"] + br {
 <li>如果订单部分完成（部分饮品已交付）后被取消，这些已完成的饮品可能浪费或被重用，取决于问题规则。在咖啡店的例子中，选择了重用：这些已完成的饮品会被视作新的供给事件，转交给其他订单。实现上，即对取消订单已完成的每个饮品，调用一次供给逻辑，好像刚刚又完成了一杯新的饮品。</li>
 </ul>
 <p><strong>数据结构</strong>：<br>通常为每个类型维护一个 <code>queue&lt;Order*&gt;</code>（因其严格按到达顺序 FIFO）。对于全局紧急度，适合使用 <code>std::set&lt;Order*, OrderComparator&gt;</code>（比较器按剩余数等）。此外，需要能快速根据 ID 或指针访问订单（如 <code>unordered_map&lt;id, Order*&gt;</code>），用于取消或状态查询。每个 <code>Order</code> 对象可包含剩余数量、状态标记，以及指向类型队列条目的迭代器，便于移除。</p>
-<p><strong>注意事项</strong>：<br>保持多个数据结构同步是主要挑战。每当订单状态变化（交付饮品、完成、取消），都必须同时更新全局集合和相关类型队列。如果忘记在完成时移除类型队列中的条目，该队列可能保留无效指针，后续供给事件就会错误地分配它。懒惰删除（出队时检查有效性）是一种安全兜底方案，但最好在可能时清理。<br>懒惰删除往往更简单：例如，某订单提前完成，但仍留在其他饮品队列中；当这些饮品的供给事件到来时，系统会发现订单已完成并跳过。  </p>
+<p><strong>注意事项</strong>：<br>保持多个数据结构同步是主要挑战。每当订单状态变化（交付饮品、完成、取消），都必须同时更新全局集合和相关类型队列。如果忘记在完成时移除类型队列中的条目，该队列可能保留无效指针，后续供给事件就会错误地分配它。懒惰删除（出队时检查有效性）是一种安全兜底方案，但最好在可能时清理。<br>懒惰删除往往更简单：例如，某订单提前完成，但仍留在其他饮品队列中；当这些饮品的供给事件到来时，系统会发现订单已完成并跳过。</p>
 <p>另一个边界情况是：若一个订单需要多个相同类型的饮品，可以让该订单多次入队该类型队列。这样，当一份饮品被供应后，订单仍可能需要该类型的其他饮品，它的另一个条目仍在队列中。实现方式是：将订单按所需数量多次压入队列，每个条目表示对一个单位饮品的请求。当供应到来时，逐一满足即可。这会导致队列中有重复项，但逻辑简洁。另一种方式是，订单对象自己记录还需多少该类型饮品，但在处理时也还是逐次消耗。</p>
 <p><strong>实践案例</strong>：<br>“咖啡店订单”问题中，每个饮品类型对应一个 <code>queue&lt;int&gt; needQueue[type]</code>，存放等待该饮品的订单 ID。另有一个全局集合 <code>urgentSet</code>，按（剩余数量，抵达时间）排序。调用 <code>supply(bevType)</code> 时，从 <code>needQueue[bevType]</code> 中弹出，直到找到仍然活跃且需要该饮品的订单，然后为其分配（减少剩余数）。调用 <code>cancel(orderId)</code> 时，标记该订单已取消，并从 <code>urgentSet</code> 移除；然后对于该订单已交付的饮品（记录在一个向量中），逐一调用 <code>supply(bevType)</code> 将其重新分配。该订单仍在 <code>needQueue</code> 的条目会自然被跳过，因为取消标记生效。</p>
 <h3 id="基于最小键选择的资源分配"><a href="#基于最小键选择的资源分配" class="headerlink" title="基于最小键选择的资源分配"></a>基于最小键选择的资源分配</h3><p><strong>模式</strong>：从资源池中进行分配，每个资源都有一个标识符或键值，需要选择满足条件的最小（或最大）键对应的资源。常见场景是存在层级选择：先根据某个指标选出资源池或类别，再在该类别中根据另一个指标选择具体资源。</p>
@@ -597,39 +594,39 @@ mjx-container[display="true"] + br {
 </ol>
 <p><strong>车辆进入（分配）算法</strong>：</p>
 <ol>
-<li>找到空位数最多的区域（若有多个，取字典序最小的区域名或最小 ID）。  </li>
-<li>在该区域的空位集合中取出编号最小的车位（从集合中删除）。  </li>
-<li>将该车位标记为已占用，同时将该区域的空位数减 1。  </li>
+<li>找到空位数最多的区域（若有多个，取字典序最小的区域名或最小 ID）。</li>
+<li>在该区域的空位集合中取出编号最小的车位（从集合中删除）。</li>
+<li>将该车位标记为已占用，同时将该区域的空位数减 1。</li>
 <li>返回该车位标识符。</li>
 </ol>
 <p><strong>车辆离开（释放）算法</strong>：</p>
 <ol>
-<li>确定离开的区域和车位（输入一般会提供，或之前已存储）。  </li>
-<li>将该车位编号重新插入该区域的空位集合，同时将该区域的空位数加 1。  </li>
+<li>确定离开的区域和车位（输入一般会提供，或之前已存储）。</li>
+<li>将该车位编号重新插入该区域的空位集合，同时将该区域的空位数加 1。</li>
 <li>这可能会改变“最空区域”的选择结果，需要更新全局的区域选择结构（例如在有序集合中删除并重新插入该区域，或更新跟踪变量）。</li>
 </ol>
-<p><strong>数据结构</strong>：  </p>
+<p><strong>数据结构</strong>：</p>
 <ul>
-<li>每个区域：<code>set&lt;int&gt; freeSlots[zone]</code>，用于存放空车位编号。  </li>
+<li>每个区域：<code>set&lt;int&gt; freeSlots[zone]</code>，用于存放空车位编号。</li>
 <li>全局：<code>set&lt;ZoneInfo&gt;</code>，其中 <code>ZoneInfo</code> 包含 <code>{freeCount, zoneId}</code>，比较器规则是 <strong>先按 freeCount 降序，再按 zoneId 升序</strong>（用于处理并列）。</li>
 </ul>
 <p>在每次分配或释放时，某个 <code>ZoneInfo</code> 会发生变化，需要更新集合（删除旧值再插入新值，或使用堆结构进行延迟删除）。因为 <code>zoneId</code> 唯一，这个过程比较直接。</p>
-<p><strong>复杂度</strong>：  </p>
+<p><strong>复杂度</strong>：</p>
 <ul>
-<li>每次进入或离开操作大约是 <code>O(log M + log N)</code>：  <ul>
-<li><code>log M</code> 用于在某个区域的车位集合中插入/删除（M 为每个区域车位数）。  </li>
+<li>每次进入或离开操作大约是 <code>O(log M + log N)</code>：<ul>
+<li><code>log M</code> 用于在某个区域的车位集合中插入/删除（M 为每个区域车位数）。</li>
 <li><code>log N</code> 用于更新全局区域排序（N 为区域数）。</li>
 </ul>
 </li>
 </ul>
 <p>在停车场例子中，<code>N</code> 很小，因此直接线性扫描即可。但在更大规模下，可以使用上述方法保证扩展性。</p>
-<p><strong>注意点</strong>：  </p>
+<p><strong>注意点</strong>：</p>
 <ul>
-<li><strong>确保并列情况的正确性</strong>。如果使用比较器，必须明确 tie-break 规则。例如空位数相同的区域应当按 <code>zoneId</code> 排序；如果忘记写 tie-break 逻辑，可能导致集合中元素被错误视为相等，从而丢失或产生未定义行为。  </li>
-<li><strong>更新集合元素时要谨慎</strong>。在 <code>std::set</code> 中，不能直接修改已存在元素的键值（会破坏有序性），而必须删除旧元素后重新插入新元素。  </li>
+<li><strong>确保并列情况的正确性</strong>。如果使用比较器，必须明确 tie-break 规则。例如空位数相同的区域应当按 <code>zoneId</code> 排序；如果忘记写 tie-break 逻辑，可能导致集合中元素被错误视为相等，从而丢失或产生未定义行为。</li>
+<li><strong>更新集合元素时要谨慎</strong>。在 <code>std::set</code> 中，不能直接修改已存在元素的键值（会破坏有序性），而必须删除旧元素后重新插入新元素。</li>
 <li>如果使用堆结构，可以通过插入新值并将旧值标记为“过期”来实现延迟删除。由于 <code>N</code> 小，这种做法常见且简单。</li>
 </ul>
-<p><strong>实践中的例子</strong>：停车场问题正是如此。每个区域（A、B、C…）都维护一个 <code>set&lt;int&gt;</code> 存放空车位。选择区域时，解法通过扫描所有区域（<code>N ≤ 26</code>）来找出空位最多的那个。选择车位时，取出 <code>availableSlots[bestZone].begin()</code>（编号最小的车位）并删除。对于小规模情况，这种实现简单高效。若在更一般的场景下，可以维护一个 <code>maxZonesSet</code> 来避免扫描。  </p>
+<p><strong>实践中的例子</strong>：停车场问题正是如此。每个区域（A、B、C…）都维护一个 <code>set&lt;int&gt;</code> 存放空车位。选择区域时，解法通过扫描所有区域（<code>N ≤ 26</code>）来找出空位最多的那个。选择车位时，取出 <code>availableSlots[bestZone].begin()</code>（编号最小的车位）并删除。对于小规模情况，这种实现简单高效。若在更一般的场景下，可以维护一个 <code>maxZonesSet</code> 来避免扫描。</p>
 <p>核心思想始终是：<strong>通过两层数据结构分离“选组”和“组选项”，分别解决</strong>。</p>
 <h3 id="过期调度与单调清理"><a href="#过期调度与单调清理" class="headerlink" title="过期调度与单调清理"></a>过期调度与单调清理</h3><p><strong>模式</strong>：当实体在一定时长后会过期或超时，系统需要在恰当的时间点移除或标记它们。基于单调时间的原则，我们按时间顺序调度这些移除操作。这通常依赖于一个按过期时间排序的优先队列（最小堆），或一个按照过期时间戳排序的有序集合。</p>
 <p><strong>示例场景</strong>：在停车场中，车辆有最长停车时长 L。如果某辆车超过付费时长仍未离开，就视为过期，会在被发现时（或在模拟中自动在时间 L 时）被拖走。我们会为每辆车安排一个“拖车事件”，时间为 <code>enterTime + L</code>。类似地，在软件任务调度中，每个任务都有一个截止时间，必须在此之前完成或取消。</p>
@@ -637,53 +634,53 @@ mjx-container[display="true"] + br {
 <p>如果对象提前被移除（例如车辆在过期前就离开），则需要取消其已安排的过期事件。即从 <code>expirationSet</code> 中删除对应时间戳（如果使用集合且存储了指针或标识符，可以直接删除；如果使用的只是时间堆，则可能需要通过标记并在之后跳过 —— 通常我们会存储指针或索引，以便识别哪个对象已过期）。若未移除，当该过期时间到来时，代码可能会尝试处理一个已不存在的对象，这就要求检查跳过或进行额外删除。</p>
 <p>如果对象可以延长存活时间（例如车辆在到期前续费），则相当于更新它的过期时间。在有序结构中需要更新键值，但不能直接就地修改，因此有两种做法：</p>
 <ul>
-<li>移除旧条目，插入新的过期时间条目；  </li>
+<li>移除旧条目，插入新的过期时间条目；</li>
 <li>如果使用堆，可以直接插入一个新条目并标记旧条目失效（即“惰性删除”，通过对象的“当前过期时间”字段来判定）。当旧条目在堆顶时，发现它已过期无效，直接跳过。</li>
 </ul>
-<p><strong>数据结构选择</strong>：  </p>
-<p>一个 <code>std::priority_queue</code>（最小堆）非常适合调度超时事件。每个元素通常是 <code>(expirationTime, itemId)</code>。需要有跳过无效元素的机制：例如维护一个数组 <code>currentExp[itemId]</code> 来记录每个对象的最新过期时间，当堆顶的时间不匹配或对象已不存在时，弹出并继续。  </p>
+<p><strong>数据结构选择</strong>：</p>
+<p>一个 <code>std::priority_queue</code>（最小堆）非常适合调度超时事件。每个元素通常是 <code>(expirationTime, itemId)</code>。需要有跳过无效元素的机制：例如维护一个数组 <code>currentExp[itemId]</code> 来记录每个对象的最新过期时间，当堆顶的时间不匹配或对象已不存在时，弹出并继续。</p>
 <p>另一种方式是用 <code>std::set</code> 按过期时间排序存储对象，这样能直接删除指定对象（如果有迭代器或对象包含 ID）。这种方式通常需要存储指针或索引，以便在续期时能移除旧条目再插入新条目。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li><strong>过期的边界问题</strong>：要明确过期是“包含”还是“不包含”。即对象在时间 T 时是否立即算过期？常见错误是偏移一单位。例如：如果车辆在第 1 天进入，拥有 5 天有效期，是在第 5 天结束时过期，还是在第 6 天开始时过期？需要在实现前确认清楚。  </li>
-<li><strong>过期时机</strong>：通常在时间 T 时，先清理所有 <code>≤ T</code> 的过期对象，再进行 T 时的操作。  </li>
+<li><strong>过期的边界问题</strong>：要明确过期是“包含”还是“不包含”。即对象在时间 T 时是否立即算过期？常见错误是偏移一单位。例如：如果车辆在第 1 天进入，拥有 5 天有效期，是在第 5 天结束时过期，还是在第 6 天开始时过期？需要在实现前确认清楚。</li>
+<li><strong>过期时机</strong>：通常在时间 T 时，先清理所有 <code>≤ T</code> 的过期对象，再进行 T 时的操作。</li>
 <li><strong>重复移除</strong>：如果对象提前被移除，同时仍保留在过期集合中，后续就会再次遇到，需要检测并跳过。更干净的做法是提前从所有相关结构中移除。</li>
 </ul>
-<p><strong>实践案例</strong>：在“停车场”和“机场停车”问题中，每辆车在入场时都会计算出过期时间。  </p>
+<p><strong>实践案例</strong>：在“停车场”和“机场停车”问题中，每辆车在入场时都会计算出过期时间。</p>
 <ul>
-<li><strong>停车场</strong>：使用一个 <code>std::set&lt;Car*&gt; towSet</code>，按拖车时间排序。每次 API 调用都会执行 <code>processTowing(currentTime)</code>，通过循环检查 <code>towSet.begin()</code> 是否过期并逐一移除。如果车辆提前离开或被拖走，就立即从 <code>towSet</code> 中移除，避免后续再次处理。  </li>
+<li><strong>停车场</strong>：使用一个 <code>std::set&lt;Car*&gt; towSet</code>，按拖车时间排序。每次 API 调用都会执行 <code>processTowing(currentTime)</code>，通过循环检查 <code>towSet.begin()</code> 是否过期并逐一移除。如果车辆提前离开或被拖走，就立即从 <code>towSet</code> 中移除，避免后续再次处理。</li>
 <li><strong>机场停车</strong>：使用最小堆，每次续期会插入一个新的过期条目，并在之后遇到旧条目时跳过。</li>
 </ul>
 <p>这种从最早过期对象开始逐一处理的模式，保证了效率：每个对象最多只触发一次移除事件。</p>
 <h3 id="动态重排与排名查询（队列重新编号）"><a href="#动态重排与排名查询（队列重新编号）" class="headerlink" title="动态重排与排名查询（队列重新编号）"></a>动态重排与排名查询（队列重新编号）</h3><p><strong>模式</strong>：我们有一个有序序列（类似队列或排队系统），其中元素按顺序分配 ID 或排名。当元素从中间或前端离开时，队列会收缩，并且我们在概念上需要为剩余元素重新分配从 1…n 的编号。直接实现意味着每次删除都要进行 O(n) 的更新，对于大规模 n 来说太慢了。更高效的方式是维护一个能够回答排名查询（“元素 X 当前在第几位？”）并支持删除的结构，如 1.6 节中的排名维护方法所述。</p>
 <p><strong>示例场景</strong>：多服务器的等候队列系统。人们按到达顺序排队，获得等候号 1, 2, 3,…，不论他们加入的是哪个服务器的子队列（问题中虽然有不同的服务器队列，但存在全局的等待编号）。如果某人取消等待，那么他之后的所有人等候号都会减一；如果某个服务器处理完一个人，该人离开队列，他之后的所有人同样前移。系统可能需要回答的问题包括：“现在排在第 k 位的人最初的到达时间是什么？”或“当前等候号为 X 的人现在在第几位？”。</p>
-<p><strong>方法</strong>：使用一种索引结构在原始插入位置和当前位置之间建立映射。一种常见方法是使用 BIT（Fenwick 树）或线段树，每个位置（原始等候号）存储一个值：若此人仍在队列中则为 1，若已移除则为 0。  </p>
+<p><strong>方法</strong>：使用一种索引结构在原始插入位置和当前位置之间建立映射。一种常见方法是使用 BIT（Fenwick 树）或线段树，每个位置（原始等候号）存储一个值：若此人仍在队列中则为 1，若已移除则为 0。</p>
 <ul>
-<li>这样，前缀和到 i 的结果表示从开头到原始位置 i 之间仍在队列中的人数，即为原始等候号为 i 的人的当前位置。  </li>
+<li>这样，前缀和到 i 的结果表示从开头到原始位置 i 之间仍在队列中的人数，即为原始等候号为 i 的人的当前位置。</li>
 <li>如果要找到当前排在第 k 位的原始等候号，可以在前缀和上做二分搜索（或使用 Fenwick 树的 select 操作）找到最小的 i，使得 sum(i) = k。</li>
 </ul>
-<p><strong>删除</strong>：若要移除原始编号为 p 的人，将 BIT 中位置 p 的值从 1 更新为 0。  </p>
-<p><strong>新增</strong>：若允许新的人加入队列，则在尾部插入一个 1（相当于扩展 BIT 的长度，或在一开始分配足够空间并更新新索引即可）。  </p>
-<p><strong>按 ID 查询位置</strong>：如果已知某人的原始编号为 X，直接计算前缀和 sum(X)。  </p>
-<p><strong>按位置查询 ID</strong>：在 BIT 上执行搜索，找到前缀和等于该位置的索引。这可以在 O(log N) 内完成（利用 Fenwick 树的二进制提升技巧，或用前缀和函数结合二分搜索）。  </p>
+<p><strong>删除</strong>：若要移除原始编号为 p 的人，将 BIT 中位置 p 的值从 1 更新为 0。</p>
+<p><strong>新增</strong>：若允许新的人加入队列，则在尾部插入一个 1（相当于扩展 BIT 的长度，或在一开始分配足够空间并更新新索引即可）。</p>
+<p><strong>按 ID 查询位置</strong>：如果已知某人的原始编号为 X，直接计算前缀和 sum(X)。</p>
+<p><strong>按位置查询 ID</strong>：在 BIT 上执行搜索，找到前缀和等于该位置的索引。这可以在 O(log N) 内完成（利用 Fenwick 树的二进制提升技巧，或用前缀和函数结合二分搜索）。</p>
 <p>另一种方法是使用顺序统计树（Order-Statistic Tree），即带有子树大小信息的平衡二叉搜索树。它可以直接支持元素删除、排名查询以及第 k 个元素选择。在 C++ 中，可以使用 <code>__gnu_pbds::tree_order_statistics_node_update</code> 来实现，但在比赛中 BIT 往往更容易实现。</p>
-<p><strong>应用到多队列</strong>：在多服务器等候队列的例子中，除了排名结构外，他们还维护了每个服务器队列的链表以及一个全局的链表（按照到达顺序）。这样可以在不同上下文中方便地移除某个人。但核心的重新编号还是通过删除计数法实现的（类似 BIT 的思想），用来在查询时计算某人的当前位置。  </p>
-<p><strong>陷阱</strong>：如果队列最大规模未知，需要动态扩展的结构（如可扩展的 BIT 或树）。在 oj 中，通常会给出或可以估计一个安全的上界（例如“总人数不超过 100k”）。实现时要注意使用 1 索引或相应调整。此外，如果涉及多个序列或分组（如每个服务器单独编号），就需要分别维护对应的 BIT。在多服务器的例子中，由于全局编号是按到达顺序分配的，因此无论在哪个服务器队列中有人离开，只要更新全局 BIT 即可。如果每个服务器编号独立，就需要为每个服务器单独建 BIT。  </p>
+<p><strong>应用到多队列</strong>：在多服务器等候队列的例子中，除了排名结构外，他们还维护了每个服务器队列的链表以及一个全局的链表（按照到达顺序）。这样可以在不同上下文中方便地移除某个人。但核心的重新编号还是通过删除计数法实现的（类似 BIT 的思想），用来在查询时计算某人的当前位置。</p>
+<p><strong>陷阱</strong>：如果队列最大规模未知，需要动态扩展的结构（如可扩展的 BIT 或树）。在 oj 中，通常会给出或可以估计一个安全的上界（例如“总人数不超过 100k”）。实现时要注意使用 1 索引或相应调整。此外，如果涉及多个序列或分组（如每个服务器单独编号），就需要分别维护对应的 BIT。在多服务器的例子中，由于全局编号是按到达顺序分配的，因此无论在哪个服务器队列中有人离开，只要更新全局 BIT 即可。如果每个服务器编号独立，就需要为每个服务器单独建 BIT。</p>
 <p><strong>实践中的例子</strong>：在“等待队列”问题中，采用了全局链表（维护跨服务器的队列顺序）和一个结构来计算等候编号。他们用了一种“删除桶”的技巧：即用数组标记已移除的原始位置，并预计算区块的删除人数，以快速统计某区间内的已删除人数。这和 BIT 前缀和的作用相同。比如，若某人原始等候号为 50，在 1..50 之间已有 5 人离开，那么他现在的位置就是 50 - 5 = 45。他们的实现方式是用 1000 个为一组的块存储已删除人数，从而加速查询。这种方法可以实现 O(1) 或 O(log N) 的位置查询，以及 O(1) 的删除更新（仅需在数组中标记并增加对应区块计数）。</p>
 <h3 id="全局偏移更新与懒惰数据结构维护"><a href="#全局偏移更新与懒惰数据结构维护" class="headerlink" title="全局偏移更新与懒惰数据结构维护"></a>全局偏移更新与懒惰数据结构维护</h3><p><strong>模式</strong>：当某些操作会统一影响一大批元素（全局或分组范围）时，同时又需要对这些元素进行查询，可以通过“懒惰偏移”（参考前文）来解决。具体做法是，将偏移值与活跃的数据结构（如堆或有序集合）结合使用，并在必要时清理掉越界的元素（例如跨过阈值的项）。这一模式常见于模拟类场景：某个事件会对所有当前元素施加相同的变化，比如：商品价格的统一折扣、截止日期的统一延长、数值的通胀调整等。</p>
 <p><strong>示例场景</strong>：在机场停车优惠券系统中，一个“事件”可能会使某公司所有已停放车辆的停车时间统一延长 X 天。这意味着每辆车的到期时间都被整体推迟 X。与其逐一更新每辆车的时间，不如直接做 <code>offset[company] += X</code>。随后，在检查车辆到期时，用公式 <code>effectiveExpiry = baseExpiry + offset[company]</code> 计算实际到期时间。类似地，在电商平台中，一次折扣事件会对某个品类的所有商品价格统一减去 $m。他们会维护一个 <code>lazyDiscount[cat]</code>，在查询时即时扣减。</p>
 <p><strong>数据结构整合</strong>：难点在于如何把懒惰更新与有序结构结合。如果所有元素都被统一加上偏移，它们的相对顺序不会改变。因此，可以将它们存储在按基础值（base value）排序的结构中，只是在查询时临时应用偏移。例如，若维护一个按基础价格排序的最小堆（min-heap），折扣事件发生后仍然可以直接从堆中取出最小基础价格商品。实际价格需要通过“基础价格减去偏移”计算。如果要移除价格低于某阈值（如 ≤ 0）的商品，需要检查“实际价格 = 基础价格 - 偏移”。堆顶元素的实际价格最小，如果它大于 0，那么其他元素都大于 0；若它 ≤ 0，则将其弹出，再继续检查下一个，直到堆顶实际价格大于 0 为止。</p>
 <p>如果不同分组有不同的偏移（例如，不同公司有各自的延期天数，不同品类有各自的折扣），就需要分别维护这些分组的数据结构。停车例子中，每个公司维护自己的一套过期时间结构和偏移量；商店例子中，每个品类-品牌组合维护自己的集合和懒惰折扣值。</p>
 <p><strong>内存与更新开销</strong>：懒惰偏移的应用非常便宜（每次事件 O(1)）。真正的成本在于清理因偏移失效的元素（比如价格跌到 0 或负数的商品）。移除这类元素的开销是 O(k log n)，其中 k 是被移除的元素数量。但注意，每个元素最多只会被移除一次（例如某商品价格降至 0 被删除后，就不会再出现）。因此，所有事件的总移除成本是 O(N log N)（每个元素最多插入一次、移除一次，每次移除 O(log N)）。相比之下，若在每次折扣时都更新所有元素，开销可能达到 O(N × 折扣次数)，效率差很多。</p>
-<p><strong>潜在陷阱</strong>：  </p>
+<p><strong>潜在陷阱</strong>：</p>
 <ul>
-<li>插入新元素时忘记考虑当前偏移，会造成数据不一致。必须事先决定存储值是否包含偏移，并始终保持一致。  </li>
-<li>偏移过大导致大量元素同时失效。例如，折扣过大使得所有商品免费，此时会整桶清空，需要确保循环能正确清理结构。  </li>
+<li>插入新元素时忘记考虑当前偏移，会造成数据不一致。必须事先决定存储值是否包含偏移，并始终保持一致。</li>
+<li>偏移过大导致大量元素同时失效。例如，折扣过大使得所有商品免费，此时会整桶清空，需要确保循环能正确清理结构。</li>
 <li>极少数情况偏移可能减少（负偏移或事件回滚），这会更复杂。因为某些原本不是最小的元素，经过负偏移后可能变成最小元素。这会破坏懒惰更新的单调性优势，需要调整比较器或重新评估集合。在常见问题中，偏移多为累加型（折扣递增、延期递增），因此通常无需处理反向偏移。</li>
 </ul>
-<p><strong>实践示例</strong>：  </p>
+<p><strong>实践示例</strong>：</p>
 <ul>
-<li>在“机场停车”问题中，使用 <code>offsetDays[company]</code> 表示全局延期。车辆在插入时存储 <code>relExpiry = absoluteExpiry - offsetDays</code>。当 <code>offsetDays</code> 增加时，相当于所有绝对到期时间整体延长。在 <code>inspect</code> 操作中检查到期时，比较 <code>relExpiry</code> 与 <code>(T - offsetDays[c])</code> 来判断是否过期。  </li>
+<li>在“机场停车”问题中，使用 <code>offsetDays[company]</code> 表示全局延期。车辆在插入时存储 <code>relExpiry = absoluteExpiry - offsetDays</code>。当 <code>offsetDays</code> 增加时，相当于所有绝对到期时间整体延长。在 <code>inspect</code> 操作中检查到期时，比较 <code>relExpiry</code> 与 <code>(T - offsetDays[c])</code> 来判断是否过期。</li>
 <li>在“电商平台”问题中，某类（Category, Brand）的折扣事件会让 <code>lazyDiscount[cat][brand]</code> 增加，同时移除所有 <code>storedPrice - lazyDiscount ≤ 0</code> 的商品。商品在桶中依旧按 <code>storedPrice</code> 排序，这是合理的，因为统一折扣不会改变相对顺序。</li>
 </ul>
 <h3 id="图上的有限范围搜索（树的-BFS-与连通性）"><a href="#图上的有限范围搜索（树的-BFS-与连通性）" class="headerlink" title="图上的有限范围搜索（树的 BFS 与连通性）"></a>图上的有限范围搜索（树的 BFS 与连通性）</h3><p><strong>模式</strong>：在图（通常是树）中回答可达性或统计某个节点在小范围距离内的节点数的问题，可能还包含动态的边删除。这类问题通常需要在给定深度或距离限制下反复执行广度优先搜索（BFS），并结合“懒惰跳过已删除边”的方式，而不是做复杂的图结构重建。</p>
@@ -693,10 +690,10 @@ mjx-container[display="true"] + br {
 <p>如果图是树，那么在边完整时，任意两个节点之间只有一条唯一路径。搜索的扩展范围受树的节点度限制。很多 oj 题会限制树的度数（例如 ≤ 3），这样有界 BFS 的效率非常高。即使没有度数限制，任意图中做深度 5 的 BFS，其复杂度至多为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.651ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2497.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mn" transform="translate(553,363) scale(0.707)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g></g><g data-mml-node="mo" transform="translate(2108.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="1.176ex" height="1.593ex" role="img" focusable="false" viewBox="0 -694 520 704"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g></g></g></svg></mjx-container> 为平均度数），在中等规模下完全可行。</p>
 <p><strong>优化</strong>：如前所述，可以使用 <code>visitedToken</code> 技巧，或使用一个静态的布尔访问数组，每次查询都重置，来避免重复访问节点。由于 N 的规模可能只有 1000（在这个场景下），每次重置 1000 元素的数组几乎没有开销，但用 token 技巧也能进一步避免重置，同时逻辑更简洁。</p>
 <p>如果查询频率极高，且半径 L 也稍大，可以考虑预计算每个节点在距离 L 内可达的所有节点（例如为每个节点预存可在 5 步内到达的源列表）。但如果边会随时间被删除，这种方式就不再静态，因而按需 BFS 是更稳妥的解决方案。</p>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>一定要确保 BFS 中不访问已删除的边。  </li>
-<li>如果采用 epoch 技巧，务必在合适的时机递增 epoch（例如重建或重置整个网络时）。  </li>
+<li>一定要确保 BFS 中不访问已删除的边。</li>
+<li>如果采用 epoch 技巧，务必在合适的时机递增 epoch（例如重建或重置整个网络时）。</li>
 <li>在持续运行的情况下，更简单的做法是使用布尔数组或矩阵来标记边是否活跃，每次调用 <code>removeLink</code> 时更新它。由于 N 规模足够小，这种方式完全可行。</li>
 </ul>
 <p><strong>实践示例</strong>：文件分发问题中，每次发起下载时，都会从请求的计算机执行 BFS，统计半径 5 内有该文件的源计算机数量。每当有边被移除，就需要重新计算正在进行的下载的路径数量 —— 实际上就是在该边被删除后，从下载方重新执行一次 BFS（或等效逻辑），这会减少可达的源数量。由于边是逐一删除，且频率不高，这种实时重算是高效的。他们在实现中采用了 epoch 技巧来标记被删除的边，并使用 visitedToken 来加速 BFS，如前文所示。</p>
@@ -770,17 +767,17 @@ mjx-container[display="true"] + br {
 </tr>
 </tbody></table>
 <p>这个矩阵可以进一步扩展。本质上是将问题中的提示映射到数据结构的选择：比如，出现“最多/最小 X”或排序需求时，意味着树或堆；“按 Y 分组”意味着桶；“全局更新”意味着延迟偏移；“时间推进”意味着事件队列，或者至少要有顺序处理的概念。</p>
-<h3 id="复杂度预算与可行性检查"><a href="#复杂度预算与可行性检查" class="headerlink" title="复杂度预算与可行性检查"></a>复杂度预算与可行性检查</h3><p>最后，务必将选定的解法与输入规模和操作次数进行交叉验证。先估算一个操作上界（例如 5 万次插入、5 万次查询），再确认每个操作的效率是否足够高。举例来说：  </p>
+<h3 id="复杂度预算与可行性检查"><a href="#复杂度预算与可行性检查" class="headerlink" title="复杂度预算与可行性检查"></a>复杂度预算与可行性检查</h3><p>最后，务必将选定的解法与输入规模和操作次数进行交叉验证。先估算一个操作上界（例如 5 万次插入、5 万次查询），再确认每个操作的效率是否足够高。举例来说：</p>
 <ul>
-<li>5 万次操作 × O(log 5 万) ≈ 5 万 × 16 ≈ 80 万次，完全可行；  </li>
+<li>5 万次操作 × O(log 5 万) ≈ 5 万 × 16 ≈ 80 万次，完全可行；</li>
 <li>5 万次操作 × O(5 万) = 25 亿次，就明显过慢。<br>如果初步方案的复杂度超出可接受范围，就必须优化，通常的做法是引入索引，或采用惰性策略来减少实际开销。</li>
 </ul>
-<p>一个快速检查清单：  </p>
+<p>一个快速检查清单：</p>
 <ul>
-<li>如果代码里出现“对所有操作或数据项的嵌套循环”（例如每次查询都扫描全部元素），那么大概率会超时，除非数据规模很小（仅几百）。  </li>
-<li>总体目标是控制在 <strong>操作次数 × log(n)</strong> 或 <strong>操作次数 × (log n + log m)</strong> 的级别。  </li>
-<li>如果某种情况导致单次操作为 O(n)，而 n（或操作数）本身很大（约 5 万或以上），那就需要寻找更优方法。  </li>
-<li>要用最坏情况来推理，同时也考虑摊还成本。一些昂贵操作若不频繁出现、且总体均摊下来仍可接受（比如过期元素的删除，每个元素最多只被删除一次），则可能是可行的。  </li>
+<li>如果代码里出现“对所有操作或数据项的嵌套循环”（例如每次查询都扫描全部元素），那么大概率会超时，除非数据规模很小（仅几百）。</li>
+<li>总体目标是控制在 <strong>操作次数 × log(n)</strong> 或 <strong>操作次数 × (log n + log m)</strong> 的级别。</li>
+<li>如果某种情况导致单次操作为 O(n)，而 n（或操作数）本身很大（约 5 万或以上），那就需要寻找更优方法。</li>
+<li>要用最坏情况来推理，同时也考虑摊还成本。一些昂贵操作若不频繁出现、且总体均摊下来仍可接受（比如过期元素的删除，每个元素最多只被删除一次），则可能是可行的。</li>
 <li>拿不准时，可以用心算或粗略估算：在最坏情况下循环会运行多少次？是否能控制在 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="3.25ex" height="2.005ex" role="img" focusable="false" viewBox="0 -864 1436.6 886"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="38" d="M70 417T70 494T124 618T248 666Q319 666 374 624T429 515Q429 485 418 459T392 417T361 389T335 371T324 363L338 354Q352 344 366 334T382 323Q457 264 457 174Q457 95 399 37T249 -22Q159 -22 101 29T43 155Q43 263 172 335L154 348Q133 361 127 368Q70 417 70 494ZM286 386L292 390Q298 394 301 396T311 403T323 413T334 425T345 438T355 454T364 471T369 491T371 513Q371 556 342 586T275 624Q268 625 242 625Q201 625 165 599T128 534Q128 511 141 492T167 463T217 431Q224 426 228 424L286 386ZM250 21Q308 21 350 55T392 137Q392 154 387 169T375 194T353 216T330 234T301 253T274 270Q260 279 244 289T218 306L210 311Q204 311 181 294T133 239T107 157Q107 98 150 60T250 21Z"></path></g></g></g></g></svg></mjx-container>（1 亿次）以内？（通常 oj 约束下要更安全，最好 &lt; <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="7.147ex" height="2.02ex" role="img" focusable="false" viewBox="0 -871.1 3159 893.1"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g><g data-mml-node="mo" transform="translate(722.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="msup" transform="translate(1722.4,0)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path></g><g data-mml-node="mn" transform="translate(1033,393.1) scale(0.707)"><path data-c="37" d="M55 458Q56 460 72 567L88 674Q88 676 108 676H128V672Q128 662 143 655T195 646T364 644H485V605L417 512Q408 500 387 472T360 435T339 403T319 367T305 330T292 284T284 230T278 162T275 80Q275 66 275 52T274 28V19Q270 2 255 -10T221 -22Q210 -22 200 -19T179 0T168 40Q168 198 265 368Q285 400 349 489L395 552H302Q128 552 119 546Q113 543 108 522T98 479L95 458V455H55V458Z"></path></g></g></g></g></svg></mjx-container> 次）。若超过，就很可能在 C++ 中超时。</li>
 </ul>
 <p>通过在前期做好复杂度预算，你可以提前排除那些必然会 TLE（超时）的方案，集中精力在更可能通过的解法上。本指南介绍的模式和结构本身大多能保持在 <strong>log n 或更优</strong> 的复杂度，但若组合不当，仍可能引入隐藏的线性扫描（例如不必要地合并过多数据）。因此要善用矩阵和决策树，精确定位何处需要更优于暴力的方法。</p>
@@ -788,99 +785,100 @@ mjx-container[display="true"] + br {
 <h3 id="Level-0-单维桶与最小值查询"><a href="#Level-0-单维桶与最小值查询" class="headerlink" title="Level 0: 单维桶与最小值查询"></a>Level 0: 单维桶与最小值查询</h3><p><strong>场景</strong>：假设我们需要管理多个类别的物品，并且要能快速获取某个类别中最小的元素。这是最基础的桶用法，不涉及多关键字排序或时间相关因素。</p>
 <p><strong>任务</strong>：实现一个支持以下操作的系统，类别用整数标识（例如 1、2、3）：</p>
 <ul>
-<li><code>add(cat, value)</code>：向类别 <code>cat</code> 中加入一个数值为 <code>value</code> 的元素。  </li>
+<li><code>add(cat, value)</code>：向类别 <code>cat</code> 中加入一个数值为 <code>value</code> 的元素。</li>
 <li><code>getMin(cat)</code>：查询类别 <code>cat</code> 中当前的最小值（若为空则需返回提示）。</li>
 </ul>
-<p><strong>实现思路</strong>：我们使用 <code>std::multiset&lt;int&gt;</code>（或 <code>priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt;</code>）数组来存储每个类别的元素。每个类别的 multiset 保证元素有序。  </p>
-<p><strong>复杂度分析</strong>： </p>
+<p><strong>实现思路</strong>：我们使用 <code>std::multiset&lt;int&gt;</code>（或 <code>priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt;</code>）数组来存储每个类别的元素。每个类别的 multiset 保证元素有序。</p>
+<p><strong>复杂度分析</strong>：</p>
 <ul>
-<li>插入：<code>O(log n)</code>（multiset 插入）。  </li>
-<li>查询最小值：<code>O(1)</code>（直接取 <code>*ms.begin()</code>）。  </li>
+<li>插入：<code>O(log n)</code>（multiset 插入）。</li>
+<li>查询最小值：<code>O(1)</code>（直接取 <code>*ms.begin()</code>）。</li>
 <li>若需要删除操作：<code>O(log n)</code>（调用 <code>erase</code>）。</li>
 </ul>
 <p><strong>示例代码</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="comment">// 我们这里演示 3 个分类（category）</span></span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> CAT_COUNT = <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用 multiset 存储每个分类的值（1 下标起始）</span></span><br><span class="line">    array&lt; multiset&lt;<span class="type">int</span>&gt;, CAT_COUNT + 1 &gt; catSets; </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 向分类中添加一个值</span></span><br><span class="line">    <span class="keyword">auto</span> add = [&amp;](<span class="type">int</span> cat, <span class="type">int</span> value) {</span><br><span class="line">        catSets[cat].<span class="built_in">insert</span>(value);</span><br><span class="line">        cout &lt;&lt; <span class="string">"已向分类 "</span> &lt;&lt; cat &lt;&lt; <span class="string">" 添加值 "</span> &lt;&lt; value &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取分类中的最小值</span></span><br><span class="line">    <span class="keyword">auto</span> getMin = [&amp;](<span class="type">int</span> cat) {</span><br><span class="line">        <span class="keyword">if</span> (catSets[cat].<span class="built_in">empty</span>()) {</span><br><span class="line">            cout &lt;&lt; <span class="string">"分类 "</span> &lt;&lt; cat &lt;&lt; <span class="string">" 为空\n"</span>;</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            cout &lt;&lt; <span class="string">"分类 "</span> &lt;&lt; cat &lt;&lt; <span class="string">" 的最小值是 "</span> </span><br><span class="line">                 &lt;&lt; *catSets[cat].<span class="built_in">begin</span>() &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示操作</span></span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">50</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">20</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">2</span>, <span class="number">30</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">40</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">getMin</span>(<span class="number">1</span>); <span class="comment">// 分类 1 的最小值</span></span><br><span class="line">    <span class="built_in">getMin</span>(<span class="number">2</span>); <span class="comment">// 分类 2 的最小值</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">add</span>(<span class="number">2</span>, <span class="number">10</span>);</span><br><span class="line">    <span class="built_in">getMin</span>(<span class="number">2</span>); <span class="comment">// 再查分类 2 的最小值</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <h3 id="Level-1-二维桶与合并全局最小元素"><a href="#Level-1-二维桶与合并全局最小元素" class="headerlink" title="Level 1: 二维桶与合并全局最小元素"></a>Level 1: 二维桶与合并全局最小元素</h3><p><strong>场景</strong>：现在将问题扩展为两个关键维度。假设每个元素有“类别（category）”和“品牌（brand）”两个属性，我们需要为每个 <code>(category, brand)</code> 对维护一个桶。目标是查询全局前 K 个最小值的元素。</p>
-<p><strong>任务</strong>：<br>实现一个结构，包含 2 个类别（记为 1 和 2）和 2 个品牌（记为 A 和 B），共 4 个桶：(1,A)、(1,B)、(2,A)、(2,B)  </p>
+<p><strong>任务</strong>：<br>实现一个结构，包含 2 个类别（记为 1 和 2）和 2 个品牌（记为 A 和 B），共 4 个桶：(1,A)、(1,B)、(2,A)、(2,B)</p>
 <p>需要支持以下操作：</p>
 <ul>
-<li><code>add(category, brand, value, id)</code>：将一个带有给定 <code>value</code> 和标识符（便于输出）的元素加入对应的桶。  </li>
+<li><code>add(category, brand, value, id)</code>：将一个带有给定 <code>value</code> 和标识符（便于输出）的元素加入对应的桶。</li>
 <li><code>topK_global(K)</code>：在所有桶中找到全局最小的 K 个元素。</li>
 </ul>
 <p><strong>思路</strong>：<br>与 Level 0 相同，每个桶内部用 multiset（或小根堆）维护。<br>要获得全局最小的 K 个元素，可以从每个桶里各取出前 K 个最小值作为候选，然后再在这些候选里挑出全局最小的 K 个。</p>
-<p>由于 K 通常很小，这种方法开销可控。<br>例如当 K=3 时：  </p>
+<p>由于 K 通常很小，这种方法开销可控。例如当 K=3 时：</p>
 <ul>
-<li>每个桶最多取 3 个元素，总候选不超过 12 个（4 个桶 × 3 个）。  </li>
+<li>每个桶最多取 3 个元素，总候选不超过 12 个（4 个桶 × 3 个）。</li>
 <li>对这些候选排序后，取出最小的 3 个。</li>
 </ul>
 <p><strong>示例代码</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Item</span> { </span><br><span class="line">    <span class="type">int</span> value;   <span class="comment">// 商品数值（例如价格）</span></span><br><span class="line">    string id;   <span class="comment">// 商品唯一 ID</span></span><br><span class="line">    <span class="comment">// 简化起见，Item 不保存分类/品牌信息，因为我们在 buckets 里用 key 区分了</span></span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="comment">// key = (分类编号, 品牌字母)，value = 该桶中的所有商品值</span></span><br><span class="line">    map&lt;pair&lt;<span class="type">int</span>,<span class="type">char</span>&gt;, multiset&lt;<span class="type">int</span>&gt;&gt; buckets;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 向某个分类/品牌桶中添加一个商品</span></span><br><span class="line">    <span class="keyword">auto</span> add = [&amp;](<span class="type">int</span> cat, <span class="type">char</span> brand, <span class="type">int</span> value) {</span><br><span class="line">        buckets[{cat, brand}].<span class="built_in">insert</span>(value);</span><br><span class="line">        cout &lt;&lt; <span class="string">"已添加商品 (分类="</span> &lt;&lt; cat </span><br><span class="line">             &lt;&lt; <span class="string">", 品牌="</span> &lt;&lt; brand </span><br><span class="line">             &lt;&lt; <span class="string">") 值="</span> &lt;&lt; value &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 全局查询 Top-K 最小值</span></span><br><span class="line">    <span class="keyword">auto</span> topK_global = [&amp;](<span class="type">int</span> K) {</span><br><span class="line">        vector&lt;<span class="type">int</span>&gt; candidates;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 遍历每个桶，取出前 K 个最小值（multiset 本身有序）</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;entry : buckets) {</span><br><span class="line">            <span class="type">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> val : entry.second) {</span><br><span class="line">                candidates.<span class="built_in">push_back</span>(val);</span><br><span class="line">                <span class="keyword">if</span> (++count == K) <span class="keyword">break</span>; <span class="comment">// 每桶最多取 K 个</span></span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (candidates.<span class="built_in">empty</span>()) {</span><br><span class="line">            cout &lt;&lt; <span class="string">"当前没有商品\n"</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取全局前 K 个</span></span><br><span class="line">        <span class="built_in">sort</span>(candidates.<span class="built_in">begin</span>(), candidates.<span class="built_in">end</span>());</span><br><span class="line">        cout &lt;&lt; <span class="string">"全局最小的 Top-"</span> &lt;&lt; K &lt;&lt; <span class="string">" 值: "</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; (<span class="type">int</span>)candidates.<span class="built_in">size</span>() &amp;&amp; i &lt; K; ++i) {</span><br><span class="line">            cout &lt;&lt; candidates[i] &lt;&lt; (i == K - <span class="number">1</span> ? <span class="string">'\n'</span> : <span class="string">' '</span>);</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示</span></span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>,<span class="string">'A'</span>, <span class="number">100</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>,<span class="string">'B'</span>, <span class="number">50</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">2</span>,<span class="string">'A'</span>, <span class="number">60</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">2</span>,<span class="string">'B'</span>, <span class="number">30</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">1</span>,<span class="string">'A'</span>, <span class="number">40</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">topK_global</span>(<span class="number">3</span>); <span class="comment">// 查询全局最小的 3 个值</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">add</span>(<span class="number">2</span>,<span class="string">'B'</span>, <span class="number">20</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">topK_global</span>(<span class="number">3</span>); <span class="comment">// 再次查询</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <h3 id="Level-2-带自定义比较器的有序集合（及安全更新）"><a href="#Level-2-带自定义比较器的有序集合（及安全更新）" class="headerlink" title="Level 2: 带自定义比较器的有序集合（及安全更新）"></a>Level 2: 带自定义比较器的有序集合（及安全更新）</h3><p><strong>场景说明</strong>：<br>现在我们考虑如何维护一个按照自定义规则排序的集合，并且能够安全地更新元素的关键字。例如，我们有一组任务（task），它们有可变的优先级。</p>
-<p><strong>任务目标</strong>：<br>管理一组由名称标识的任务，每个任务有一个整数优先级。系统需要支持以下操作：  </p>
+<p><strong>任务目标</strong>：管理一组由名称标识的任务，每个任务有一个整数优先级。系统需要支持以下操作：</p>
 <ul>
-<li>插入任务  </li>
-<li>删除任务  </li>
-<li>获取最高优先级的任务  </li>
+<li>插入任务</li>
+<li>删除任务</li>
+<li>获取最高优先级的任务</li>
 <li>提升任务的优先级（优先级变化后，任务的排序位置需要更新）</li>
 </ul>
 <p><strong>排序规则</strong>：<br>任务按照优先级降序排列；如果优先级相同，则按名称的字典序排序，以保持稳定性。我们使用 <code>std::set</code> 来维护顺序。当优先级更新时，需要先移除再重新插入该任务。</p>
 <p><strong>解决思路</strong>：</p>
 <ul>
-<li>使用一个字典（哈希表）保存 <code>任务名 → 当前优先级</code> 的映射，以便快速查找任务和获取其当前值。  </li>
-<li>在 <code>std::set</code> 中存储 <code>(priority, name)</code> 形式的条目。  </li>
-<li>比较器定义为：先比较优先级（越大越靠前），若优先级相同，则比较任务名称字典序。  </li>
+<li>使用一个字典（哈希表）保存 <code>任务名 → 当前优先级</code> 的映射，以便快速查找任务和获取其当前值。</li>
+<li>在 <code>std::set</code> 中存储 <code>(priority, name)</code> 形式的条目。</li>
+<li>比较器定义为：先比较优先级（越大越靠前），若优先级相同，则比较任务名称字典序。</li>
 <li>当更新优先级时，先构造一个旧值的任务对象进行删除，再插入新值。</li>
 </ul>
 <p><strong>示例代码</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 任务结构体</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Task</span> {</span><br><span class="line">    string name;   <span class="comment">// 任务名称</span></span><br><span class="line">    <span class="type">int</span> priority;  <span class="comment">// 任务优先级</span></span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义比较器：</span></span><br><span class="line"><span class="comment">// 1. 优先级高的任务排在前面</span></span><br><span class="line"><span class="comment">// 2. 优先级相同则按名称字典序排序</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">TaskCmp</span> {</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> Task &amp;a, <span class="type">const</span> Task &amp;b)</span> <span class="type">const</span> </span>{</span><br><span class="line">        <span class="keyword">if</span> (a.priority != b.priority) <span class="keyword">return</span> a.priority &gt; b.priority;</span><br><span class="line">        <span class="keyword">return</span> a.name &lt; b.name;</span><br><span class="line">    }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    std::set&lt;Task, TaskCmp&gt; taskSet;         <span class="comment">// 按自定义排序存储的任务集合</span></span><br><span class="line">    unordered_map&lt;string,<span class="type">int</span>&gt; prMap;         <span class="comment">// 记录任务名称 -&gt; 优先级，便于查找和更新</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加任务</span></span><br><span class="line">    <span class="keyword">auto</span> addTask = [&amp;](string name, <span class="type">int</span> pr) {</span><br><span class="line">        Task t{name, pr};</span><br><span class="line">        taskSet.<span class="built_in">insert</span>(t);</span><br><span class="line">        prMap[name] = pr;</span><br><span class="line">        cout &lt;&lt; <span class="string">"已添加任务 "</span> &lt;&lt; name &lt;&lt; <span class="string">" (优先级 "</span> &lt;&lt; pr &lt;&lt; <span class="string">")\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提升某个任务的优先级</span></span><br><span class="line">    <span class="keyword">auto</span> increasePriority = [&amp;](string name, <span class="type">int</span> delta) {</span><br><span class="line">        <span class="keyword">if</span> (prMap.<span class="built_in">find</span>(name) == prMap.<span class="built_in">end</span>()) <span class="keyword">return</span>; <span class="comment">// 没找到任务则忽略</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 移除旧任务</span></span><br><span class="line">        <span class="type">int</span> oldPr = prMap[name];</span><br><span class="line">        Task old{name, oldPr};</span><br><span class="line">        taskSet.<span class="built_in">erase</span>(old);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 插入新任务</span></span><br><span class="line">        <span class="type">int</span> newPr = oldPr + delta;</span><br><span class="line">        prMap[name] = newPr;</span><br><span class="line">        taskSet.<span class="built_in">insert</span>({name, newPr});</span><br><span class="line"></span><br><span class="line">        cout &lt;&lt; <span class="string">"任务 "</span> &lt;&lt; name &lt;&lt; <span class="string">" 优先级提升至 "</span> &lt;&lt; newPr &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 弹出并处理当前最高优先级任务</span></span><br><span class="line">    <span class="keyword">auto</span> popTop = [&amp;]() {</span><br><span class="line">        <span class="keyword">if</span> (taskSet.<span class="built_in">empty</span>()) {</span><br><span class="line">            cout &lt;&lt; <span class="string">"当前没有任务可处理\n"</span>;</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            <span class="keyword">auto</span> it = taskSet.<span class="built_in">begin</span>(); <span class="comment">// set.begin() 指向最高优先级任务</span></span><br><span class="line">            cout &lt;&lt; <span class="string">"处理任务: "</span> &lt;&lt; it-&gt;name </span><br><span class="line">                 &lt;&lt; <span class="string">" (优先级="</span> &lt;&lt; it-&gt;priority &lt;&lt; <span class="string">")\n"</span>;</span><br><span class="line">            prMap.<span class="built_in">erase</span>(it-&gt;name);</span><br><span class="line">            taskSet.<span class="built_in">erase</span>(it);</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示流程</span></span><br><span class="line">    <span class="built_in">addTask</span>(<span class="string">"Alpha"</span>, <span class="number">5</span>);</span><br><span class="line">    <span class="built_in">addTask</span>(<span class="string">"Beta"</span>, <span class="number">3</span>);</span><br><span class="line">    <span class="built_in">addTask</span>(<span class="string">"Gamma"</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">popTop</span>();                  <span class="comment">// 应该弹出 Alpha (优先级=5，字典序优先于 Gamma)</span></span><br><span class="line">    <span class="built_in">increasePriority</span>(<span class="string">"Beta"</span>, <span class="number">3</span>); <span class="comment">// Beta 优先级从 3 → 6</span></span><br><span class="line">    <span class="built_in">popTop</span>();                  <span class="comment">// 应该弹出 Beta (优先级=6)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
-<p>我们定义了一个 <code>TaskCmp</code> 比较器，用于按照“优先级降序，其次名称升序”排序。  </p>
+
+<p>我们定义了一个 <code>TaskCmp</code> 比较器，用于按照“优先级降序，其次名称升序”排序。</p>
 <ul>
-<li>所有任务存储在 <code>std::set</code> 和 <code>prMap</code> 中。  </li>
-<li>当更新优先级时，先根据旧的 <code>(name, priority)</code> 构造 <code>Task</code>，并从 <code>taskSet</code> 中删除；再插入更新后的新任务。  </li>
+<li>所有任务存储在 <code>std::set</code> 和 <code>prMap</code> 中。</li>
+<li>当更新优先级时，先根据旧的 <code>(name, priority)</code> 构造 <code>Task</code>，并从 <code>taskSet</code> 中删除；再插入更新后的新任务。</li>
 <li>由于 <code>std::set</code> 的比较器基于 <code>priority</code> 和 <code>name</code>，删除时只要构造相同的值，就能找到并移除正确的元素。</li>
 </ul>
 <h3 id="Level-3-单调时间模拟与过期移除"><a href="#Level-3-单调时间模拟与过期移除" class="headerlink" title="Level 3: 单调时间模拟与过期移除"></a>Level 3: 单调时间模拟与过期移除</h3><p><strong>场景</strong>：这里我们要模拟一个基于时间驱动的过期机制。假设有一批元素，如果在固定时长 <code>L</code> 内没有被提前移除，那么在到期时间点它们会自动过期并被删除。</p>
 <p>我们会在给定的时间点加入元素，并在它们到期时或更早的时候移除。</p>
-<p><strong>任务</strong>：<br>每个元素有一个唯一的 <code>ID</code>，在某个时间点进入系统，并且拥有一个固定的存活周期 <code>L</code>（例如 <code>L=5</code> 个时间单位）。  </p>
+<p><strong>任务</strong>：<br>每个元素有一个唯一的 <code>ID</code>，在某个时间点进入系统，并且拥有一个固定的存活周期 <code>L</code>（例如 <code>L=5</code> 个时间单位）。</p>
 <p>需要实现以下操作：</p>
 <ul>
-<li><code>enter(time, id)</code>：元素在时间 <code>time</code> 进入系统，并将在 <code>time+L</code> 时过期（如果未提前移除）。  </li>
+<li><code>enter(time, id)</code>：元素在时间 <code>time</code> 进入系统，并将在 <code>time+L</code> 时过期（如果未提前移除）。</li>
 <li><code>remove(time, id)</code>：元素在时间 <code>time</code> 被外部操作提前移除（早于其过期时间）。</li>
 </ul>
 <p>要求：在任何查询或操作发生的时间点，都要确保所有到期的元素都已经被清理。</p>
-<p><strong>实现思路</strong>：<br>我们维护一个“当前时间”和一个按过期时间排序的小根堆 <code>(expireTime, id)</code>。  </p>
-<p>每次进行操作时：  </p>
+<p><strong>实现思路</strong>：<br>我们维护一个“当前时间”和一个按过期时间排序的小根堆 <code>(expireTime, id)</code>。</p>
+<p>每次进行操作时：</p>
 <ol>
-<li>将当前时间推进到新的操作时间。  </li>
-<li>从堆中不断弹出所有已经过期的元素。  </li>
-<li>使用一个集合 <code>active</code> 来存储仍然有效的元素 ID，防止重复处理。  <ul>
+<li>将当前时间推进到新的操作时间。</li>
+<li>从堆中不断弹出所有已经过期的元素。</li>
+<li>使用一个集合 <code>active</code> 来存储仍然有效的元素 ID，防止重复处理。<ul>
 <li>如果某个元素已经被提前移除，当它的过期事件弹出时，发现它不在 <code>active</code> 中，就跳过（这就是所谓的懒惰删除）。</li>
 </ul>
 </li>
 </ol>
-<p><strong>示例代码（L=5）</strong>：  </p>
+<p><strong>示例代码（L=5）</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义事件：包含过期时间和物品ID</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ExpEvent</span> { </span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> expTime; </span><br><span class="line">    string id; </span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较器：按过期时间升序（最小堆效果）</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Cmp</span> { </span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> ExpEvent &amp;a, <span class="type">const</span> ExpEvent &amp;b)</span> <span class="type">const</span> </span>{</span><br><span class="line">        <span class="keyword">return</span> a.expTime &gt; b.expTime; </span><br><span class="line">    } </span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> currentTime = <span class="number">0</span>;   <span class="comment">// 当前时间</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> L = <span class="number">5</span>;             <span class="comment">// 物品存活时长</span></span><br><span class="line">    priority_queue&lt;ExpEvent, vector&lt;ExpEvent&gt;, Cmp&gt; pq; </span><br><span class="line">    unordered_set&lt;string&gt; active; <span class="comment">// 当前仍有效的物品集合</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 物品进入（有效 L 时间）</span></span><br><span class="line">    <span class="keyword">auto</span> enter = [&amp;](<span class="type">long</span> <span class="type">long</span> t, string mID) {</span><br><span class="line">        <span class="comment">// 先推进时间到 t，处理所有已过期的事件</span></span><br><span class="line">        <span class="keyword">while</span> (!pq.<span class="built_in">empty</span>() &amp;&amp; pq.<span class="built_in">top</span>().expTime &lt;= t) {</span><br><span class="line">            ExpEvent ev = pq.<span class="built_in">top</span>();</span><br><span class="line">            pq.<span class="built_in">pop</span>();</span><br><span class="line">            <span class="keyword">if</span> (active.<span class="built_in">count</span>(ev.id)) {</span><br><span class="line">                active.<span class="built_in">erase</span>(ev.id);</span><br><span class="line">                cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; ev.expTime &lt;&lt; <span class="string">": "</span> &lt;&lt; ev.id &lt;&lt; <span class="string">" 已过期\n"</span>;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        currentTime = t;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 添加新物品</span></span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> expT = t + L;</span><br><span class="line">        pq.<span class="built_in">push</span>({expT, mID});</span><br><span class="line">        active.<span class="built_in">insert</span>(mID);</span><br><span class="line">        cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": "</span> &lt;&lt; mID </span><br><span class="line">             &lt;&lt; <span class="string">" 进入 (将在 "</span> &lt;&lt; expT &lt;&lt; <span class="string">" 过期)\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主动移除物品</span></span><br><span class="line">    <span class="keyword">auto</span> removeItem = [&amp;](<span class="type">long</span> <span class="type">long</span> t, string mID) {</span><br><span class="line">        <span class="comment">// 先推进时间到 t，处理所有已过期的事件</span></span><br><span class="line">        <span class="keyword">while</span> (!pq.<span class="built_in">empty</span>() &amp;&amp; pq.<span class="built_in">top</span>().expTime &lt;= t) {</span><br><span class="line">            ExpEvent ev = pq.<span class="built_in">top</span>(); </span><br><span class="line">            pq.<span class="built_in">pop</span>();</span><br><span class="line">            <span class="keyword">if</span> (active.<span class="built_in">count</span>(ev.id)) {</span><br><span class="line">                active.<span class="built_in">erase</span>(ev.id);</span><br><span class="line">                cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; ev.expTime &lt;&lt; <span class="string">": "</span> &lt;&lt; ev.id &lt;&lt; <span class="string">" 已过期\n"</span>;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        currentTime = t;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果该物品仍有效，则提前移除</span></span><br><span class="line">        <span class="keyword">if</span> (active.<span class="built_in">count</span>(mID)) {</span><br><span class="line">            active.<span class="built_in">erase</span>(mID);</span><br><span class="line">            cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": "</span> &lt;&lt; mID &lt;&lt; <span class="string">" 被提前移除\n"</span>;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示流程</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">1</span>, <span class="string">"ItemA"</span>);   <span class="comment">// A 进入，有效期至 6</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">2</span>, <span class="string">"ItemB"</span>);   <span class="comment">// B 进入，有效期至 7</span></span><br><span class="line">    <span class="built_in">removeItem</span>(<span class="number">5</span>, <span class="string">"ItemB"</span>); <span class="comment">// 在时间 5 提前移除 B</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">6</span>, <span class="string">"ItemC"</span>);   <span class="comment">// 在时间 6 处理 A 的过期，然后加入 C</span></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <h3 id="Level-4-全局偏移懒惰更新（价格折扣示例）"><a href="#Level-4-全局偏移懒惰更新（价格折扣示例）" class="headerlink" title="Level 4: 全局偏移懒惰更新（价格折扣示例）"></a>Level 4: 全局偏移懒惰更新（价格折扣示例）</h3><p><strong>场景</strong>：<br>我们来模拟一个商品价格折扣的简单场景。假设有一组商品价格，偶尔会对所有商品统一打折，将它们的价格整体降低一定数值。</p>
 <p><strong>任务</strong>：维护一个商品价格集合，要求支持以下操作：</p>
 <ul>
-<li><code>add(price)</code>：新增一个给定价格的商品。  </li>
-<li><code>discount(amount)</code>：对所有商品应用折扣，每个商品价格减少 <code>amount</code>（最低不小于 0）。若某商品价格降至 0 或以下，则将其移出集合。  </li>
+<li><code>add(price)</code>：新增一个给定价格的商品。</li>
+<li><code>discount(amount)</code>：对所有商品应用折扣，每个商品价格减少 <code>amount</code>（最低不小于 0）。若某商品价格降至 0 或以下，则将其移出集合。</li>
 <li><code>minPrice()</code>：查询当前所有商品中的最低价格。</li>
 </ul>
-<p><strong>思路</strong>：我们使用“懒惰全局偏移”的方式：  </p>
+<p><strong>思路</strong>：我们使用“懒惰全局偏移”的方式：</p>
 <ul>
-<li>所有商品的原始价格 <code>p</code> 存储在一个最小堆或 <code>multiset</code> 中；  </li>
-<li>维护一个全局偏移量 <code>offset</code>，表示迄今为止的总折扣值。  </li>
+<li>所有商品的原始价格 <code>p</code> 存储在一个最小堆或 <code>multiset</code> 中；</li>
+<li>维护一个全局偏移量 <code>offset</code>，表示迄今为止的总折扣值。</li>
 <li>某个商品当前真实价格为 <code>max(p - offset, 0)</code>。</li>
 </ul>
-<p>关键是：我们并不会在数据结构中直接修改 <code>p</code>，而是仅仅跟踪 <code>offset</code> 的变化。  </p>
-<p><strong>查询时</strong>：  </p>
+<p>关键是：我们并不会在数据结构中直接修改 <code>p</code>，而是仅仅跟踪 <code>offset</code> 的变化。</p>
+<p><strong>查询时</strong>：</p>
 <ul>
-<li>查看堆顶的最小 <code>p</code>，计算 <code>p - offset</code> 得到当前价格；  </li>
-<li>若该价格 <code>≤ 0</code>，说明该商品已免费或无效，应移除；  </li>
+<li>查看堆顶的最小 <code>p</code>，计算 <code>p - offset</code> 得到当前价格；</li>
+<li>若该价格 <code>≤ 0</code>，说明该商品已免费或无效，应移除；</li>
 <li>持续弹出，直到堆顶对应的实际价格大于 0 为止。</li>
 </ul>
 <p>为演示方便，我们在每次调用 <code>discount</code> 后立即清理堆顶那些实际价格 <code>≤ 0</code> 的商品。</p>
@@ -888,10 +886,10 @@ mjx-container[display="true"] + br {
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="comment">// 小顶堆，存储“价格 + 全局折扣”的值</span></span><br><span class="line">    priority_queue&lt;<span class="type">int</span>, vector&lt;<span class="type">int</span>&gt;, greater&lt;<span class="type">int</span>&gt;&gt; prices; </span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> totalDiscount = <span class="number">0</span>; <span class="comment">// 全局折扣（懒惰更新）</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加新商品</span></span><br><span class="line">    <span class="keyword">auto</span> add = [&amp;](<span class="type">int</span> price) {</span><br><span class="line">        <span class="comment">// 存储时加上当前全局折扣，这样之后不用逐个更新</span></span><br><span class="line">        prices.<span class="built_in">push</span>(price + totalDiscount);</span><br><span class="line">        cout &lt;&lt; <span class="string">"已添加商品，价格 = "</span> &lt;&lt; price &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 对所有商品应用一次折扣</span></span><br><span class="line">    <span class="keyword">auto</span> discountAll = [&amp;](<span class="type">int</span> amount) {</span><br><span class="line">        totalDiscount += amount;</span><br><span class="line">        cout &lt;&lt; <span class="string">"已对所有商品应用折扣："</span> &lt;&lt; amount &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 移除所有折扣后价格 &lt;= 0 的商品</span></span><br><span class="line">        <span class="keyword">while</span> (!prices.<span class="built_in">empty</span>()) {</span><br><span class="line">            <span class="type">int</span> storedPrice = prices.<span class="built_in">top</span>();</span><br><span class="line">            <span class="type">int</span> currentPrice = storedPrice - totalDiscount;</span><br><span class="line">            <span class="keyword">if</span> (currentPrice &lt;= <span class="number">0</span>) {</span><br><span class="line">                prices.<span class="built_in">pop</span>();</span><br><span class="line">                cout &lt;&lt; <span class="string">"移除一个折扣后免费(&lt;=0)的商品\n"</span>;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            }</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">// 最小值已 &gt;0，停止</span></span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取当前最低价商品</span></span><br><span class="line">    <span class="keyword">auto</span> minPrice = [&amp;]() {</span><br><span class="line">        <span class="keyword">if</span> (prices.<span class="built_in">empty</span>()) {</span><br><span class="line">            cout &lt;&lt; <span class="string">"没有可用商品\n"</span>;</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            <span class="type">int</span> storedPrice = prices.<span class="built_in">top</span>();</span><br><span class="line">            cout &lt;&lt; <span class="string">"当前最低价格 = "</span> &lt;&lt; storedPrice - totalDiscount &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示</span></span><br><span class="line">    <span class="built_in">add</span>(<span class="number">100</span>);</span><br><span class="line">    <span class="built_in">add</span>(<span class="number">50</span>);</span><br><span class="line">    <span class="built_in">minPrice</span>();</span><br><span class="line">    <span class="built_in">discountAll</span>(<span class="number">30</span>);</span><br><span class="line">    <span class="built_in">minPrice</span>();</span><br><span class="line">    <span class="built_in">discountAll</span>(<span class="number">25</span>);</span><br><span class="line">    <span class="built_in">minPrice</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 
 <h3 id="Level-5-不用整体重新编号的队列排名调整"><a href="#Level-5-不用整体重新编号的队列排名调整" class="headerlink" title="Level 5: 不用整体重新编号的队列排名调整"></a>Level 5: 不用整体重新编号的队列排名调整</h3><p><strong>场景说明</strong>：<br>这里我们处理“排队号码”的问题。我们要模拟一个简单的队列：每个新到的人依次拿到递增的号码。当某人离开时，不会对所有人重新编号；而是通过 <strong>Fenwick Tree（树状数组，BIT）</strong> 动态计算排名。</p>
-<p><strong>任务需求</strong>：<br>每个人在进入队列时会获得一个原始号码（1,2,3,…）。我们需要支持以下操作：</p>
+<p><strong>任务需求</strong>：每个人在进入队列时会获得一个原始号码（1,2,3,…）。我们需要支持以下操作：</p>
 <ul>
-<li><code>join()</code>：有新的人加入队列（分配下一个可用的原始号码）。  </li>
-<li><code>leave(orig_no)</code>：原始号码为 <code>orig_no</code> 的人离开队列。  </li>
+<li><code>join()</code>：有新的人加入队列（分配下一个可用的原始号码）。</li>
+<li><code>leave(orig_no)</code>：原始号码为 <code>orig_no</code> 的人离开队列。</li>
 <li><code>getPos(orig_no)</code>：查询原始号码为 <code>orig_no</code> 的人在当前队列中的位置（从 1 开始计数）。</li>
 </ul>
 <p>我们会使用一个大小略大于可能人数上限的 <strong>BIT</strong> 来跟踪队列状态（在队列为 1，不在队列为 0）。同时维护一个全局计数器，用于分配下一个原始号码。</p>
@@ -901,7 +899,7 @@ mjx-container[display="true"] + br {
 <h3 id="Level-6-有限深度图遍历与动态边处理"><a href="#Level-6-有限深度图遍历与动态边处理" class="headerlink" title="Level 6: 有限深度图遍历与动态边处理"></a>Level 6: 有限深度图遍历与动态边处理</h3><p><strong>场景</strong>：这里我们模拟一个小型计算机网络（树结构），在限定的距离范围内进行搜索。同时，我们会移除一条边，观察其对可达性的影响。</p>
 <p><strong>任务</strong>：构建一棵包含 4 台计算机（1-4）的树，带有加权的链路，然后实现以下操作：</p>
 <ul>
-<li><code>reachableWithin(src, L)</code>：从源点 <code>src</code> 出发，找出总路径长度 ≤ L 的所有可达节点。  </li>
+<li><code>reachableWithin(src, L)</code>：从源点 <code>src</code> 出发，找出总路径长度 ≤ L 的所有可达节点。</li>
 <li><code>removeLink(u,v)</code>：移除节点 <code>u</code> 与 <code>v</code> 之间的连接。</li>
 </ul>
 <p>我们将使用邻接表来表示图结构，采用累积距离的简单 BFS。对于边的删除，可以维护一组被移除的边，也可以直接在邻接表中删除（这里采用后一种方式，因为只演示一次删除操作）。</p>
@@ -911,118 +909,119 @@ mjx-container[display="true"] + br {
 <h3 id="Level-7-综合系统设计"><a href="#Level-7-综合系统设计" class="headerlink" title="Level 7: 综合系统设计"></a>Level 7: 综合系统设计</h3><p><strong>场景说明</strong>：最后，我们来设计一个小型系统，将多个要素结合起来：一个带有分区（zone）、车位（slot）和计时停车的微型停车场系统。这里会用到多索引选择、停车票的过期处理，以及一个简单的搜索功能。</p>
 <p><strong>任务</strong>：我们有 2 个区域（A 和 B），每个区域有 2 个车位（00 和 01）。停车时长上限 L=4 个时间单位。系统需要支持以下操作：</p>
 <ul>
-<li><code>enter(time, carID)</code>：为车辆 carID 分配车位，分配规则为：优先选择空闲车位多的区域（若相同，则按字母顺序），然后选择该区域中编号最小的车位。停车票过期时间为 <code>time + L</code>。  </li>
-<li><code>leave(time, carID)</code>：车辆提前离场。  </li>
+<li><code>enter(time, carID)</code>：为车辆 carID 分配车位，分配规则为：优先选择空闲车位多的区域（若相同，则按字母顺序），然后选择该区域中编号最小的车位。停车票过期时间为 <code>time + L</code>。</li>
+<li><code>leave(time, carID)</code>：车辆提前离场。</li>
 <li><strong>周期检查</strong>：在任意操作时间点，自动移除（拖走）所有停车时间已到的车辆。</li>
 </ul>
 <p>为了演示，还需支持通过 carID 进行简单搜索，判断车辆是否仍在停车场或已被拖走。</p>
 <p><strong>设计方案</strong>：</p>
 <ul>
-<li>使用一个集合（set）维护每个区域的空闲车位。  </li>
-<li>使用一个结构体或计数器记录当前区域的占用情况。  </li>
-<li>使用一个映射（map）存储 <code>carID -&gt; CarInfo</code>，记录车辆所在区域、车位、过期时间等。  </li>
+<li>使用一个集合（set）维护每个区域的空闲车位。</li>
+<li>使用一个结构体或计数器记录当前区域的占用情况。</li>
+<li>使用一个映射（map）存储 <code>carID -&gt; CarInfo</code>，记录车辆所在区域、车位、过期时间等。</li>
 <li>使用一个最小堆（min-heap）维护即将过期的车辆队列。</li>
 </ul>
-<p><strong>核心方法</strong>：  </p>
+<p><strong>核心方法</strong>：</p>
 <ul>
-<li>使用 <code>processTime(now)</code> 处理到当前时间点为止的过期车辆（单调时间 + 事件队列模式）。  </li>
-<li>使用“桶选择”（bucket selection）来决定停车区域。  </li>
+<li>使用 <code>processTime(now)</code> 处理到当前时间点为止的过期车辆（单调时间 + 事件队列模式）。</li>
+<li>使用“桶选择”（bucket selection）来决定停车区域。</li>
 <li>使用映射（map）进行直接查找以支持搜索功能。</li>
 </ul>
 <p><strong>示例代码</strong>：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 停车信息</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Car</span> { </span><br><span class="line">    <span class="type">char</span> zone;        <span class="comment">// 停车区域</span></span><br><span class="line">    string slot;      <span class="comment">// 车位编号</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> expTime;<span class="comment">// 过期时间（超时将被拖车）</span></span><br><span class="line">    <span class="type">bool</span> towed;       <span class="comment">// 是否已被拖走</span></span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>{</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> L = <span class="number">4</span>; <span class="comment">// 每辆车的停放时长限制</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> currentTime = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 每个区域的空闲车位集合（自动排序）</span></span><br><span class="line">    map&lt;<span class="type">char</span>, set&lt;string&gt;&gt; freeSlots;</span><br><span class="line">    freeSlots[<span class="string">'A'</span>] = {<span class="string">"00"</span>,<span class="string">"01"</span>};</span><br><span class="line">    freeSlots[<span class="string">'B'</span>] = {<span class="string">"00"</span>,<span class="string">"01"</span>};</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 已停放车辆 carID -&gt; Car 信息</span></span><br><span class="line">    unordered_map&lt;string, Car&gt; parked;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 拖车计划：按过期时间升序的小顶堆</span></span><br><span class="line">    priority_queue&lt;pair&lt;<span class="type">long</span> <span class="type">long</span>,string&gt;, </span><br><span class="line">                   vector&lt;pair&lt;<span class="type">long</span> <span class="type">long</span>,string&gt;&gt;, </span><br><span class="line">                   greater&lt;pair&lt;<span class="type">long</span> <span class="type">long</span>,string&gt;&gt;&gt; towPQ;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理时间推进，过期车辆拖走</span></span><br><span class="line">    <span class="keyword">auto</span> processTime = [&amp;](<span class="type">long</span> <span class="type">long</span> t) {</span><br><span class="line">        <span class="keyword">while</span> (!towPQ.<span class="built_in">empty</span>() &amp;&amp; towPQ.<span class="built_in">top</span>().first &lt;= t) {</span><br><span class="line">            <span class="keyword">auto</span> [exp, id] = towPQ.<span class="built_in">top</span>();</span><br><span class="line">            towPQ.<span class="built_in">pop</span>();</span><br><span class="line">            <span class="keyword">if</span> (parked.<span class="built_in">count</span>(id)) {</span><br><span class="line">                Car &amp;car = parked[id];</span><br><span class="line">                cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; exp &lt;&lt; <span class="string">": 车辆 "</span> &lt;&lt; id </span><br><span class="line">                     &lt;&lt; <span class="string">" 被拖走 (车位 "</span> &lt;&lt; car.zone &lt;&lt; car.slot &lt;&lt; <span class="string">")\n"</span>;</span><br><span class="line">                <span class="comment">// 释放车位</span></span><br><span class="line">                freeSlots[car.zone].<span class="built_in">insert</span>(car.slot);</span><br><span class="line">                car.towed = <span class="literal">true</span>;</span><br><span class="line">                parked.<span class="built_in">erase</span>(id);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        currentTime = t;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 车辆进入停车场</span></span><br><span class="line">    <span class="keyword">auto</span> enter = [&amp;](<span class="type">long</span> <span class="type">long</span> t, string carID) {</span><br><span class="line">        <span class="built_in">processTime</span>(t);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 选择最佳区域：空位最多的区域（若并列则字母序优先）</span></span><br><span class="line">        <span class="type">char</span> bestZone = <span class="string">'\0'</span>; </span><br><span class="line">        <span class="type">size_t</span> maxFree = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;pr : freeSlots) {</span><br><span class="line">            <span class="type">char</span> z = pr.first;</span><br><span class="line">            <span class="type">size_t</span> freeCount = pr.second.<span class="built_in">size</span>();</span><br><span class="line">            <span class="keyword">if</span> (freeCount &gt; maxFree || </span><br><span class="line">               (freeCount == maxFree &amp;&amp; bestZone != <span class="string">'\0'</span> &amp;&amp; z &lt; bestZone)) {</span><br><span class="line">                bestZone = z; </span><br><span class="line">                maxFree = freeCount;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果没有空位</span></span><br><span class="line">        <span class="keyword">if</span> (bestZone == <span class="string">'\0'</span> || maxFree == <span class="number">0</span>) {</span><br><span class="line">            cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": 车辆 "</span> &lt;&lt; carID &lt;&lt; <span class="string">" 被拒绝 (停车场已满)\n"</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 分配最小编号的车位</span></span><br><span class="line">        string slot = *freeSlots[bestZone].<span class="built_in">begin</span>();</span><br><span class="line">        freeSlots[bestZone].<span class="built_in">erase</span>(slot);</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> exp = t + L;</span><br><span class="line">        parked[carID] = { bestZone, slot, exp, <span class="literal">false</span> };</span><br><span class="line">        towPQ.<span class="built_in">push</span>({exp, carID});</span><br><span class="line"></span><br><span class="line">        cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": 车辆 "</span> &lt;&lt; carID </span><br><span class="line">             &lt;&lt; <span class="string">" 停在 "</span> &lt;&lt; bestZone &lt;&lt; slot </span><br><span class="line">             &lt;&lt; <span class="string">" (过期时间 "</span> &lt;&lt; exp &lt;&lt; <span class="string">")\n"</span>;</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 车辆离开停车场</span></span><br><span class="line">    <span class="keyword">auto</span> leave = [&amp;](<span class="type">long</span> <span class="type">long</span> t, string carID) {</span><br><span class="line">        <span class="built_in">processTime</span>(t);</span><br><span class="line">        <span class="keyword">if</span> (parked.<span class="built_in">count</span>(carID)) {</span><br><span class="line">            Car car = parked[carID]; </span><br><span class="line">            parked.<span class="built_in">erase</span>(carID);</span><br><span class="line">            freeSlots[car.zone].<span class="built_in">insert</span>(car.slot);</span><br><span class="line">            cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": 车辆 "</span> &lt;&lt; carID </span><br><span class="line">                 &lt;&lt; <span class="string">" 从 "</span> &lt;&lt; car.zone &lt;&lt; car.slot &lt;&lt; <span class="string">" 离开\n"</span>;</span><br><span class="line">        } <span class="keyword">else</span> {</span><br><span class="line">            cout &lt;&lt; <span class="string">"时间 "</span> &lt;&lt; t &lt;&lt; <span class="string">": 车辆 "</span> &lt;&lt; carID </span><br><span class="line">                 &lt;&lt; <span class="string">" 不在停车场 (可能已被拖走)\n"</span>;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 演示流程</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">1</span>, <span class="string">"X123"</span>); <span class="comment">// 1时刻，X123 入场 → A00</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">2</span>, <span class="string">"Y456"</span>); <span class="comment">// 2时刻，Y456 入场 → A01</span></span><br><span class="line">    <span class="built_in">leave</span>(<span class="number">5</span>, <span class="string">"Y456"</span>); <span class="comment">// 5时刻，Y456 离开（此时 X123 已超时，先被拖走）</span></span><br><span class="line">    <span class="built_in">enter</span>(<span class="number">6</span>, <span class="string">"Z789"</span>); <span class="comment">// 6时刻，Z789 入场，找到空位</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
 <p><strong>运行说明</strong>：</p>
 <ul>
-<li><strong>t=1</strong>：两个区域均有 2 个空位，选择字母序更靠前的 A 区，将 X123 停入 A00。  </li>
-<li><strong>t=2</strong>：A 区剩 1 个空位，B 区有 2 个空位，因此 Y456 停入 B00。  </li>
-<li><strong>t=5</strong>：X123 的停车票过期，自动被拖走；随后 Y456 正常离场。此时 A00 与 B00 同时空出。  </li>
+<li><strong>t=1</strong>：两个区域均有 2 个空位，选择字母序更靠前的 A 区，将 X123 停入 A00。</li>
+<li><strong>t=2</strong>：A 区剩 1 个空位，B 区有 2 个空位，因此 Y456 停入 B00。</li>
+<li><strong>t=5</strong>：X123 的停车票过期，自动被拖走；随后 Y456 正常离场。此时 A00 与 B00 同时空出。</li>
 <li><strong>t=6</strong>：Z789 进入时，A、B 区均有 2 个空位，字母序优先选择 A 区，停入 A00。</li>
 </ul>
-<p><strong>总结</strong>：<br>在这个最终关卡中，我们将“分区（zone/slot 的桶结构）”、“有序选择”、“基于时间的事件处理”以及“懒惰过期检查”组合到了一起。通过合理的设计和前面所学的模式配合，逻辑保持清晰：  </p>
+<p><strong>总结</strong>：<br>在这个最终关卡中，我们将“分区（zone/slot 的桶结构）”、“有序选择”、“基于时间的事件处理”以及“懒惰过期检查”组合到了一起。通过合理的设计和前面所学的模式配合，逻辑保持清晰：</p>
 <ul>
-<li>每个部分由合适的数据结构承担（集合、映射、优先队列）。  </li>
+<li>每个部分由合适的数据结构承担（集合、映射、优先队列）。</li>
 <li>各种功能（车位分配、票据过期、提前离场、状态查询）得到了自然的统一。</li>
 </ul>
 <h2 id="示例问题与案例分析"><a href="#示例问题与案例分析" class="headerlink" title="示例问题与案例分析"></a>示例问题与案例分析</h2><p>现在我们将这些模式应用到真实的 oj 问题中。以下每个案例都是对一个结合了上述多种技巧的问题进行的简要分析。我们重点强调识别特征、所选数据结构，以及常见的陷阱或错误做法。</p>
 <h3 id="停车场系统（资源分配-定时过期）"><a href="#停车场系统（资源分配-定时过期）" class="headerlink" title="停车场系统（资源分配 + 定时过期）"></a>停车场系统（资源分配 + 定时过期）</h3><p><strong>问题描述</strong>：<br>管理一个带有多个区域（如 A、B、C…）的停车场。每个区域都有若干停车位。当一辆车进入时，应将其分配到“剩余车位最多的区域”（如有并列，则按区域名称排序），并在该区域内获得编号最小的空闲车位。车辆有最长停车时长 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.541ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 681 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g></g></g></svg></mjx-container>；若超时未离开，则会在该时刻被拖走（移除）。系统需要支持车辆进入、离开，以及可能的搜索功能（如根据车牌部分信息查找）。</p>
-<p><strong>关键数据结构</strong>：<br>该问题需要多重索引的分配方式：既要按区域空余车位数选择，又要按车位编号分配。  </p>
+<p><strong>关键数据结构</strong>：该问题需要多重索引的分配方式：既要按区域空余车位数选择，又要按车位编号分配。</p>
 <ul>
-<li>一个简单做法是：对每个区域维护一个 <code>freeSlots[zone]</code>，存放该区域空闲车位编号的 <code>set&lt;int&gt;</code>。  </li>
-<li>区域选择可以通过扫描所有区域找最大剩余数（若区域数量较少）完成，或者维护一个集合，按 <code>(freeCount, zoneName)</code> 排序。  </li>
-<li>拖车事件通过按过期时间排序的最小堆或集合来处理。  </li>
+<li>一个简单做法是：对每个区域维护一个 <code>freeSlots[zone]</code>，存放该区域空闲车位编号的 <code>set&lt;int&gt;</code>。</li>
+<li>区域选择可以通过扫描所有区域找最大剩余数（若区域数量较少）完成，或者维护一个集合，按 <code>(freeCount, zoneName)</code> 排序。</li>
+<li>拖车事件通过按过期时间排序的最小堆或集合来处理。</li>
 <li>使用哈希表 <code>plate -&gt; CarInfo(zone, slot, expiry)</code> 可实现快速查找，用于搜索或移除特定车辆。</li>
 </ul>
-<p><strong>涉及模式</strong>：  </p>
+<p><strong>涉及模式</strong>：</p>
 <ul>
-<li>资源池选择（选择区域）  </li>
-<li>最小元素检索（通过集合获取最小车位号）  </li>
-<li>单调计时器（在时间推进时处理拖车事件）  </li>
+<li>资源池选择（选择区域）</li>
+<li>最小元素检索（通过集合获取最小车位号）</li>
+<li>单调计时器（在时间推进时处理拖车事件）</li>
 <li>如果有基于车牌后缀的搜索，可以再用一个“桶”结构：例如建立一个大小为 10000 的数组，根据车牌后四位映射到活跃车辆列表，从而快速定位以某个数字结尾的车。</li>
 </ul>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li>常见错误之一是未在查询或新车辆进入时，处理所有应当被拖走的车辆。如果不先清理过期车辆，就可能导致无法将车分配到一个实际上早已腾出的车位。<strong>因此必须在分配或查询前调用过期处理逻辑</strong>。  </li>
-<li>另一个陷阱是区域选择的顺序错误（未正确处理并列情况）。如果使用集合存储区域 <code>(freeCount, zoneName)</code>，在车位数发生变化时必须小心：需要先移除旧值再插入新值。  </li>
-<li>编码时，若忘记在车辆离开时将车位从该区域的 <code>set</code> 中移除，或者未在拖车后清理活跃记录，可能会导致“重复占位”或把已占用的车位再次分配。  </li>
+<li>常见错误之一是未在查询或新车辆进入时，处理所有应当被拖走的车辆。如果不先清理过期车辆，就可能导致无法将车分配到一个实际上早已腾出的车位。<strong>因此必须在分配或查询前调用过期处理逻辑</strong>。</li>
+<li>另一个陷阱是区域选择的顺序错误（未正确处理并列情况）。如果使用集合存储区域 <code>(freeCount, zoneName)</code>，在车位数发生变化时必须小心：需要先移除旧值再插入新值。</li>
+<li>编码时，若忘记在车辆离开时将车位从该区域的 <code>set</code> 中移除，或者未在拖车后清理活跃记录，可能会导致“重复占位”或把已占用的车位再次分配。</li>
 <li>对于车牌后缀搜索，若扫描所有车辆效率太低，必须采用“后缀桶”或维护基于车牌子串的索引。</li>
 </ul>
-<p><strong>为什么不能用更简单的方法？</strong><br>有人可能会尝试维护一个全局列表，按 <code>(freeCount, zone)</code> 等组合键排序来分配车位，但更新起来过于复杂。将问题拆分为“先按区域，再按车位”的两步选择更加清晰。<br>此外，如果没有有序结构存放车位，就必须扫描大量车位才能找到一个空位，当 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.378ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 1051 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g></g></g></svg></mjx-container> 很大时效率很低。而采用有序集合，可以在近似 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="9.133ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4036.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g><g data-mml-node="mo" transform="translate(3647.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 的时间完成车位分配。类似地，通过排序结构处理拖车事件，可以避免每次都扫描所有已停车辆。  </p>
+<p><strong>为什么不能用更简单的方法？</strong><br>有人可能会尝试维护一个全局列表，按 <code>(freeCount, zone)</code> 等组合键排序来分配车位，但更新起来过于复杂。将问题拆分为“先按区域，再按车位”的两步选择更加清晰。<br>此外，如果没有有序结构存放车位，就必须扫描大量车位才能找到一个空位，当 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.378ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 1051 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g></g></g></svg></mjx-container> 很大时效率很低。而采用有序集合，可以在近似 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="9.133ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4036.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g><g data-mml-node="mo" transform="translate(3647.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 的时间完成车位分配。类似地，通过排序结构处理拖车事件，可以避免每次都扫描所有已停车辆。</p>
 <h3 id="多服务器等待队列（全局队列与本地队列-重排）"><a href="#多服务器等待队列（全局队列与本地队列-重排）" class="headerlink" title="多服务器等待队列（全局队列与本地队列 + 重排）"></a>多服务器等待队列（全局队列与本地队列 + 重排）</h3><p><strong>问题描述</strong>：<br>有 N 台服务器，每台服务器都有自己的等待队列。新用户会进入当前等待人数最少的队列（若有并列，则选择服务器 ID 最小的那一台）。每个用户会获得一个全局的等待号（类似依次递增的票号）。当系统发生变化时（有人登录或离开），所有用户的等待号会被重新从 1 开始编号（因为队列可能合并或顺序改变）。另外，如果某台服务器宕机，该服务器的整个队列会保持原有顺序被插入到其他队列的末尾（一次重排操作）。系统需要支持以下操作：用户到达、用户离开、服务器故障（队列重排）、以及查询某个用户当前的等待号。</p>
 <p><strong>关键数据结构</strong>：<br>这本质上是之前提到的排队问题的变体。我们需要维护用户的全局顺序，同时还要保存各服务器的队列。一个便捷的方式是使用<strong>双向链表</strong>分别表示全局队列和每台服务器的队列（并通过指针进行关联）。每个用户节点既属于服务器队列，又属于全局队列。</p>
 <p>为了在队列变化后高效计算等待号，可以使用 <strong>Fenwick 树（树状数组）</strong> 或“删除计数”方法，将用户在全局队列中的位置映射为等待号。具体做法是：当用户加入时赋予一个递增的序列号（原始票号），随后利用 BIT 统计其之前仍在队列中的人数，从而在 O(log n) 时间内计算出当前位置。另一种替代方案是使用基于全局位置的<strong>顺序统计树</strong>。</p>
 <p>在决定新用户应进入哪台服务器时，需要一个<strong>优先队列结构</strong>（最小堆或平衡树），按队列长度进行排序。当有用户离开或登录时，相应服务器的队列长度会减少，此时要更新该结构。</p>
 <p><strong>使用的模式</strong>：</p>
 <ul>
-<li><strong>桶套桶结构</strong>：每台服务器对应一个桶（即队列），新用户进入队列长度最小的桶。  </li>
-<li><strong>排名查询</strong>：通过 BIT 计算删除后的等待号。  </li>
+<li><strong>桶套桶结构</strong>：每台服务器对应一个桶（即队列），新用户进入队列长度最小的桶。</li>
+<li><strong>排名查询</strong>：通过 BIT 计算删除后的等待号。</li>
 <li><strong>链表结构</strong>：用于在服务器宕机时快速整体移动队列。由于双向链表可以在 O(1) 时间内拼接子链表，若掌握首尾指针就能轻松完成重排。在 oj 解法中，通常做法是将宕机服务器的队列从全局链表中删除，再整体插入到全局队列的尾部。</li>
 </ul>
 <p>这种结构的组合确保了每种操作的效率。</p>
 <p><strong>常见陷阱</strong>：</p>
 <ul>
-<li><strong>低效重编号</strong>：如果每次有人离开或服务器宕机就遍历整个队列重新编号，复杂度是 O(n)，在大数据量下不可接受。Fenwick 树或“删除计数”方法可以避免这一问题。  </li>
-<li><strong>链表实现出错</strong>：双向链表插入和删除时必须完整更新指针，如果忘记正确断开节点，很容易破坏队列结构。  </li>
-<li><strong>服务器队列重排错误</strong>：若处理不当，宕机服务器的队列在移动时顺序可能被破坏。标准做法是整体删除并重新插入，保证相对顺序不变。  </li>
-<li><strong>队列长度统计失误</strong>：若多个用户同时到达，单纯依靠计数可能导致错误，必须始终依赖维护的优先队列结构来分配。  </li>
+<li><strong>低效重编号</strong>：如果每次有人离开或服务器宕机就遍历整个队列重新编号，复杂度是 O(n)，在大数据量下不可接受。Fenwick 树或“删除计数”方法可以避免这一问题。</li>
+<li><strong>链表实现出错</strong>：双向链表插入和删除时必须完整更新指针，如果忘记正确断开节点，很容易破坏队列结构。</li>
+<li><strong>服务器队列重排错误</strong>：若处理不当，宕机服务器的队列在移动时顺序可能被破坏。标准做法是整体删除并重新插入，保证相对顺序不变。</li>
+<li><strong>队列长度统计失误</strong>：若多个用户同时到达，单纯依靠计数可能导致错误，必须始终依赖维护的优先队列结构来分配。</li>
 <li><strong>BIT 或排名计算的边界问题</strong>：常见的 off-by-one 错误可能导致等待号计算错误。</li>
 </ul>
 <p><strong>为什么不能更简单？</strong><br>如果 N 和用户总数都很小，可以直接在数组或向量中用插入/删除来重算等待号（O(n)）。但在数万次操作的场景中，这种方法不可行。通过树状数组或顺序统计树来做排名查询，并结合链表与优先队列，才是可扩展的高效方案。这道题考验的更多是系统设计思维，而不是单一的 BFS 或 DP 算法。</p>
 <h3 id="咖啡店订单履行（类型队列-紧急度排序）"><a href="#咖啡店订单履行（类型队列-紧急度排序）" class="headerlink" title="咖啡店订单履行（类型队列 + 紧急度排序）"></a>咖啡店订单履行（类型队列 + 紧急度排序）</h3><p><strong>问题</strong>：顾客下单时会点若干饮品。每种饮品都有独立的制作线。当一杯饮品制作完成后，应当分配给最早需要该饮品的订单。如果某个订单的所有饮品都完成，该订单即视为完成并移除。顾客也可能取消订单；如果订单被取消，已经制作好的饮品需要重新分配给其他仍然需要它们的订单。同时，咖啡店还希望展示“最紧急的订单”（例如：剩余饮品最多的订单，若相同则优先显示最早的订单）。</p>
 <p><strong>关键结构</strong>：我们为每种饮品维护一个 FIFO 队列，用来管理下一个该饮品应当分配给哪个订单。例如，<code>needQueue[type]</code> 保存等待该饮品的订单，按到达顺序排列。一个订单 ID 可能会出现在多个队列中，因为它可能需要多种饮品。我们还需要维护一个全局有序集合，按照 <code>(remainingItems, arrivalTime)</code> 排序，用来支持“紧急订单”查询（这是一个多关键字排序结构）。此外，需要一个从订单 ID 到订单对象的映射，用来追踪订单细节，比如每种饮品还剩多少未完成，以及（在处理取消时）可能还需要记录已供应的饮品。</p>
-<p><strong>使用的模式</strong>：  </p>
+<p><strong>使用的模式</strong>：</p>
 <ul>
-<li><strong>生产者-消费者队列</strong>：每种饮品的制作线就是生产者，订单是消费者；<code>needQueue</code> 确保饮品按 FCFS（先到先服务）规则分配。  </li>
-<li><strong>全局优先级集合</strong>：订单按复合键排序，用于“紧急度”查询。  </li>
+<li><strong>生产者-消费者队列</strong>：每种饮品的制作线就是生产者，订单是消费者；<code>needQueue</code> 确保饮品按 FCFS（先到先服务）规则分配。</li>
+<li><strong>全局优先级集合</strong>：订单按复合键排序，用于“紧急度”查询。</li>
 <li><strong>惰性删除</strong>：当订单被取消时，它可能仍然留在某些 <code>needQueue</code> 中；我们标记其为已取消，并在队列遍历时跳过，而不是尝试直接从深层队列中删除（虽然如果存储了迭代器，也可以直接移除）。类似地，当订单完成后，理想情况下应从其他饮品队列中移除，但如果没有，也可以在之后跳过，因为已完成的订单不再“活跃”。</li>
 </ul>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
-<li><strong>没有使用按类型区分的队列</strong>：这样一来，当某个饮品制作完成时，就需要扫描所有订单以找到第一个需要它的订单。每次 O(n) 的操作会非常低效。正确做法是为每种饮品维护一个队列，这样可以在 O(1) 时间内获得下一个目标订单。  </li>
-<li><strong>忘记更新全局订单集合</strong>：当订单的剩余数量发生变化（无论是分配了饮品还是订单取消），必须将其从集合中移除再插入（或就地调整，如果结构支持），以保证排序的正确性。若忽略这一步，紧急订单列表就会出错。  </li>
-<li><strong>取消处理不完整</strong>：如果忘记将已经制作好的饮品重新分配出去，就会造成浪费（与题目规则冲突）。  </li>
-<li><strong>多份相同饮品的处理</strong>：一个订单可能需要同一种饮品的多份。常见的解决方法是将订单在该饮品队列中排入多次（每份一次），这种方式可行，但要小心不要给订单分配超过所需的数量。一旦该订单已经满足，就需要在队列中跳过它。  </li>
+<li><strong>没有使用按类型区分的队列</strong>：这样一来，当某个饮品制作完成时，就需要扫描所有订单以找到第一个需要它的订单。每次 O(n) 的操作会非常低效。正确做法是为每种饮品维护一个队列，这样可以在 O(1) 时间内获得下一个目标订单。</li>
+<li><strong>忘记更新全局订单集合</strong>：当订单的剩余数量发生变化（无论是分配了饮品还是订单取消），必须将其从集合中移除再插入（或就地调整，如果结构支持），以保证排序的正确性。若忽略这一步，紧急订单列表就会出错。</li>
+<li><strong>取消处理不完整</strong>：如果忘记将已经制作好的饮品重新分配出去，就会造成浪费（与题目规则冲突）。</li>
+<li><strong>多份相同饮品的处理</strong>：一个订单可能需要同一种饮品的多份。常见的解决方法是将订单在该饮品队列中排入多次（每份一次），这种方式可行，但要小心不要给订单分配超过所需的数量。一旦该订单已经满足，就需要在队列中跳过它。</li>
 <li><strong>事件顺序问题</strong>：如果订单正好在某杯饮品完成的那一刻满足了所有需求，要确保代码能够正确识别它已完成（避免把这杯饮品错误地再分配给它），或者在事件处理的逻辑上明确完成顺序。通常在事件层面顺序化处理即可。</li>
 </ul>
 <p><strong>现实类比</strong>：这就像有多个咖啡师（一个做咖啡，一个做茶，等等），而顾客点了不同组合的饮品。每当一位咖啡师完成饮品，就会叫出该饮品，最早需要它的顾客接走。数据结构保证了咖啡师不需要在整个店里扫描顾客来确认谁需要咖啡——他们手里有一份等待咖啡的队列。</p>
 <h3 id="机场停车券（容量-全局延长-到期）"><a href="#机场停车券（容量-全局延长-到期）" class="headerlink" title="机场停车券（容量 + 全局延长 + 到期）"></a>机场停车券（容量 + 全局延长 + 到期）</h3><p><strong>问题描述</strong>：有多家停车公司，每家公司车位容量有限。车辆会购买若干天有效的停车券。如果车辆停放时间超过了券的有效期，在检查时会被拖走。车辆可以在到期前续费（延长停车券），公司也可能举办促销活动，将所有在停车辆的券统一延长若干天。系统需要支持：车辆入场（若有空位）、离场、续期（单车或全体延长）、定期检查并拖走过期车辆，以及查询某辆车还剩余多少天或已经超期多久（若被拖走）。</p>
-<p><strong>关键数据结构</strong>：每家公司独立处理。  </p>
+<p><strong>关键数据结构</strong>：每家公司独立处理。</p>
 <ul>
-<li><strong>容量管理</strong>：为每家公司维护一个剩余车位的计数器（或空位集合）。  </li>
-<li><strong>过期管理</strong>：维护一个按到期时间排序的小根堆。更优的做法是：堆中存储相对过期时间，并结合全局偏移量（因为促销会使所有车辆的过期时间同时延长）。  <ul>
+<li><strong>容量管理</strong>：为每家公司维护一个剩余车位的计数器（或空位集合）。</li>
+<li><strong>过期管理</strong>：维护一个按到期时间排序的小根堆。更优的做法是：堆中存储相对过期时间，并结合全局偏移量（因为促销会使所有车辆的过期时间同时延长）。<ul>
 <li>具体实现：为每家公司维护一个延长偏移量 <code>offsetDays[company]</code>，累计所有的促销延长。每辆车存储的过期时间为“基础值”，即车辆入场或上次续期时设定的值。实际过期时间 = 基础值 + 偏移量。</li>
 </ul>
 </li>
-<li><strong>检查逻辑</strong>：检查时，从堆顶取出最早到期的车辆。如果其 <code>基础到期时间 + 当前偏移量 ≤ 当前时间</code>，则判定已过期。拖车操作释放车位（容量计数 +1）。  </li>
+<li><strong>检查逻辑</strong>：检查时，从堆顶取出最早到期的车辆。如果其 <code>基础到期时间 + 当前偏移量 ≤ 当前时间</code>，则判定已过期。拖车操作释放车位（容量计数 +1）。</li>
 <li><strong>续期逻辑</strong>：单车续期时，直接更新该车的基础到期值（或计算新到期时间并插入堆中）。为避免堆中难以更新旧值，使用 <strong>惰性删除</strong>：插入新到期时间，并在车辆记录里标记为最新值；旧的过期条目留在堆里，等弹出时再跳过。</li>
 </ul>
-<p><strong>使用的模式</strong>：  </p>
+<p><strong>使用的模式</strong>：</p>
 <ul>
-<li><strong>容量检查</strong>：每家公司维护已停 vs 总容量，类似桶计数。  </li>
-<li><strong>惰性全局更新</strong>：通过偏移量记录促销延长，避免逐一更新所有车辆。  </li>
-<li><strong>优先队列 + 惰性删除</strong>：管理车辆过期时间表，解决更新和移除难题。  </li>
+<li><strong>容量检查</strong>：每家公司维护已停 vs 总容量，类似桶计数。</li>
+<li><strong>惰性全局更新</strong>：通过偏移量记录促销延长，避免逐一更新所有车辆。</li>
+<li><strong>优先队列 + 惰性删除</strong>：管理车辆过期时间表，解决更新和移除难题。</li>
 <li><strong>单调时间事件</strong>：检查操作按时间顺序进行，逐步清理到当前时间点之前的过期车辆。</li>
 </ul>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
 <li><strong>促销更新 O(n)</strong>：错误做法是遇到促销就更新所有车辆过期时间，导致事件复杂度 O(n)，在大规模场景下会超时。偏移量法能把这步降为 O(1)。</li>
 <li><strong>车辆提前离开未清理</strong>：如果车辆离场却仍留在过期堆里，可能在检查时被误拖。需要惰性删除或指针显式移除。</li>
@@ -1031,28 +1030,28 @@ mjx-container[display="true"] + br {
 <li><strong>容量释放</strong>：车辆离开或被拖走时必须释放车位，否则会导致系统错误地拒绝新车入场。</li>
 </ul>
 <p><strong>替代方案</strong>：<br>有人可能考虑使用一个全局结构统一管理所有公司的到期时间。但由于检查是分公司进行的，这会使问题更复杂：促销只作用于某一家公司，导致全局排序难以统一更新。因此更好的做法是：<strong>每家公司独立维护一个堆和偏移量</strong>，这样既简化逻辑，又能保持操作高效。若强行用全局排序结构，促销就会变成非均匀偏移，操作难度和复杂度都大大增加。</p>
-<h3 id="在线商店目录（类别-厂商索引-折扣-Top-K）"><a href="#在线商店目录（类别-厂商索引-折扣-Top-K）" class="headerlink" title="在线商店目录（类别-厂商索引 + 折扣 + Top-K）"></a>在线商店目录（类别-厂商索引 + 折扣 + Top-K）</h3><p><strong>问题场景</strong>：一家线上商店的商品由类别（category）和生产厂商（company）共同标识。系统需要支持以下操作：  </p>
+<h3 id="在线商店目录（类别-厂商索引-折扣-Top-K）"><a href="#在线商店目录（类别-厂商索引-折扣-Top-K）" class="headerlink" title="在线商店目录（类别-厂商索引 + 折扣 + Top-K）"></a>在线商店目录（类别-厂商索引 + 折扣 + Top-K）</h3><p><strong>问题场景</strong>：一家线上商店的商品由类别（category）和生产厂商（company）共同标识。系统需要支持以下操作：</p>
 <ul>
-<li>添加商品  </li>
-<li>移除商品（下架）  </li>
-<li>对某一类别与厂商的所有商品统一打折（从价格中减去固定金额，可能导致部分商品价格降为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.131ex" height="1.557ex" role="img" focusable="false" viewBox="0 -666 500 688"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g></svg></mjx-container> 从而下架）  </li>
+<li>添加商品</li>
+<li>移除商品（下架）</li>
+<li>对某一类别与厂商的所有商品统一打折（从价格中减去固定金额，可能导致部分商品价格降为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.131ex" height="1.557ex" role="img" focusable="false" viewBox="0 -666 500 688"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g></svg></mjx-container> 从而下架）</li>
 <li>查询最便宜的最多 5 个商品，可以是某一类别下的、某一厂商下的，或者全局范围内的</li>
 </ul>
-<p><strong>关键数据结构</strong>：这可以抽象为一个二维分桶结构：5 个类别 × 5 个厂商 = 共 25 个桶。  </p>
+<p><strong>关键数据结构</strong>：这可以抽象为一个二维分桶结构：5 个类别 × 5 个厂商 = 共 25 个桶。</p>
 <ul>
-<li>每个桶存放该类别与厂商下所有商品的价格，使用有序容器（例如 <code>multiset&lt;int&gt;</code> 或小根堆）。  </li>
-<li><strong>折扣操作</strong>：采用惰性偏移（lazy offset）。不直接更新每个商品价格，而是在该桶上维护一个累计的 <code>offset[bucket]</code>，表示该桶累计打折的金额。桶内的价格仍保持最初的基础值，在查询或移除时，实际价格 = <code>storedPrice - offset</code>。  </li>
-<li><strong>跨桶查询</strong>：若需要找多个桶中的最便宜商品，只需取出每个相关桶的最小值，经过 offset 调整后再比较，得到全局最小值。由于最多只需前 5 个商品，可以只从每个桶中取出几个最小的候选，如在模式 <strong>2.1</strong> 中所述。  </li>
+<li>每个桶存放该类别与厂商下所有商品的价格，使用有序容器（例如 <code>multiset&lt;int&gt;</code> 或小根堆）。</li>
+<li><strong>折扣操作</strong>：采用惰性偏移（lazy offset）。不直接更新每个商品价格，而是在该桶上维护一个累计的 <code>offset[bucket]</code>，表示该桶累计打折的金额。桶内的价格仍保持最初的基础值，在查询或移除时，实际价格 = <code>storedPrice - offset</code>。</li>
+<li><strong>跨桶查询</strong>：若需要找多个桶中的最便宜商品，只需取出每个相关桶的最小值，经过 offset 调整后再比较，得到全局最小值。由于最多只需前 5 个商品，可以只从每个桶中取出几个最小的候选，如在模式 <strong>2.1</strong> 中所述。</li>
 <li><strong>快速定位与删除</strong>：维护一个产品 ID 到其所在桶和基础价格的映射，以便移除时能快速找到并从对应桶中删除。</li>
 </ul>
-<p><strong>使用到的模式</strong>：  </p>
+<p><strong>使用到的模式</strong>：</p>
 <ul>
-<li><strong>多索引分桶</strong>：按类别与厂商预分组，便于定向查询。  </li>
-<li><strong>惰性统一更新</strong>：通过 offset 实现高效打折。  </li>
-<li><strong>跨桶 Top-K 合并</strong>：从多个桶中取局部最小值再归并。  </li>
+<li><strong>多索引分桶</strong>：按类别与厂商预分组，便于定向查询。</li>
+<li><strong>惰性统一更新</strong>：通过 offset 实现高效打折。</li>
+<li><strong>跨桶 Top-K 合并</strong>：从多个桶中取局部最小值再归并。</li>
 <li><strong>惰性删除</strong>：折扣可能使部分价格降至 0 或以下，此时在折扣操作过程中不断弹出桶中这些商品，将其移除。</li>
 </ul>
-<p><strong>常见陷阱</strong>：  </p>
+<p><strong>常见陷阱</strong>：</p>
 <ul>
 <li><strong>没有使用惰性偏移</strong>：如果每次打折都要移除并重新插入所有商品，复杂度为 O(n)，在 1 万商品、1 万次打折的极端情况中将达到 1 亿级操作，性能不可接受。</li>
 <li><strong>打折后未及时清理无效商品</strong>：折扣可能导致商品价格 ≤ 0，若不删除，会残留“幽灵商品”，在查询时错误地显示为最便宜项。正确做法是在折扣时不断检查桶中最小值，若实际价格 ≤ 0 就弹出。</li>
@@ -1064,17 +1063,17 @@ mjx-container[display="true"] + br {
 <p><strong>关键结构</strong>：核心查询是统计目标计算机在半径 5 以内的源计算机数量。实现方法是从目标点执行一次限定范围的 BFS（或 DFS，因半径较小），在下载开始或网络变化时进行。BFS 遍历在距离 &gt; 5 时终止，大幅限制了计算范围。随后统计找到的源节点数量（或列出它们）。假设找到的源数量为 p，则下载速率为 <code>9 * p</code>。实际下载过程通过一个时间变量来模拟：对每个正在进行的下载，存储其当前进度和可用源数量。时间向前推进到下一个事件发生的时刻（如链路移除或文件完成）。链路移除属于计划事件；当链路被移除时，我们需重新计算相关下载任务的源数量（再次执行限定范围的 BFS）。为了确定下一个事件（完成或移除）发生的先后，可以使用按完成时间排序的优先队列来管理下载任务。</p>
 <p><strong>使用的模式</strong>：</p>
 <ul>
-<li><strong>限定范围 BFS 在树上的应用</strong>：寻找目标点半径内的源节点，利用树的度数 ≤ 3 且半径小的特性。  </li>
-<li><strong>单调时间模拟</strong>：所有操作带有时间戳，因此下载进度始终快进到下一个事件发生的时间点。  </li>
-<li><strong>移除的延迟更新</strong>：不持续重算，而是仅在链路移除时（或下载开始时）才重新计算源数量。  </li>
+<li><strong>限定范围 BFS 在树上的应用</strong>：寻找目标点半径内的源节点，利用树的度数 ≤ 3 且半径小的特性。</li>
+<li><strong>单调时间模拟</strong>：所有操作带有时间戳，因此下载进度始终快进到下一个事件发生的时间点。</li>
+<li><strong>移除的延迟更新</strong>：不持续重算，而是仅在链路移除时（或下载开始时）才重新计算源数量。</li>
 <li><strong>优先队列的懒删除</strong>：当下载参数发生变化（例如源数量从 3 降为 2），可以插入新的完成时间，或将旧条目标记为无效。</li>
 </ul>
-<p><strong>常见陷阱</strong>：网络与时间结合的问题往往复杂。常见错误包括：  </p>
+<p><strong>常见陷阱</strong>：网络与时间结合的问题往往复杂。常见错误包括：</p>
 <ul>
-<li><strong>试图逐秒模拟下载过程</strong>：在可能达到千万秒的情况下，这是不可行的。正确做法是事件驱动，跳跃到下一个事件点。  </li>
-<li><strong>未能及时更新下载速率</strong>：当链路移除切断部分源时，下载速率必须在该时间点立即下降。如果提前或延后更改速率，都会导致下载进度计算错误。  </li>
-<li><strong>忽略并发管理</strong>：如果题目允许同时存在多个下载任务，需要分别跟踪。很多题目中每个查询对应一次下载，可以简化为独立处理。  </li>
-<li><strong>算法选择错误</strong>：BFS 使用范围有限时是可行的。如果有人尝试用 Floyd-Warshall 之类的全局预处理，那在动态移除链路的约束下是完全不必要且低效的。  </li>
+<li><strong>试图逐秒模拟下载过程</strong>：在可能达到千万秒的情况下，这是不可行的。正确做法是事件驱动，跳跃到下一个事件点。</li>
+<li><strong>未能及时更新下载速率</strong>：当链路移除切断部分源时，下载速率必须在该时间点立即下降。如果提前或延后更改速率，都会导致下载进度计算错误。</li>
+<li><strong>忽略并发管理</strong>：如果题目允许同时存在多个下载任务，需要分别跟踪。很多题目中每个查询对应一次下载，可以简化为独立处理。</li>
+<li><strong>算法选择错误</strong>：BFS 使用范围有限时是可行的。如果有人尝试用 Floyd-Warshall 之类的全局预处理，那在动态移除链路的约束下是完全不必要且低效的。</li>
 <li><strong>忘记在链路移除时正确处理部分进度</strong>：正确做法是先用旧速率推进到移除时刻，再调整速率。如果过早或过晚修改速率，会导致进度计算偏差。</li>
 </ul>
 <p><strong>替代方法</strong>：若图不是树或半径不小，可能需要更复杂的路径算法或维护距离矩阵。但在这里，题目条件（树结构且半径 ≤ 5）明显指向简单的 BFS。题解还利用了链路权值较小（1..3）的特性，但即便权值在 1..100 之间，BFS 在深度 5 的情况下仍然可行。使用“epoch 标记”来处理链路移除是一种巧妙技巧：无需实际删除边，只需在遍历时跳过被标记的边。这比动态维护最短路径树要简洁得多。</p>
@@ -1121,19 +1120,19 @@ mjx-container[display="true"] + br {
 <p><strong>使用示例：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">pushItem</span>(<span class="number">5</span>, <span class="number">100</span>);</span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">200</span>);</span><br><span class="line">Node n = <span class="built_in">topItem</span>(); <span class="comment">// should be id=3, key=200</span></span><br><span class="line"><span class="built_in">pushItem</span>(<span class="number">3</span>, <span class="number">150</span>);    <span class="comment">// update id=3 to key=150</span></span><br><span class="line">n = <span class="built_in">topItem</span>();     <span class="comment">// re-evaluate top, should now be id=3 with key=150</span></span><br></pre></td></tr></table></figure>
 
-<p>在该示例中：  </p>
+<p>在该示例中：</p>
 <ul>
-<li><code>pushItem(5, 100)</code> 插入元素 5，权值为 100。  </li>
-<li><code>pushItem(3, 200)</code> 插入元素 3，权值为 200。  </li>
-<li>调用 <code>topItem()</code> 时，返回的应是 <code>id=3, key=200</code>。  </li>
-<li>之后，执行 <code>pushItem(3, 50)</code> 将元素 3 更新为新权值 150。  </li>
+<li><code>pushItem(5, 100)</code> 插入元素 5，权值为 100。</li>
+<li><code>pushItem(3, 200)</code> 插入元素 3，权值为 200。</li>
+<li>调用 <code>topItem()</code> 时，返回的应是 <code>id=3, key=200</code>。</li>
+<li>之后，执行 <code>pushItem(3, 50)</code> 将元素 3 更新为新权值 150。</li>
 <li>再次调用 <code>topItem()</code>，返回的应是 <code>id=3, key=150</code>。</li>
 </ul>
 <p>旧的 <code>Node(3,200)</code> 在第二次 <code>topItem()</code> 调用时，因为版本号已过期会被弹出，不再影响结果。</p>
-<p>更一般化的扩展思路：  </p>
+<p>更一般化的扩展思路：</p>
 <ul>
-<li><code>currentVer</code> 不一定是整数递增版本号，也可以是布尔类型的“是否有效”标记。  </li>
-<li>如果删除操作只会发生一次，可以采用 0/1 的切换方式来表示版本。  </li>
+<li><code>currentVer</code> 不一定是整数递增版本号，也可以是布尔类型的“是否有效”标记。</li>
+<li>如果删除操作只会发生一次，可以采用 0/1 的切换方式来表示版本。</li>
 <li>核心思想是 <code>top()</code> 中的 while 循环：它会持续丢弃所有过期条目，确保最终返回的一定是最新有效的元素。</li>
 </ul>
 <h3 id="删除计数追踪器（分块数组-树状数组）"><a href="#删除计数追踪器（分块数组-树状数组）" class="headerlink" title="删除计数追踪器（分块数组 & 树状数组）"></a>删除计数追踪器（分块数组 &amp; 树状数组）</h3><p>在删除元素后，如果想要维护顺序或排名而不必重新给所有元素编号，可以使用一些数据结构来统计被删除的元素数量。</p>
@@ -1144,15 +1143,16 @@ mjx-container[display="true"] + br {
 <p><strong>使用场景</strong>：这正是我们在“排队等待问题”中计算当前等待人数的方法。公式为：<br><code>current position = original index - removedUpTo(original index - 1)</code>（需根据 1-indexing 习惯调整）。<br>分块数组方法实现简单，在多数情况下足够好用。</p>
 <p><strong>树状数组方法（Fenwick Tree Method）</strong><br>前文介绍过树状数组（Fenwick Tree / BIT）。思路是维护一个数组 <code>bit[]</code>，其中 <code>bit[i] = 1</code> 表示元素存在，<code>0</code> 表示已删除。树状数组支持 <strong>前缀和查询</strong> 与 <strong>单点更新</strong>，复杂度均为 <code>O(log n)</code>。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Fenwick</span> {</span><br><span class="line">  <span class="type">int</span> N; vector&lt;<span class="type">int</span>&gt; f;</span><br><span class="line">  <span class="built_in">Fenwick</span>(<span class="type">int</span> n):<span class="built_in">N</span>(n),<span class="built_in">f</span>(n<span class="number">+1</span>){}</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">update</span><span class="params">(<span class="type">int</span> i, <span class="type">int</span> delta)</span></span>{ <span class="keyword">for</span>(;i&lt;=N;i+=i&amp;-i) f[i]+=delta; }</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">query</span><span class="params">(<span class="type">int</span> i)</span></span>{ <span class="type">int</span> s=<span class="number">0</span>; <span class="keyword">for</span>(;i&gt;<span class="number">0</span>;i-=i&amp;-i) s+=f[i]; <span class="keyword">return</span> s; }</span><br><span class="line">  <span class="comment">// optionally, find by order statistic</span></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">findByOrder</span><span class="params">(<span class="type">int</span> k)</span></span>{ <span class="comment">// find smallest i such that prefix sum &gt;= k</span></span><br><span class="line">    <span class="type">int</span> pos=<span class="number">0</span>, bitMask = <span class="number">1</span>&lt;&lt;<span class="number">20</span>; <span class="comment">// assume N &lt;= 2^20</span></span><br><span class="line">    <span class="keyword">while</span>(bitMask) {</span><br><span class="line">      <span class="type">int</span> next = pos + bitMask;</span><br><span class="line">      <span class="keyword">if</span>(next&lt;=N &amp;&amp; f[next] &lt; k) {</span><br><span class="line">        k -= f[next];</span><br><span class="line">        pos = next;</span><br><span class="line">      }</span><br><span class="line">      bitMask &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> pos<span class="number">+1</span>;</span><br><span class="line">  }</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
-<p>其中：  </p>
+
+<p>其中：</p>
 <ul>
-<li><code>query(i)</code> 返回前缀 [1, i] 内仍然存在的元素数量，可用于排名计算。  </li>
+<li><code>query(i)</code> 返回前缀 [1, i] 内仍然存在的元素数量，可用于排名计算。</li>
 <li><code>findByOrder(k)</code> 返回当前序列中第 k 个存在元素的索引（例如用来查找现在排在第 k 位的是谁）。</li>
 </ul>
 <p><strong>使用场景</strong>：树状数组特别适合处理动态序列。在等待队列问题中，每次加入或离开时执行 <code>update(index, +1/-1)</code>，若要查询某个原始索引的当前位置，则执行 <code>query(originalIndex)</code>。</p>
-<p><strong>Fenwick vs 分块方法</strong>  </p>
+<p><strong>Fenwick vs 分块方法</strong></p>
 <ul>
-<li><strong>Fenwick</strong>：在理论复杂度上更优（<code>O(log n)</code>），功能更强大，适合需要灵活顺序查询的动态场景。  </li>
+<li><strong>Fenwick</strong>：在理论复杂度上更优（<code>O(log n)</code>），功能更强大，适合需要灵活顺序查询的动态场景。</li>
 <li><strong>分块方法</strong>：实现简单，常数开销低，在 <code>n</code> 不太大（如 ≤ 100k）的情况下可能更快。</li>
 </ul>
 <p>在 oj 环境中，如果数据规模在 10^5 级别，两个方法都完全可用。</p>
@@ -1165,8 +1165,8 @@ mjx-container[display="true"] + br {
 
 <p>在这个例子中：</p>
 <ol>
-<li>插入 100 和 50，最小值是 50。  </li>
-<li>调用 <code>addOffset(30)</code> 后，相当于所有价格都下降了 30，此时最小值为 20（原本的 50 减去 30）。  </li>
+<li>插入 100 和 50，最小值是 50。</li>
+<li>调用 <code>addOffset(30)</code> 后，相当于所有价格都下降了 30，此时最小值为 20（原本的 50 减去 30）。</li>
 <li>调用 <code>popMin()</code> 会删除当前最小的实际值 20（即原先存储的 50）。</li>
 </ol>
 <p>这与我们之前演示的“折扣”场景完全一致。<code>LazyBucket</code> 保证了批量更新操作可以在 <strong>O(1)</strong> 时间内完成。<br>需要注意的是，如果某些元素因批量更新而变得小于等于 0，需要及时移除（可以通过重复调用 <code>getMin</code> 检查并删除，就像我们在 Level 4 示例中所做的那样）。</p>
@@ -1176,9 +1176,10 @@ mjx-container[display="true"] + br {
 <p>在这个实现中，事件会按照时间顺序出队，确保在前进到 <code>newTime</code> 之前，所有应当发生的事件都被处理完毕。在真实场景中，处理某个事件时可能会产生新的事件（例如调度下一个过期时间）。循环机制保证即便新事件的时间早于 <code>newTime</code>，它也会在推进之前被正确处理。调用该函数后，要么 <code>currentTime</code> 等于 <code>newTime</code>，要么在此之前的事件已经全部处理完毕。</p>
 <p><strong>使用示例：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">eventPQ.<span class="built_in">push</span>({<span class="number">5</span>}); eventPQ.<span class="built_in">push</span>({<span class="number">3</span>});</span><br><span class="line"><span class="built_in">advanceTo</span>(<span class="number">4</span>);</span><br><span class="line"><span class="comment">// This will process the event at time 3, set currentTime=3, skip the one at 5 as it's beyond 4.</span></span><br><span class="line"><span class="built_in">advanceTo</span>(<span class="number">6</span>);</span><br><span class="line"><span class="comment">// This will now process the event at time 5 (currentTime goes to 5), then currentTime = 6.</span></span><br></pre></td></tr></table></figure>
+
 <p>在这个例子中：</p>
 <ul>
-<li>当调用 <code>advanceTo(4)</code> 时，事件队列中时间为 3 的事件会被处理，<code>currentTime</code> 更新为 3，而时间为 5 的事件会被跳过（因为它超出了 4）。  </li>
+<li>当调用 <code>advanceTo(4)</code> 时，事件队列中时间为 3 的事件会被处理，<code>currentTime</code> 更新为 3，而时间为 5 的事件会被跳过（因为它超出了 4）。</li>
 <li>当再调用 <code>advanceTo(6)</code> 时，时间为 5 的事件会被处理，<code>currentTime</code> 先更新为 5，之后再推进到 6。</li>
 </ul>
 <p>这个工具可以让与时间相关的代码保持简洁清晰。你可以进一步扩展它，例如通过 <code>variant</code> 或类型字段支持不同类型的事件，并为每种事件设计独立的处理逻辑。但整体骨架是一致的：<strong>当下一个事件时间 ≤ 目标时间，就处理它。</strong></p>
@@ -1198,29 +1199,23 @@ mjx-container[display="true"] + br {
 <p><strong>使用场景</strong>：假设每个桶表示某一类别下的商品价格。这段代码可以找到全局最低的 5 个价格。这与我们在 “在线商店查询” 示例中的做法一致，只不过当时还需要处理延迟调整（lazy offset），在实现时可以通过推入 <code>val - offset</code> 而不是原始值来实现。</p>
 <p>对于较大的 K 或桶的数量很多时，更高效的方法是使用一个最小堆来保存迭代器：先将每个桶中的最小元素压入堆中，然后重复 K 次弹出堆顶；每次弹出后，再将该桶中的下一个元素压入堆（如果有的话）。不过在本例中，K 的值最多为 5，上述简单方法已经足够高效。</p>
 <h3 id="调试辅助工具：不变式检查"><a href="#调试辅助工具：不变式检查" class="headerlink" title="调试辅助工具：不变式检查"></a>调试辅助工具：不变式检查</h3><p>在使用复杂数据结构时，在调试模式下运行时验证假设会很有帮助。以下是一些思路：</p>
-<p><strong>检查顺序不变式</strong>：如果在 <code>set</code> 中使用了自定义比较器，可以遍历整个集合，并验证每一对相邻元素 <code>prev</code> 和 <code>curr</code> 是否满足 <code>cmp(prev, curr)</code> 为真（或至少不是假）。<br>或者，使用前文提到的 <code>isStrictWeakOrdered</code> 函数来确保没有两个元素违反排序规则。<br>示例：  </p>
+<p><strong>检查顺序不变式</strong>：如果在 <code>set</code> 中使用了自定义比较器，可以遍历整个集合，并验证每一对相邻元素 <code>prev</code> 和 <code>curr</code> 是否满足 <code>cmp(prev, curr)</code> 为真（或至少不是假）。<br>或者，使用前文提到的 <code>isStrictWeakOrdered</code> 函数来确保没有两个元素违反排序规则。<br>示例：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ASSERT_ORDERED(cont, comp) \</span></span><br><span class="line"><span class="meta">    do { \</span></span><br><span class="line"><span class="meta">        for(auto it = cont.begin(); it != cont.end();) { \</span></span><br><span class="line"><span class="meta">            auto jt = it++; \</span></span><br><span class="line"><span class="meta">            <span class="keyword">if</span>(it != cont.end()) assert(comp(*jt, *it) &amp;&amp; !comp(*it, *jt)); \</span></span><br><span class="line"><span class="meta">        } \</span></span><br><span class="line"><span class="meta">    } while(0)</span></span><br></pre></td></tr></table></figure>
-<p>在调试版本中操作后放置<code>ASSERT_ORDERED(mySet, ItemCmp());</code>，可以捕捉任何顺序违规（例如修改了元素但没有重新排序时）。</p>
+
+<p>在调试版本中操作后放置 <code>ASSERT_ORDERED(mySet, ItemCmp());</code>，可以捕捉任何顺序违规（例如修改了元素但没有重新排序时）。</p>
 <p><strong>验证大小与总和</strong>：如果维护了多个镜像数据结构（例如一个总计数和按区分组的计数），就可以通过断言检查它们的总和是否一致：<code>assert(totalCars == sum(zoneFreeCount[i] for all i) + sum(zoneOccupiedCount[i]));</code>，这样能发现是否遗漏了更新。</p>
 <p><strong>使用哨兵值</strong>：对于像 <code>removedEpoch</code> 或 BIT 这样的数组，可以用特定模式初始化（如 <code>0x7F</code> 或 <code>-1</code>），并通过断言确保算法不会访问越界的范围。有些人会用 <code>0xDEADBEEF</code> 填充新分配的内存来达到类似目的。<br>在 oj 中，简单的断言如 <code>index &lt; N</code> 就足够。</p>
 <p><strong>日志输出</strong>：在复杂模拟中，打印事件有助于理解运行情况，例如 <code>"在时间 T 拖走车辆 X"</code> 或 <code>"将车位 Y 分配给车辆 Z"</code>。如果输出过于冗余，可以通过 <code>#ifdef DEBUG</code> 宏限制只在调试模式下输出。</p>
 <p><strong>总结</strong>：在实现这些结构时，建议编写一些小型测试用例（正如我们在前面的逐步示例中所做的），并使用断言来验证每一步的基本不变式是否成立。在小测试中发现问题要比在完整 oj 输入中调试错误容易得多。</p>
 <h2 id="常见陷阱与反模式"><a href="#常见陷阱与反模式" class="headerlink" title="常见陷阱与反模式"></a>常见陷阱与反模式</h2><p>下面列出在此类问题中经常出现的错误，以及它们导致失败（超时 TLE 或错误答案）的原因：</p>
 <ol>
-<li><p><strong>在有序容器中直接修改键值而不重新插入</strong>：<br>如果你修改了 <code>std::set</code> 或 <code>std::map</code> 中元素的某个影响排序的字段，会破坏容器的不变性。结果是该元素可能处于错误的位置，导致 <code>find/erase</code> 失效，或者顺序错误（进而导致查询结果错误）。<br><strong>解决方法</strong>：务必先删除，再修改，然后重新插入（或者在使用堆时采用“惰性删除”的方式，标记旧数据为失效，再插入新数据）。</p>
-</li>
-<li><p><strong>比较器未提供严格弱序</strong>：<br>在比较器中忘记处理平局情况，会导致两个不同元素被认为等价。在 <code>set</code> 中，其中一个元素将无法插入（容器认为已存在），数据等于被丢弃。即便使用 <code>multiset</code> 或排序函数，如果比较器不具备传递性，也可能导致未定义行为（某些排序算法甚至会崩溃或陷入死循环）。<br><strong>要点</strong>：确保当 <code>comp(a,b) == false</code> 且 <code>comp(b,a) == false</code> 时，<code>a</code> 与 <code>b</code> 在逻辑上确实是相同的。</p>
-</li>
-<li><p><strong>没有及时推进时间或处理事件</strong>：<br>在模拟问题中，如果不清理过期条目或不按顺序处理事件，数据结构就会与实际情况脱节。<br>例如：忘记在分配新车位前移除已过期的车辆，会导致无法分配到本应空出来的车位；又或者没有在下载源丢失时更新速度，结果会高估进度。<br><strong>修复方法</strong>：在每次操作开始时（或在合适的时机），调用时间处理例程，确保状态始终一致。</p>
-</li>
-<li><p><strong>每次查询或更新都遍历大数据集</strong>：<br>常见的反模式是嵌套循环，其中某一维规模很大。<br>例如：每次新停车时都扫描所有 M 个车位。如果 M 很大（比如 10000），且操作 50000 次，那就是 5 亿次检查（几乎必然超时）。<br>应替换为对数级或常数级的数据结构查找（如用 <code>set</code> 维护空闲车位）。<br>另一个例子：查找某个饮品的订单时不应遍历所有订单，而是应为每种饮品维护一个队列。</p>
-</li>
-<li><p><strong>内存泄漏或悬空指针</strong>：<br>如果你在 <code>set</code> 中删除了一个指针，但该指针仍然存在于其他结构或数组中，然后又重复使用或错误释放，就可能访问无效内存。<br>在这些问题中，通常对象存放在数组里，<code>set</code> 里只存指针（除非明确删除，否则指针一直有效）。<br><strong>注意事项</strong>：关注对象生命周期；若是堆分配，可以考虑用智能指针；更常见的方式是使用索引（很多时候我们就是用数组/vector 存数据，然后用索引作为引用）。</p>
-</li>
-<li><p><strong>时间与索引的 off-by-one 错误</strong>：<br>例如：车辆到期时间是 L 还是 L+1？计算剩余时间时是 <code>expTime - currentTime</code>，还是 <code>expTime - currentTime + 1</code>？<br>必须仔细核对题目中关于区间端点的定义（持续时间 L 是到 <code>entry+L</code> 到期，还是 <code>entry+L-1</code>？）。<br>队列位置也是类似：到底输出 0-base 还是 1-base？在树状数组查询时需注意索引偏移。<br>这些 off-by-one 错误尤其容易导致排名或时间计算出错。</p>
-</li>
-<li><p><strong>过度工程化</strong>：<br>有时给定的约束下可以用更简单的方法。例如：扫描 26 个区是完全可以接受的，如果硬要用线段树维护 26 个元素，就增加了不必要的复杂性，还更容易出错。<br><strong>要点</strong>：理解约束，找到复杂度与实现难度的平衡。</p>
-</li>
+<li><strong>在有序容器中直接修改键值而不重新插入</strong>：<br>如果你修改了 <code>std::set</code> 或 <code>std::map</code> 中元素的某个影响排序的字段，会破坏容器的不变性。结果是该元素可能处于错误的位置，导致 <code>find/erase</code> 失效，或者顺序错误（进而导致查询结果错误）。<strong>解决方法</strong>：务必先删除，再修改，然后重新插入（或者在使用堆时采用“惰性删除”的方式，标记旧数据为失效，再插入新数据）。</li>
+<li><strong>比较器未提供严格弱序</strong>：在比较器中忘记处理平局情况，会导致两个不同元素被认为等价。在 <code>set</code> 中，其中一个元素将无法插入（容器认为已存在），数据等于被丢弃。即便使用 <code>multiset</code> 或排序函数，如果比较器不具备传递性，也可能导致未定义行为（某些排序算法甚至会崩溃或陷入死循环）。<strong>要点</strong>：确保当 <code>comp(a,b) == false</code> 且 <code>comp(b,a) == false</code> 时，<code>a</code> 与 <code>b</code> 在逻辑上确实是相同的。</li>
+<li><strong>没有及时推进时间或处理事件</strong>：在模拟问题中，如果不清理过期条目或不按顺序处理事件，数据结构就会与实际情况脱节。例如：忘记在分配新车位前移除已过期的车辆，会导致无法分配到本应空出来的车位；又或者没有在下载源丢失时更新速度，结果会高估进度。<strong>修复方法</strong>：在每次操作开始时（或在合适的时机），调用时间处理例程，确保状态始终一致。</li>
+<li><strong>每次查询或更新都遍历大数据集</strong>：常见的反模式是嵌套循环，其中某一维规模很大。例如：每次新停车时都扫描所有 M 个车位。如果 M 很大（比如 10000），且操作 50000 次，那就是 5 亿次检查（几乎必然超时）。应替换为对数级或常数级的数据结构查找（如用 <code>set</code> 维护空闲车位）。另一个例子：查找某个饮品的订单时不应遍历所有订单，而是应为每种饮品维护一个队列。</li>
+<li><strong>内存泄漏或悬空指针</strong>：如果你在 <code>set</code> 中删除了一个指针，但该指针仍然存在于其他结构或数组中，然后又重复使用或错误释放，就可能访问无效内存。在这些问题中，通常对象存放在数组里，<code>set</code> 里只存指针（除非明确删除，否则指针一直有效）。<strong>注意事项</strong>：关注对象生命周期；若是堆分配，可以考虑用智能指针；更常见的方式是使用索引（很多时候我们就是用数组/vector 存数据，然后用索引作为引用）。</li>
+<li><strong>时间与索引的 off-by-one 错误</strong>：例如：车辆到期时间是 L 还是 L+1？计算剩余时间时是 <code>expTime - currentTime</code>，还是 <code>expTime - currentTime + 1</code>？必须仔细核对题目中关于区间端点的定义（持续时间 L 是到 <code>entry+L</code> 到期，还是 <code>entry+L-1</code>？）。队列位置也是类似：到底输出 0-base 还是 1-base？在树状数组查询时需注意索引偏移。这些 off-by-one 错误尤其容易导致排名或时间计算出错。</li>
+<li><strong>过度工程化</strong>：<br>有时给定的约束下可以用更简单的方法。例如：扫描 26 个区是完全可以接受的，如果硬要用线段树维护 26 个元素，就增加了不必要的复杂性，还更容易出错。<br><strong>要点</strong>：理解约束，找到复杂度与实现难度的平衡。</li>
 </ol>
 <p>意识到这些陷阱就已经成功了一半——另一半则在于测试。在 oj 环境下，可以在脑中构造简单场景，或者快速写一个暴力脚本，来验证程序各部分的输出是否正确。</p>
 <h2 id="最终检查清单与速查表"><a href="#最终检查清单与速查表" class="headerlink" title="最终检查清单与速查表"></a>最终检查清单与速查表</h2><h3 id="快速决策问答（是-否）"><a href="#快速决策问答（是-否）" class="headerlink" title="快速决策问答（是/否）"></a>快速决策问答（是/否）</h3><p>时间是否只会单向前进？<br>→ 使用时间模拟模式：累积效果并按时间顺序处理事件，而不是逐步遍历时间。</p>
@@ -1233,9 +1228,9 @@ mjx-container[display="true"] + br {
 <p>输入的某一维是否非常小（例如 N=10 或类别数=5）？<br>→ 在这种维度下用简单循环或数组即可，把优化重点放在更大的维度。</p>
 <p>一个更简单的方法是否在 ~10^7 次操作以内？<br>→ 在 C++ 的时限内通常没问题。超过 ~10^8 就有风险。务必预估最坏情况的操作次数。</p>
 <p>是否在多个数据结构中重复存储数据？<br>→ 确保一致性：在所有相关位置都要同时更新或删除。</p>
-<h3 id="复杂度判断"><a href="#复杂度判断" class="headerlink" title="复杂度判断"></a>复杂度判断</h3><p>在约 10^5 次操作、10^5 个数据规模下，单次 O(log n)（约 O(17)）完全可行，总计约 170 万次操作。若是 O(n) 每次（10^5），则会达到 10^10，远远超标。  </p>
-<p>目标是：总操作数 × 单次复杂度 ≈ 10^7 – 10^8 或更少。  </p>
-<p>可用摊还分析：某些操作可能较重，但发生频率低；要保证最坏情况下也能接受。  </p>
+<h3 id="复杂度判断"><a href="#复杂度判断" class="headerlink" title="复杂度判断"></a>复杂度判断</h3><p>在约 10^5 次操作、10^5 个数据规模下，单次 O(log n)（约 O(17)）完全可行，总计约 170 万次操作。若是 O(n) 每次（10^5），则会达到 10^10，远远超标。</p>
+<p>目标是：总操作数 × 单次复杂度 ≈ 10^7 – 10^8 或更少。</p>
+<p>可用摊还分析：某些操作可能较重，但发生频率低；要保证最坏情况下也能接受。</p>
 <p>同时考虑常数因子：1e7 次简单操作是可以的，1e7 次复杂操作可能就临界了。拿不准时，优先选择更高效的数据结构。</p>
 <h3 id="模板参考"><a href="#模板参考" class="headerlink" title="模板参考"></a>模板参考</h3><p>前文的模板代码片段可作为实现这些结构的起点：</p>
 <ul>
@@ -1251,13 +1246,13 @@ mjx-container[display="true"] + br {
 </ul>
 <p>可以直接复制并根据具体问题调整变量类型和条件。</p>
 <h3 id="提交前检查清单"><a href="#提交前检查清单" class="headerlink" title="提交前检查清单"></a>提交前检查清单</h3><ul>
-<li>是否处理了所有边界情况？（例如：没有可用槽位、队列为空、查询不存在的 ID 等）  </li>
-<li>所有数据结构的更新是否都完成？（每次插入是否在其他结构中也做了必要的删除？每个事件是否都已处理？）  </li>
-<li>是否避免了在容器元素中直接修改？（检查所有 <code>std::set</code> 操作）  </li>
-<li>比较器是否正确？（测试几对数据，或使用上文的断言方法）  </li>
-<li>时间驱动的事件是否在正确的时间点处理？（在时间推进或操作发生时立即处理）  </li>
-<li>已经正确释放或标记删除元素了吗？（避免内存泄漏或“幽灵”条目一直存在）  </li>
-<li>使用的索引和时间数据类型是否合适？（例如时间可能很大时要用 <code>long long</code>）  </li>
+<li>是否处理了所有边界情况？（例如：没有可用槽位、队列为空、查询不存在的 ID 等）</li>
+<li>所有数据结构的更新是否都完成？（每次插入是否在其他结构中也做了必要的删除？每个事件是否都已处理？）</li>
+<li>是否避免了在容器元素中直接修改？（检查所有 <code>std::set</code> 操作）</li>
+<li>比较器是否正确？（测试几对数据，或使用上文的断言方法）</li>
+<li>时间驱动的事件是否在正确的时间点处理？（在时间推进或操作发生时立即处理）</li>
+<li>已经正确释放或标记删除元素了吗？（避免内存泄漏或“幽灵”条目一直存在）</li>
+<li>使用的索引和时间数据类型是否合适？（例如时间可能很大时要用 <code>long long</code>）</li>
 <li>是否在提供的样例和自定义的小规模测试上运行过？（通常一次快速的手动小规模测试能发现很多问题）</li>
 </ul>
 
@@ -1576,14 +1571,14 @@ mjx-container[display="true"] + br {
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">162k</span>
+    <span title="站点总字数">176k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">9:49</span>
+    <span title="站点阅读时长">10:40</span>
   </span>
 </div>
 <div class="busuanzi-count">

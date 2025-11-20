@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="/lib/@fortawesome/fontawesome-free/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="/lib/animate.css/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.wuwangyangxin.com","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.25.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":-1,"unescape":true,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="深入解析算法竞赛与系统设计中的高频难点——“有序列表维护题”。本文系统性地梳理了Trie、平衡树、倒排索引等数据结构在动态集合维护中的应用，创新性地将问题划分为“插入型”与“追加型”两大类进行对比分析。通过搜索引擎自动补全、通配符模糊匹配及日志流查询等经典模型，提供从解题策略、C++模板到性能优化的全方位实战指南，助你掌握复杂数据流处理的核心技巧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="有序列表维护题的共性、考点与数据结构策略">
+<meta property="og:url" content="https://www.wuwangyangxin.com/2025/11/20/%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%E7%9A%84%E5%85%B1%E6%80%A7%E3%80%81%E8%80%83%E7%82%B9%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AD%96%E7%95%A5/index.html">
+<meta property="og:site_name" content="勿忘羊心">
+<meta property="og:description" content="深入解析算法竞赛与系统设计中的高频难点——“有序列表维护题”。本文系统性地梳理了Trie、平衡树、倒排索引等数据结构在动态集合维护中的应用，创新性地将问题划分为“插入型”与“追加型”两大类进行对比分析。通过搜索引擎自动补全、通配符模糊匹配及日志流查询等经典模型，提供从解题策略、C++模板到性能优化的全方位实战指南，助你掌握复杂数据流处理的核心技巧。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-20T11:39:00.000Z">
+<meta property="article:modified_time" content="2025-11-20T12:25:44.558Z">
+<meta property="article:author" content="Ziyoeng Zoeng">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://www.wuwangyangxin.com/2025/11/20/%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%E7%9A%84%E5%85%B1%E6%80%A7%E3%80%81%E8%80%83%E7%82%B9%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AD%96%E7%95%A5/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://www.wuwangyangxin.com/2025/11/20/%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%E7%9A%84%E5%85%B1%E6%80%A7%E3%80%81%E8%80%83%E7%82%B9%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AD%96%E7%95%A5/","path":"2025/11/20/有序列表维护题的共性、考点与数据结构策略/","title":"有序列表维护题的共性、考点与数据结构策略"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>有序列表维护题的共性、考点与数据结构策略 | 勿忘羊心</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/animejs/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="/lib/hexo-generator-searchdb/dist/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"all","js":{"url":"/lib/mathjax/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style><link rel="stylesheet" href="/css/prism-vs.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">勿忘羊心</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-算法"><a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="section"><i class="fa fa-code fa-fw"></i>算法</a></li><li class="menu-item menu-item-投稿"><a href="/categories/%E6%8A%95%E7%A8%BF/" rel="section"><i class="fa fa-inbox fa-fw"></i>投稿</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E5%AF%BC%E5%85%A5%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">概念导入：什么是有序列表维护题？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">常用数据结构与模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E7%B1%BB%EF%BC%9A%E6%8F%92%E5%85%A5%E5%9E%8B-vs-%E8%BF%BD%E5%8A%A0%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">问题分类：插入型 vs 追加型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E5%9E%8B%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">插入型问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%BD%E5%8A%A0%E5%9E%8B%E9%97%AE%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">追加型问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E6%A8%A1%E5%9E%8B%E7%B2%BE%E8%AE%B2"><span class="nav-number">4.</span> <span class="nav-text">典型模型精讲</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E4%B8%80%EF%BC%9A%E9%80%9A%E9%85%8D%E7%AC%A6%E5%8A%A8%E6%80%81%E5%8D%95%E8%AF%8D%E5%BA%93%EF%BC%88%E6%8F%92%E5%85%A5%E5%9E%8B%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">模型一：通配符动态单词库（插入型）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E4%BA%8C%EF%BC%9A%E9%80%9A%E4%BF%A1%E5%BD%95%E6%97%A5%E5%BF%97%E6%9F%A5%E8%AF%A2%EF%BC%88%E8%BF%BD%E5%8A%A0%E5%9E%8B%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">模型二：通信录日志查询（追加型）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E4%B8%89%EF%BC%9A%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8%EF%BC%88%E6%8F%92%E5%85%A5%E5%9E%8B%E7%BB%BC%E5%90%88%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">模型三：搜索引擎自动补全（插入型综合）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E8%80%83%E7%82%B9%E6%B1%87%E6%80%BB%E4%B8%8E%E5%BA%94%E8%AF%95%E6%8A%80%E5%B7%A7"><span class="nav-number">5.</span> <span class="nav-text">常见考点汇总与应试技巧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E6%AD%A5%E9%AA%A4"><span class="nav-number">6.</span> <span class="nav-text">解题步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Step1-%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="nav-number">6.1.</span> <span class="nav-text">Step1: 核心模型分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step2-%E7%BA%A6%E6%9D%9F%E6%9D%A1%E4%BB%B6%E5%AE%A1%E6%9F%A5"><span class="nav-number">6.2.</span> <span class="nav-text">Step2: 约束条件审查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step3-%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E9%80%89%E6%8B%A9"><span class="nav-number">6.3.</span> <span class="nav-text">Step3: 结构与算法选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step4-%E4%BC%98%E5%8C%96%E9%99%B7%E9%98%B1"><span class="nav-number">6.4.</span> <span class="nav-text">Step4: 优化陷阱</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89%E4%B8%8E%E8%AE%AD%E7%BB%83%E5%BB%BA%E8%AE%AE"><span class="nav-number">7.</span> <span class="nav-text">举一反三与训练建议</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ziyoeng Zoeng</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.wuwangyangxin.com/2025/11/20/%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%E7%9A%84%E5%85%B1%E6%80%A7%E3%80%81%E8%80%83%E7%82%B9%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AD%96%E7%95%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ziyoeng Zoeng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勿忘羊心">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="有序列表维护题的共性、考点与数据结构策略 | 勿忘羊心">
+      <meta itemprop="description" content="深入解析算法竞赛与系统设计中的高频难点——“有序列表维护题”。本文系统性地梳理了Trie、平衡树、倒排索引等数据结构在动态集合维护中的应用，创新性地将问题划分为“插入型”与“追加型”两大类进行对比分析。通过搜索引擎自动补全、通配符模糊匹配及日志流查询等经典模型，提供从解题策略、C++模板到性能优化的全方位实战指南，助你掌握复杂数据流处理的核心技巧。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          有序列表维护题的共性、考点与数据结构策略
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-11-20 19:39:00 / 修改时间：20:25:44" itemprop="dateCreated datePublished" datetime="2025-11-20T19:39:00+08:00">2025-11-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>14k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>52 分钟</span>
+    </span>
+</div>
+
+            <div class="post-description">深入解析算法竞赛与系统设计中的高频难点——“有序列表维护题”。本文系统性地梳理了Trie、平衡树、倒排索引等数据结构在动态集合维护中的应用，创新性地将问题划分为“插入型”与“追加型”两大类进行对比分析。通过搜索引擎自动补全、通配符模糊匹配及日志流查询等经典模型，提供从解题策略、C++模板到性能优化的全方位实战指南，助你掌握复杂数据流处理的核心技巧。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>有序列表题分为两类，一类是以词典序为典型的插入型有序列表，另一类是以时序为典型的追加型有序列表。</p>
+</blockquote>
+<h2 id="概念导入：什么是有序列表维护题？"><a href="#概念导入：什么是有序列表维护题？" class="headerlink" title="概念导入：什么是有序列表维护题？"></a>概念导入：什么是有序列表维护题？</h2><p>“有序列表维护题”通常指需要<strong>动态维护一个按照特定顺序组织的元素集合</strong>的问题类型。这类问题要求支持元素的<strong>插入、删除</strong>以及各种基于顺序的<strong>查询操作</strong>。所谓“有序列表”，并不局限于简单的数字大小排序，也可以是<strong>字典序</strong>（如单词排序）、<strong>时间顺序</strong>（如日志记录按时间排序）等。关键在于集合中的元素具有某种全局顺序关系，操作需要维护这种顺序并快速查询。这类问题广泛存在于<strong>高频交易系统设计</strong>（维护买卖单队列）、<strong>搜索引擎后端</strong>（关键词自动补全与排名）、以及<strong>社交网络Feed流设计</strong>（多路归并时间线）中。</p>
+<p><strong>典型特征：</strong></p>
+<ul>
+<li><strong>动态更新</strong>：集合元素会随着操作不断增加或减少，需要支持在任意时刻插入新元素、删除现有元素。</li>
+<li><strong>顺序相关查询</strong>：查询操作基于元素的顺序定位，比如查询第 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.179ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 521 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g></g></g></svg></mjx-container> 小的元素、求某元素的排名、按前缀或模式筛选元素等。</li>
+<li><strong>高频操作</strong>：这类题目的操作次数往往很多（可达数万甚至十万级），必须设计高效的数据结构，否则朴素解法难以在时限内完成 1 2。</li>
+<li><strong>利用特殊限制</strong>：题目通常对元素的性质有特殊限制以降低难度，如“字符串长度很短” 3、“通配符个数很少” 4、“不同标签种类极少” 5 等。这些限制启示我们可用预处理、压缩等技巧优化操作。</li>
+</ul>
+<p>总的来说，有序列表维护题考察选手<strong>设计定制数据结构</strong>的能力：根据问题特点，将顺序维护、快速查询和动态更新结合起来。这类问题涵盖字符串字典、搜索引擎关键词联想、日志管理、自动补全等场景，是综合性很强的一类题型。</p>
+<h2 id="常用数据结构与模式"><a href="#常用数据结构与模式" class="headerlink" title="常用数据结构与模式"></a>常用数据结构与模式</h2><p>解决有序列表维护问题，需要根据元素类型和操作设计合适的数据结构。以下是常用的结构与设计模式：</p>
+<ul>
+<li><p><strong>Trie（前缀树）</strong>：针对字符串类问题，Trie能利用公共前缀将单词有序组织，并天然维护字典序。它支持高效的前缀查询，节点中附加信息即可用于排名统计、模式匹配等 6。例如，可在节点保存<strong>子树单词计数</strong>实现顺序统计（order statistic），用于求前缀下第 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.179ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 521 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g></g></g></svg></mjx-container> 个单词或整体第 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.179ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 521 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g></g></g></svg></mjx-container> 小单词 6。Trie 还可扩展存储其他信息，如<strong>子树中权重最大的单词</strong>（用于推荐）等。对于需要支持 <strong>排名（Rank）</strong> 和 <strong>第K小（Select）</strong> 的题目，标准的实现模板是在节点中维护<code>subTreeSize</code>。以下是C++实现模板，能够以<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="9.426ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 4166.4 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="mo" transform="translate(2055.2,0)"><path data-c="D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></g><g data-mml-node="mi" transform="translate(3055.4,0)"><path data-c="3A3" d="M666 247Q664 244 652 126T638 4V0H351Q131 0 95 0T57 5V6Q54 12 57 17L73 36Q89 54 121 90T182 159L305 299L56 644L55 658Q55 677 60 681Q63 683 351 683H638V679Q640 674 652 564T666 447V443H626V447Q618 505 604 543T559 605Q529 626 478 631T333 637H294H189L293 494Q314 465 345 422Q400 346 400 340Q400 338 399 337L154 57Q407 57 428 58Q476 60 508 68T551 83T575 103Q595 125 608 162T624 225L626 251H666V247Z"></path></g><g data-mml-node="mo" transform="translate(3777.4,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>的复杂度完成查询，与总数据量<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.009ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 888 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g></g></svg></mjx-container>无关：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Node</span> {</span><br><span class="line">    Node* ch[<span class="number">26</span>];</span><br><span class="line">    <span class="type">int</span> cnt;         <span class="comment">// 以该节点结尾的单词数</span></span><br><span class="line">    <span class="type">int</span> subTreeSize; <span class="comment">// 【关键】以该节点为根的子树中包含的单词总数</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">Node</span>() : <span class="built_in">cnt</span>(<span class="number">0</span>), <span class="built_in">subTreeSize</span>(<span class="number">0</span>) {</span><br><span class="line">        <span class="built_in">memset</span>(ch, <span class="number">0</span>, <span class="built_in">sizeof</span>(ch));</span><br><span class="line">    }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入操作：递归路径上每个节点 size + 1</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">insert</span><span class="params">(Node* root, <span class="type">const</span> string&amp; s)</span> </span>{</span><br><span class="line">    Node* curr = root;</span><br><span class="line">    curr-&gt;subTreeSize++; </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">char</span> c : s) {</span><br><span class="line">        <span class="type">int</span> idx = c - <span class="string">'a'</span>;</span><br><span class="line">        <span class="keyword">if</span> (!curr-&gt;ch[idx]) curr-&gt;ch[idx] = <span class="keyword">new</span> <span class="built_in">Node</span>();</span><br><span class="line">        curr = curr-&gt;ch[idx];</span><br><span class="line">        curr-&gt;subTreeSize++; </span><br><span class="line">    }</span><br><span class="line">    curr-&gt;cnt++;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查找字典序第 K 小的单词</span></span><br><span class="line"><span class="function">string <span class="title">findKth</span><span class="params">(Node* root, <span class="type">int</span> k)</span> </span>{</span><br><span class="line">    Node* curr = root;</span><br><span class="line">    string res = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">if</span> (curr-&gt;subTreeSize &lt; k) <span class="keyword">return</span> <span class="string">""</span>; <span class="comment">// 总数不足</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) {</span><br><span class="line">        <span class="comment">// 1. 检查当前节点本身是否覆盖了 K (即目标是当前单词)</span></span><br><span class="line">        <span class="keyword">if</span> (curr-&gt;cnt &gt;= k) <span class="keyword">return</span> res;</span><br><span class="line">        k -= curr-&gt;cnt; </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 按字典序遍历子节点寻找目标范围</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">26</span>; ++i) {</span><br><span class="line">            <span class="keyword">if</span> (curr-&gt;ch[i]) {</span><br><span class="line">                <span class="keyword">if</span> (curr-&gt;ch[i]-&gt;subTreeSize &gt;= k) {</span><br><span class="line">                    res += (<span class="type">char</span>)(<span class="string">'a'</span> + i);</span><br><span class="line">                    curr = curr-&gt;ch[i];</span><br><span class="line">                    <span class="keyword">goto</span> NEXT_LEVEL; </span><br><span class="line">                } <span class="keyword">else</span> {</span><br><span class="line">                    k -= curr-&gt;ch[i]-&gt;subTreeSize; <span class="comment">// 跳过这整个分支，减去其数量</span></span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">break</span>; </span><br><span class="line">        NEXT_LEVEL:;</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">}</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>哈希与字符串编码</strong>：由于比较字符串本身代价高，一些解法用哈希将字符串映射为整数，以便快速比较或作为键。例如用<strong>base-26/27进制</strong>把短字符串编码到64位整数，实现字典序可比较的键 7 8。哈希编码还用于将组合特征映射存储，如将(前缀,后缀)模式组合压成一个64位键 9。合理的编码能确保整数大小顺序与字典序一致 10，从而替代繁琐的字符串比较，提高效率。</p>
+</li>
+<li><p><strong>位掩码 / Bitmask</strong>：当元素包含多个属性且取值范围很小时，可用一个位掩码组合属性。例如某题中每条帖子有1~5个标签，且<strong>总标签种类不超过5</strong>，就将包含标签集合映射为一个5位二进制数 5。这样单标签或双标签查询都对应固定的掩码或掩码组合，方便作为数组索引或哈希键快速检索。此外，位运算还常用于记录字符集合、状态集合等，在保持信息的同时压缩存储并优化比较操作。</p>
+</li>
+<li><p><strong>平衡二叉搜索树 / 顺序统计树</strong>：典型如Treap、Splay、AVL等扩展出维护子树大小信息，可支持 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.764ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3873.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(3484.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 时间的插入、删除，以及按序号选第k小、求元素排名等操作 8。一些实现会根据问题特点拆分成多棵树（如按首字母26棵）以减小每棵规模 11。平衡BST适合元素可以做全序比较的情形，比如维护所有单词的有序序列 12。也有用<strong>Fenwick树或线段树</strong>维护有序序列的办法，比如将每个元素映射到排序后的位置，树上维护存在标记计数，以支持快速选择第k个或排名查询。</p>
+</li>
+<li><p><strong>分块与跳表</strong>：对于需要按顺序快速遍历和局部插入删除的，也有采用<strong>分块数组</strong>的方案。例如将有序序列分成块，每块维护内部排序和计数，在查询第k个时跳过整块 13 14。块大小控制在 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="7.425ex" height="2.758ex" role="img" focusable="false" viewBox="0 -969 3282 1219"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msqrt" transform="translate(1152,0)"><g transform="translate(853,0)"><g data-mml-node="mi"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g><g data-mml-node="mo" transform="translate(0,109)"><path data-c="221A" d="M95 178Q89 178 81 186T72 200T103 230T169 280T207 309Q209 311 212 311H213Q219 311 227 294T281 177Q300 134 312 108L397 -77Q398 -77 501 136T707 565T814 786Q820 800 834 800Q841 800 846 794T853 782V776L620 293L385 -193Q381 -200 366 -200Q357 -200 354 -197Q352 -195 256 15L160 225L144 214Q129 202 113 190T95 178Z"></path></g><rect width="888" height="60" x="853" y="849"></rect></g><g data-mml-node="mo" transform="translate(2893,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 左右可兼顾查询和更新的效率。这类方案实现上更复杂，但在C++代码中经常出现，用静态数组模拟链表或分块以减少指针开销。</p>
+</li>
+<li><p><strong>优先队列（堆）</strong>：在<strong>Top-K 或优先级查询</strong>中，堆是经典结构。很多自动补全或推荐场景会对每个前缀维护一个大顶堆，存储该前缀下若干“候选词”的优先级 15。通过堆顶即可取出最高优先级的候选。但动态更新时需要注意<strong>懒删除</strong>策略：更新时直接插入新条目，查询时发现堆顶是过期数据则丢弃跳过 16。这种“堆+懒惰标记”模式可避免每次更新时耗费 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.764ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3873.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(3484.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 删除旧元素，只在查询时清理无效项，均摊效率高。</p>
+</li>
+<li><p><strong>多路归并与拉取模型</strong>：在追加型场景（如社交Feed流）中，与其维护全局大顶堆，不如维护多个有序队列（如每个用户的发布列表）。当查询“关注的人的最新 Top-K”时，利用优先队列进行多路归并。模板如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Item</span> {</span><br><span class="line">    <span class="type">int</span> msgID;      <span class="comment">// 消息ID / 时间戳</span></span><br><span class="line">    <span class="type">int</span> listIndex;  <span class="comment">// 来源列表 ID</span></span><br><span class="line">    <span class="type">int</span> elemIndex;  <span class="comment">// 在该来源列表中的下标</span></span><br><span class="line">    <span class="comment">// 大顶堆：时间最新的在堆顶</span></span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Item&amp; other) <span class="type">const</span> { <span class="keyword">return</span> msgID &lt; other.msgID; }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">getGlobalTopK</span><span class="params">(<span class="type">const</span> vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; sources, <span class="type">int</span> K)</span> </span>{</span><br><span class="line">    priority_queue&lt;Item&gt; pq;</span><br><span class="line">    <span class="comment">// 1. 初始化：将所有来源列表的“最新一条”入堆</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; sources.<span class="built_in">size</span>(); ++i) {</span><br><span class="line">        <span class="keyword">if</span> (!sources[i].<span class="built_in">empty</span>()) {</span><br><span class="line">            <span class="type">int</span> lastIdx = sources[i].<span class="built_in">size</span>() - <span class="number">1</span>;</span><br><span class="line">            pq.<span class="built_in">push</span>({ sources[i][lastIdx], i, lastIdx });</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; res;</span><br><span class="line">    <span class="comment">// 2. 多路归并</span></span><br><span class="line">    <span class="keyword">while</span> (!pq.<span class="built_in">empty</span>() &amp;&amp; res.<span class="built_in">size</span>() &lt; K) {</span><br><span class="line">        Item top = pq.<span class="built_in">top</span>(); pq.<span class="built_in">pop</span>();</span><br><span class="line">        <span class="comment">// 此处可加入懒删除检查：if (isDeleted(top.msgID)) continue;</span></span><br><span class="line">        res.<span class="built_in">push_back</span>(top.msgID);</span><br><span class="line">        <span class="keyword">if</span> (top.elemIndex &gt; <span class="number">0</span>) { <span class="comment">// 补充该来源的下一条</span></span><br><span class="line">            <span class="type">int</span> nextIdx = top.elemIndex - <span class="number">1</span>;</span><br><span class="line">            pq.<span class="built_in">push</span>({ sources[top.listIndex][nextIdx], top.listIndex, nextIdx });</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>并查集（Union-Find）</strong>：有的题目引入了元素分组合并的操作（如“相关搜索词”把两个词关联在一起 17）。并查集可维护分组关系，配合其它结构维护每个组的属性（如组总浏览次数）。当合并操作很少时（几十次级别），用并查集合并集合并累加统计影响即可 18。需要注意在<strong>合并后更新排序</strong>：例如合并两个关键词组后，它们的浏览计数之和改变了在各前缀下的排序，需要更新相关结构中的值。</p>
+</li>
+</ul>
+<p>上述数据结构往往组合使用。例如Trie节点上挂一个小顶堆用于推荐、在哈希表中用编码串作为键快速查找词频等等。<strong>设计模式上</strong>，要紧扣操作需求，将顺序和统计信息预处理、分摊到更新中，使得查询尽量简单快速（理想是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 或对数级）。正如有的题解总结：“对每个元素预处理出所有可能查询特征，查询时直接哈希查表即可” 19 ——这体现了以空间换时间的思想，在允许的内存范围内提前存储查询答案，牺牲更新代价来换取多次查询的高效。</p>
+<hr>
+<h2 id="问题分类：插入型-vs-追加型"><a href="#问题分类：插入型-vs-追加型" class="headerlink" title="问题分类：插入型 vs 追加型"></a>问题分类：插入型 vs 追加型</h2><p>有序列表维护题大体可分为<strong>插入型</strong>和<strong>追加型</strong>两类，这两类题目有着不同的应用场景和解法侧重点：</p>
+<h3 id="插入型问题"><a href="#插入型问题" class="headerlink" title="插入型问题"></a>插入型问题</h3><p><strong>定义</strong>：插入型题目允许在整个维护过程中，元素被<strong>任意顺序地插入</strong>集合（不一定按时间顺序末尾追加），也通常支持删除操作。换言之，新元素可以在集合的有序位置中“插队”，打破原有顺序，需要调整数据结构维护整体有序性。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>更新操作多样</strong>：既可能插入，也可能删除，且发生次序不可预测，需要数据结构对<strong>任意位置更新</strong>都稳健支持。</li>
+<li><strong>查询要求复杂</strong>：通常包括<strong>按内容查询</strong>（如精确匹配或模式匹配）、<strong>按顺序查询</strong>（如第k小、前缀过滤）甚至组合条件。</li>
+<li><strong>数据组织灵活</strong>：因为没有单调的时间属性可利用，往往依赖<strong>字典序</strong>或其它可比较键，对应地常用Trie、BST等组织数据。</li>
+<li><strong>典型场景</strong>：动态字典（支持单词插入删除、按字典序检索）、支持通配符的字符串集合查询、搜索引擎热词统计（词频随时变化）等。</li>
+</ul>
+<p><strong>解法策略</strong>：插入型任务核心在于<strong>高效维护全局顺序</strong>。一般采用 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="8.764ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 3873.7 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(2430,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mi" transform="translate(2596.7,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(3484.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 或更优的平衡结构。举措包括：</p>
+<ul>
+<li><strong>树结构维持序</strong>：如前缀树按字母有序、BST按键有序，使插入删除导致的顺序变化只影响局部 20。配合子树统计便可快速执行排名/选择操作 21。</li>
+<li><strong>多层索引</strong>：按照某种分类建立多级结构减小每级规模。例如按首字母拆成26棵子树 12，或按字符串长度、前两字符分桶等 22，先快速定位桶再在桶内操作，降低平均复杂度。</li>
+<li><strong>空间换时间</strong>：大量预存各种查询索引，用更新时的开销换取查询时的极速。比如对每个单词预存所有可能前缀+后缀组合模式键，并维护匹配该模式的单词计数 23 24。这样查询带通配符 <code>*</code> 时只需<strong>一次哈希查找</strong> 25，达到接近 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 26。</li>
+<li><strong>特殊情况优化</strong>：根据题目限制，有针对性地优化某些操作。例如带 <code>*</code> 的删除操作在某些题中非常少（≤10次），可以<strong>不惜代价做全库扫描更新</strong> 27 28；又比如关键词相关合并（relate）很少，可在合并时遍历一个小组的所有词更新它们计数，而不是维护复杂的实时联动。</li>
+</ul>
+<p>总之，插入型题目要准备处理<strong>最通用的动态情况</strong>，往往需要较复杂的数据结构支持。但由于输入规模和约束，很多时候可以通过<strong>合理利用限制</strong>，将一般性的平衡树等替换为更高效的特化结构。</p>
+<h3 id="追加型问题"><a href="#追加型问题" class="headerlink" title="追加型问题"></a>追加型问题</h3><p><strong>定义</strong>：追加型题目中的元素基本只会<strong>按时间顺序附加</strong>在集合末尾（如日志追加、新帖子追加），<strong>通常不要求在中间插入</strong>。删除操作如果有，也多是针对已有元素的移除，但不会破坏整体按时间的顺序属性。可以理解为维护一个不断增长的序列（可能有少量移除）。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>顺序即时间</strong>：元素有天然的时间戳顺序，新元素总比旧元素“新”。很多查询以时间新旧为依据（如“最新的N条记录”）。</li>
+<li><strong>单调性可利用</strong>：因为时间序列单调，许多统计可以<strong>增量更新</strong>而非全局重排。例如每个用户的消息列表按时间递增存储即可，每次append新消息在尾部 29。按时间排序的查询可以从尾部倒着取最大。</li>
+<li><strong>查询多涉及筛选</strong>：由于按时间容易获取最新元素，问题往往在于对元素按某些条件筛选，如按属性过滤（特定标签的帖子、某用户及关注者的消息等）再按新到旧取前几条 30 31。因此<strong>索引设计</strong>很关键。</li>
+<li><strong>典型场景</strong>：社交平台动态流（推文按时间、过滤关注）、日志查询（最近的含某关键词的日志）、通信录最近联系排序等。</li>
+</ul>
+<p><strong>解法策略</strong>：追加型任务可充分利用时间维度的单调和累积特性，常见策略有：</p>
+<ul>
+<li><p><strong>顺序存储+多指针归并</strong>：由于每个来源（如每个用户的动态、每个标签的帖子列表）内部按时间已排序，查询需要混合多个来源时，可以用<strong>多指针或堆高效取出全局最新的前K条</strong> 32 33。比如获取某用户关注的所有人的最新动态：每人有各自按时排序的动态列表，只需把每人的最新一条取出建一个最大堆，反复弹出堆顶即得到时间顺序的前几条 31。每弹出一个就从对应用户列表取下一条加入堆。因为只取前K（通常K很小，如5），这比合并整个列表开销低得多。</p>
+</li>
+<li><p><strong>倒排索引</strong>：针对筛选条件建立索引，将元素ID按条件分类维护。例如“按标签查询帖子”：为每个标签保存一个帖子ID列表（按时间排序） 34；查询单标签直接返回对应列表片段，查询多标签取交集 or 同时包含关系时，可对相应列表求交集或双指针筛选 5 35。当标签种类很少时（极端到5个），甚至可为每种<strong>组合</strong>建列表，查询时直接按组合键获取结果 5。这种以空间换时间的方法在追加型题目中很有效，因为组合种类有限且可以离线预处理初始数据结构。</p>
+</li>
+<li><p><strong>分页与跳过</strong>：很多追加型查询需要支持分页（如按时间最新的帖子分页浏览）。为避免每次翻页线性跳过大量元素，可以在索引结构中预先记录每块包含的元素数，支持<strong>跳过整块</strong> 36 37。例如将时间序列按块存储，每块100条，预先计算每块满足过滤条件的条目数，查询第X页时按块累加快速定位起始块，再在块内顺序找起始元素。</p>
+</li>
+<li><p><strong>Lazy删除或标记失效</strong>：若支持删除操作，又为了保持时间序列高效追加的优势，常不直接物理删除元素，而是<strong>标记失效</strong>然后懒处理。比如日志系统中 <code>remove</code> 一个联系人，会标记这个联系人的所有记录无效，以后查询跳过它们；底层仍保留数据以避免调整整个结构。只有当失效元素积累到一定程度，才批量整理。或者干脆利用删除操作少的特点，查询时碰到失效记录再跳过处理即可，保持插入过程无需额外代价 28。</p>
+</li>
+</ul>
+<p>追加型问题由于新增只在末尾，可以省去大量维护顺序的成本，<strong>查询优化</strong>成为核心：即如何快速缩小范围、合并结果、跳过无关元素。这类题目的高效解法往往充分应用<strong>预排序和预统计</strong>，结合时间单调，做到接近 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 或与输出结果规模线性相关的查询成本 38 33。</p>
+<p>综上，插入型和追加型题虽都维护有序集合，但插入型更偏重复杂更新下的顺序维护，追加型更偏重顺序固化后的快速筛选。解题时应根据问题类别选择合适的策略：插入型往往需要强大的平衡结构或多重索引，追加型则应利用时间顺序和预处理尽量减少查询扫描。</p>
+<hr>
+<h2 id="典型模型精讲"><a href="#典型模型精讲" class="headerlink" title="典型模型精讲"></a>典型模型精讲</h2><p>下面通过两类各选一到两个具有代表性的题目模型，逐步讲解如何从题干出发分析需求、设计数据结构并实现功能。这些模型涵盖了有序列表维护题的常见考查点。</p>
+<h3 id="模型一：通配符动态单词库（插入型）"><a href="#模型一：通配符动态单词库（插入型）" class="headerlink" title="模型一：通配符动态单词库（插入型）"></a>模型一：通配符动态单词库（插入型）</h3><p><strong>问题描述</strong>：（综合自多道原题）维护一个单词的多重集合，支持如下操作：</p>
+<ul>
+<li><code>init()</code>：初始化，清空当前单词库。</li>
+<li><code>addWord(str)</code>：插入单词 <code>str</code> 到库中（允许重复插入相同单词，多次插入计数累加）。</li>
+<li><code>removeWord(str)</code>：删除所有<strong>匹配模式</strong> <code>str</code> 的单词，返回删除的数量。模式串 <code>str</code> 由小写字母和最多一个通配符 <code>'*'</code> 组成。 <code>'*'</code> 表示任意长度（包括0）的任意字符串，匹配规则为前缀和后缀固定，中间任意。例如模式 <code>"a*bc"</code> 能匹配以 <code>"a"</code> 开头、以 <code>"bc"</code> 结尾的任意字符串 39 40。特殊情况 <code>"*"</code> 匹配任意单词 41。</li>
+<li><code>searchWord(str)</code>：查询当前单词库中所有能匹配模式 <code>str</code> 的单词个数，返回计数。模式规则同上，<code>'*'</code> 可匹配任意中间子串。</li>
+</ul>
+<p><strong>核心难点分析</strong>：此类问题要求对<strong>任意位置</strong>的通配符匹配进行快速检索，而不是简单前缀或后缀匹配。考虑操作特点：</p>
+<ul>
+<li><strong>查询频繁</strong>：<code>searchWord</code> 可能被大量调用，且模式串可能含 <code>*</code> 42。必须优化匹配过程，不能每次遍历整个集合去匹配 1。理想上，普通字符串查询做到哈希查找，带 <code>*</code> 的模式查询尽量接近 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 26。</li>
+<li><strong>删除特殊性</strong>：带 <code>*</code> 的 <code>removeWord</code> 调用非常少（题目保证最多10次左右 43），这是强烈提示删除操作可以相对粗暴而查询要尽量快 28。我们可以接受在少数删除时做相对费时的处理，比如全库扫描，但查询必须快。</li>
+<li><strong>模式与单词长度</strong>：单词长度很短（一般≤6），模式的前缀后缀加起来也短。这意味着可能的<strong>前缀/后缀组合数量有限</strong> 3。具体而言，对长度L的单词，可形成的 <code>prefix*suffix</code> 模式种类最多是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.974ex;" xmlns="http://www.w3.org/2000/svg" width="23.02ex" height="3.163ex" role="img" focusable="false" viewBox="0 -967.8 10174.6 1398.1"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="munderover"><g data-mml-node="mo"><path data-c="2211" d="M61 748Q64 750 489 750H913L954 640Q965 609 976 579T993 533T999 516H979L959 517Q936 579 886 621T777 682Q724 700 655 705T436 710H319Q183 710 183 709Q186 706 348 484T511 259Q517 250 513 244L490 216Q466 188 420 134T330 27L149 -187Q149 -188 362 -188Q388 -188 436 -188T506 -189Q679 -189 778 -162T936 -43Q946 -27 959 6H999L913 -249L489 -250Q65 -250 62 -248Q56 -246 56 -239Q56 -234 118 -161Q186 -81 245 -11L428 206Q428 207 242 462L57 717L56 728Q56 744 61 748Z"></path></g><g data-mml-node="mi" transform="translate(1089,477.1) scale(0.707)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="TeXAtom" transform="translate(1089,-285.4) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mi" transform="translate(716,0)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(1061,0)"><path data-c="1D459" d="M117 59Q117 26 142 26Q179 26 205 131Q211 151 215 152Q217 153 225 153H229Q238 153 241 153T246 151T248 144Q247 138 245 128T234 90T214 43T183 6T137 -11Q101 -11 70 11T38 85Q38 97 39 102L104 360Q167 615 167 623Q167 626 166 628T162 632T157 634T149 635T141 636T132 637T122 637Q112 637 109 637T101 638T95 641T94 647Q94 649 96 661Q101 680 107 682T179 688Q194 689 213 690T243 693T254 694Q266 694 266 686Q266 675 193 386T118 83Q118 81 118 75T117 65V59Z"></path></g><g data-mml-node="mi" transform="translate(1359,0)"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(1879,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="mi" transform="translate(2560,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mi" transform="translate(3026,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(3626,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(4404,0)"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g><g data-mml-node="munderover" transform="translate(4773.3,0)"><g data-mml-node="mo"><path data-c="2211" d="M61 748Q64 750 489 750H913L954 640Q965 609 976 579T993 533T999 516H979L959 517Q936 579 886 621T777 682Q724 700 655 705T436 710H319Q183 710 183 709Q186 706 348 484T511 259Q517 250 513 244L490 216Q466 188 420 134T330 27L149 -187Q149 -188 362 -188Q388 -188 436 -188T506 -189Q679 -189 778 -162T936 -43Q946 -27 959 6H999L913 -249L489 -250Q65 -250 62 -248Q56 -246 56 -239Q56 -234 118 -161Q186 -81 245 -11L428 206Q428 207 242 462L57 717L56 728Q56 744 61 748Z"></path></g><g data-mml-node="TeXAtom" transform="translate(1089,477.1) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="mo" transform="translate(681,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mi" transform="translate(1459,0)"><path data-c="1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path></g><g data-mml-node="mi" transform="translate(2175,0)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(2520,0)"><path data-c="1D459" d="M117 59Q117 26 142 26Q179 26 205 131Q211 151 215 152Q217 153 225 153H229Q238 153 241 153T246 151T248 144Q247 138 245 128T234 90T214 43T183 6T137 -11Q101 -11 70 11T38 85Q38 97 39 102L104 360Q167 615 167 623Q167 626 166 628T162 632T157 634T149 635T141 636T132 637T122 637Q112 637 109 637T101 638T95 641T94 647Q94 649 96 661Q101 680 107 682T179 688Q194 689 213 690T243 693T254 694Q266 694 266 686Q266 675 193 386T118 83Q118 81 118 75T117 65V59Z"></path></g><g data-mml-node="mi" transform="translate(2818,0)"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(3338,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="mi" transform="translate(4019,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mi" transform="translate(4485,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="TeXAtom" transform="translate(1089,-285.4) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g><g data-mml-node="mi" transform="translate(503,0)"><path data-c="1D45F" d="M21 287Q22 290 23 295T28 317T38 348T53 381T73 411T99 433T132 442Q161 442 183 430T214 408T225 388Q227 382 228 382T236 389Q284 441 347 441H350Q398 441 422 400Q430 381 430 363Q430 333 417 315T391 292T366 288Q346 288 334 299T322 328Q322 376 378 392Q356 405 342 405Q286 405 239 331Q229 315 224 298T190 165Q156 25 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 114 189T154 366Q154 405 128 405Q107 405 92 377T68 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(954,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mi" transform="translate(1420,0)"><path data-c="1D453" d="M118 -162Q120 -162 124 -164T135 -167T147 -168Q160 -168 171 -155T187 -126Q197 -99 221 27T267 267T289 382V385H242Q195 385 192 387Q188 390 188 397L195 425Q197 430 203 430T250 431Q298 431 298 432Q298 434 307 482T319 540Q356 705 465 705Q502 703 526 683T550 630Q550 594 529 578T487 561Q443 561 443 603Q443 622 454 636T478 657L487 662Q471 668 457 668Q445 668 434 658T419 630Q412 601 403 552T387 469T380 433Q380 431 435 431Q480 431 487 430T498 424Q499 420 496 407T491 391Q489 386 482 386T428 385H372L349 263Q301 15 282 -47Q255 -132 212 -173Q175 -205 139 -205Q107 -205 81 -186T55 -132Q55 -95 76 -78T118 -61Q162 -61 162 -103Q162 -122 151 -136T127 -157L118 -162Z"></path></g><g data-mml-node="mi" transform="translate(1970,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g><g data-mml-node="mi" transform="translate(2651,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mi" transform="translate(3117,0)"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(3717,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(4495,0)"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g><g data-mml-node="mn" transform="translate(9674.6,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></svg></mjx-container>，对于L=6的上限是27种 44。有限的组合数意味着我们可以<strong>预计算每个单词对应的所有模式</strong>，用空间换时间来加速查询。</li>
+</ul>
+<p><strong>解法设计</strong>：</p>
+<ol>
+<li><p><strong>预处理存储所有前缀-后缀组合模式</strong>：使用一个哈希映射或字典，键为 <code>(prefix, suffix)</code> 组合（可以将两个字符串用特殊分隔符连起来，或者用双哈希/编码压成一个64位整数），值为能匹配该模式的单词计数。具体实现时，由于单词和模式都短，可采用如下编码方式：每个字符用5位（二进制）表示（‘a’=1,…,‘z’=26），然后把前缀哈希和后缀哈希拼接成一个64位键 9。例如，计算出单词的所有前缀哈希 <code>prefHash[i]</code> 和后缀哈希 <code>sufHash[j]</code> ，组合成 <code>key = (prefHash &lt;&lt; 32) | sufHash</code> 9。这样每个单词插入时，把它贡献给最多27个模式键，对应的计数全部+1 24 25。查询带 <code>*</code> 时，只需对模式取前缀和后缀计算出键，从哈希表取出计数即可 26。普通查询（无 <code>*</code> ）则维护一个单词哈希表存精确计数，或直接存入Trie中。</p>
+</li>
+<li><p><strong>特殊值“任意”处理</strong>：模式 <code>"*"</code>（仅一个星号）匹配任意单词，此时可直接维护一个全局计数 <code>totalCount</code> 表示当前库中单词总数 45。每次插入++，删除全部时清零等。遇到 <code>searchWord("*")</code> 直接返回总数 46。</p>
+</li>
+<li><p><strong>删除实现</strong>：区分三种情况：</p>
+<ul>
+<li><strong>精确删除</strong>（模式无 <code>*</code>）：找到对应单词的计数，将其所有相关模式键的计数减去该计数并将单词移除 47。例如某单词出现次数为3，被删除，则涉及它的每个 <code>(prefix,suffix)</code> 组合计数都减3 47。</li>
+<li><strong>通配删除</strong>（模式含 <code>*</code>）：由于这操作稀少，可以直接<strong>遍历当前所有单词检查匹配并删除</strong> 48。一种优化做法是利用前述前缀、后缀哈希：计算模式的 <code>prefHash</code> 和 <code>sufHash</code> 后<strong>遍历所有 Word</strong>，用位运算快速判断每个单词是否具有该前缀且该后缀 48（将单词整词编码存在Word结构里 49，判断前缀/后缀等于模式要求 50）。匹配则删掉该单词并更新关联计数。虽然这是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.495ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2429 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(2040,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 检查，但因最多10次，完全可接受 51。</li>
+<li><strong>“*” 模式删除全部</strong>：直接清空所有结构计数 52。</li>
+</ul>
+</li>
+<li><p><strong>查询实现</strong>：如前所述，<code>searchWord</code> 分情况：</p>
+<ul>
+<li>没有通配符：直接查单词哈希表或Trie计数。</li>
+<li>有一个 <code>*</code>：计算前后缀组合键，查询哈希表取出计数，没有则为0 26。</li>
+</ul>
+</li>
+</ol>
+<p><strong>示例代码</strong>（简化伪码，使用全局哈希表）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">unordered_map&lt;<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>, <span class="type">int</span>&gt; patternCount;</span><br><span class="line">unordered_map&lt;string, <span class="type">int</span>&gt; wordCount;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> <span class="title">encodePrefixSuffix</span><span class="params">(<span class="type">const</span> string&amp; pref, <span class="type">const</span> string&amp; suf)</span> </span>{</span><br><span class="line">    <span class="comment">// 将前缀和后缀分别编码5bit一位，拼成64位键</span></span><br><span class="line">    <span class="keyword">auto</span> hashStr = [&amp;](<span class="type">const</span> string&amp; s) {</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> h = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">char</span> c: s) {</span><br><span class="line">            h = (h &lt;&lt; <span class="number">5</span>) | (<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>)(c - <span class="string">'a'</span> + <span class="number">1</span>);</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">return</span> h;</span><br><span class="line">    };</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> prefKey = <span class="built_in">hashStr</span>(pref);</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> sufKey = <span class="built_in">hashStr</span>(suf);</span><br><span class="line">    <span class="keyword">return</span> (prefKey &lt;&lt; <span class="number">32</span>) | sufKey;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">addWord</span><span class="params">(<span class="type">const</span> string&amp; w)</span> </span>{</span><br><span class="line">    wordCount[w]++;    <span class="comment">// 多重集合计数</span></span><br><span class="line">    <span class="comment">// 预处理所有 prefix-suffix 组合</span></span><br><span class="line">    <span class="type">int</span> L = w.<span class="built_in">size</span>();</span><br><span class="line">    <span class="function">vector&lt;<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>&gt; <span class="title">prefHash</span><span class="params">(L<span class="number">+1</span>)</span>, <span class="title">sufHash</span><span class="params">(L<span class="number">+1</span>)</span></span>;</span><br><span class="line">    prefHash[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=L;++i) prefHash[i] = (prefHash[i<span class="number">-1</span>] &lt;&lt; <span class="number">5</span>) | (w[i<span class="number">-1</span>]-<span class="string">'a'</span><span class="number">+1</span>);</span><br><span class="line">    sufHash[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;=L;++j) sufHash[j] = (sufHash[j<span class="number">-1</span>] &lt;&lt; <span class="number">5</span>) | (w[L-j]-<span class="string">'a'</span><span class="number">+1</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 枚举wildcard可能占用长度0..L</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> wildLen=<span class="number">0</span>; wildLen&lt;=L; ++wildLen) {</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> prefLen=<span class="number">0</span>; prefLen&lt;=L-wildLen; ++prefLen) {</span><br><span class="line">            <span class="type">int</span> sufLen = L - wildLen - prefLen;</span><br><span class="line">            <span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> key = (prefHash[prefLen] &lt;&lt; <span class="number">32</span>) | sufHash[sufLen];</span><br><span class="line">            patternCount[key] += <span class="number">1</span>;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>上面代码展示了插入时如何计算所有模式键并更新计数。注意实际实现可优化常数，比如预先计算字符-&gt;5bit的映射、使用数组存哈希等。</p>
+<p><strong>效果</strong>：插入操作由于每个单词最多产生27个模式，复杂度近乎 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>（常数27）；查询操作带 <code>*</code> 时精确哈希查找 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 26。删除操作带 <code>*</code> 虽是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.495ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2429 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g><g data-mml-node="mo" transform="translate(2040,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 扫全表，但因次数极少，对总体影响可忽略 51。这种解法成功利用了<strong>模式拆分和短字符串</strong>的特点，将难点集中在构建索引，使查询性能极佳 42。该模型体现的思想——“<strong>预生成所有可能查询模式特征</strong>”和“<strong>查询走哈希表</strong>”——对于许多包含通配符、区间等查询的维护问题都有借鉴意义。</p>
+<h3 id="模型二：通信录日志查询（追加型）"><a href="#模型二：通信录日志查询（追加型）" class="headerlink" title="模型二：通信录日志查询（追加型）"></a>模型二：通信录日志查询（追加型）</h3><p><strong>问题描述</strong>：维护一个通讯录系统，包含联系人和通话日志两部分数据，需要支持以下操作（改编自题目，略去次要细节）：</p>
+<ul>
+<li><code>init()</code>：初始化系统，清空所有联系人和日志记录。</li>
+<li><code>add(name, telephone)</code>：添加一个新联系人，姓名为 <code>name</code>，电话号码为 <code>telephone</code>。联系人加入通讯录，并在日志中添加一条记录 <code>(name, telephone)</code> 表示此联系人加入。</li>
+<li><code>remove(str)</code>：删除操作，<code>str</code> 可能是一个姓名或电话号码：<ul>
+<li>如果 <code>str</code> 是姓名且是现有联系人，则从通讯录删除该联系人，并从日志中<strong>删除所有该联系人的相关记录</strong>（无论日志中是以名字还是号码形式出现） 53。</li>
+<li>如果 <code>str</code> 是电话号码，无论其是否属于某个联系人，都从日志中删除所有该号码的记录。若该号码对应了某联系人，也一并删除该联系人 54。</li>
+<li>删除后，与该联系人或号码相关的日志在查询中视为不存在 55。</li>
+</ul>
+</li>
+<li><code>call(telephone)</code>：模拟一次拨打电话的行为。将此拨号加入日志：<ul>
+<li>如果号码属于某联系人，日志记录存储联系人 <code>(name, telephone)</code>。</li>
+<li>如果号码没有在联系人列表中，则日志记录仅存电话号码（无姓名） 56。</li>
+</ul>
+</li>
+<li><code>search(str)</code>：查询所有以 <code>str</code> 为前缀的联系人名或电话号码，并返回<strong>最多5条</strong>结果，<strong>按最近在日志出现的记录时间降序排序</strong> 57。要求结果去重：相同联系人或相同号码只返回一次（取其最近一次出现时间作为排序依据） 58。如果前缀是字母串，则只匹配联系人的姓名前缀；如果前缀是数字串，则匹配所有日志中电话号码以该前缀开头的记录 59。返回结果包括姓名和号码，如果号码无对应联系人则姓名字段可空 60。</li>
+</ul>
+<p><strong>分析</strong>：这是一个复合功能的系统，但核心需求可以拆解为：<strong>动态维护两类数据</strong>——联系人表和日志表，并按<strong>前缀和时间</strong>进行检索。主要难点：</p>
+<ul>
+<li><strong>前缀检索</strong>：按名字或号码的前缀搜索。如果直接遍历所有联系人/记录进行前缀匹配，效率太低（最多5000联系人、日志条数上万，最坏每次要比较数千字符串） 62。需要能快速定位某前缀范围，例如使用Trie树或按序的数组+二分。尤其电话号码前缀查询要求从日志记录中筛选，日志条目可能上万条，也需索引。</li>
+<li><strong>最近出现排序</strong>：需要根据日志中的<strong>最近一次出现时间</strong>对匹配项排序 63。这暗示每个联系人和电话号码都要维护它<strong>最近的日志出现时间戳</strong>。由于日志只增不改，我们可以用一整个自增的时间戳计数（如第几次操作）记录每条日志的插入顺序，相当于时间。 64 提到日志新记录在上，说明日志有明确顺序，可用一个全局计数器或者系统时间模拟。</li>
+<li><strong>去重和分类</strong>：<code>search</code> 要求名字前缀只找联系人、号码前缀包含非联系人号码。这涉及从不同数据源获取候选（联系人列表 vs 历史号码列表），并对结果去重。去重可通过分别处理联系人名和号码，再合并时跳过重复。</li>
+<li><strong>删除操作的影响</strong>：删除联系人或号码需要把相关日志<strong>全部视为无效</strong> 65。日志记录本身按时间存在，但查询时要排除被删除的项。这可以通过维护<strong>有效性标记</strong>实现——比如有集合存当前有效的号码/联系人，查询时跳过已删除的。此外，删除联系人需要同步删除其最近出现时间的参考，因为以后不应再出现在结果里。</li>
+</ul>
+<p><strong>数据结构设计</strong>：</p>
+<ol>
+<li><p><strong>Trie树存储联系人姓名</strong>：用于快速前缀匹配姓名。Trie节点除了26个子节点，再存一个列表或其他结构，保存该前缀下的<strong>所有联系人ID或者至少最近出现时间最大的若干联系人</strong>。因为只需要返回前5个结果，可以考虑每个节点只存出现时间top5的联系人。但实现复杂的话，也可以存全部然后查询时再筛。考虑性能，5000联系人不算多，全存也能接受。此Trie用于字母前缀搜索姓名。</p>
+</li>
+<li><p><strong>数组或Trie存储电话号码</strong>：电话号码是数字串（长度固定8位），可用类似Trie的10叉树，或因为数量有限（总不同号码≤5000），也可以排序数组+二分查找前缀范围 66。这里可以选择维护一个<strong>排序的号码列表</strong>，对应每个号码的最近日志时间和所属联系人（如果有）。查询数字前缀时，用二分找到以该前缀起头的起点，然后顺序向后枚举匹配前缀的号码，收集前5个最近未删除的 66 67。由于号码总数较小，这样做也可以接受。如果需要更快，可以做号码Trie，每节点挂一个top5最近时间的号码优先队列，类似名字Trie的想法。</p>
+</li>
+<li><p><strong>哈希表/字典</strong>：用于存联系人信息和号码信息：</p>
+<ul>
+<li><code>name -&gt; {tel, lastAppearTime}</code>：联系人的映射，快速获取某姓名对应的电话，以及最近出现日志时间（方便去重排序）。</li>
+<li><code>tel -&gt; {name, lastAppearTime}</code>：号码映射，既覆盖联系人电话也包括非联系人纯号码。可以用一个结构存所有出现过的电话号码及属性，其中如果有name则是联系人，否则标记为纯号码。这里 <code>lastAppearTime</code> 每次该号码在日志中出现都更新为新的时间戳。</li>
+</ul>
+</li>
+<li><p><strong>日志记录结构</strong>：其实不需要保存整条日志序列来回答查询，我们只需在插入日志时更新上述两个映射的 <code>lastAppearTime</code>。因为search只关心<strong>每个候选项最后出现时间</strong>，不需要列出所有历史出现。所以可以维护：每次 <code>add</code> 或 <code>call</code> 时，对于涉及的联系人和号码，记录它们的最新出现时间。例如：</p>
+<ul>
+<li><code>add(name, tel)</code> : 设当前全局时间戳 <code>t</code>，设置 <code>nameInfo[name].lastAppear = t</code>，<code>telInfo[tel].lastAppear = t</code>。</li>
+<li><code>call(tel)</code> : 若tel有对应联系人name，则两者 <code>lastAppear = t</code>；若纯号码，则该tel的 <code>lastAppear = t</code>。</li>
+<li>另外，每次 <code>add</code> 要插入联系人Trie。<code>call</code> 如果号码非联系人，不插Trie，但更新telInfo。</li>
+</ul>
+</li>
+<li><p><strong>删除操作</strong>：如果删除联系人，则在nameTrie中将其移除，并在映射中标记其name和tel为已删除（或直接删除条目）。如果删除号码，则在tel映射中标记删除。<strong>懒删除思想</strong>：日志中旧记录不移除，但通过标记保证查询不把它算进去 56。因此对于 <code>lastAppearTime</code>，当一个号码或姓名被删时，可以将其lastAppear清零或标记无效，这样在结果过滤时跳过它。</p>
+</li>
+</ol>
+<p><strong>查询实现</strong>：</p>
+<ul>
+<li><code>search(namePrefix)</code>：在姓名Trie中找到对应前缀节点，然后获取该节点下所有联系人集合。遍历集合取出每个联系人的 <code>lastAppearTime</code>，跳过已删除的，然后按照时间降序排序取前5个。如果联系人较多，可以在Trie节点预先维护top5，这需要在每次日志更新时上溯更新相关前缀节点的top5，复杂但更高效。</li>
+<li><code>search(numPrefix)</code>：在排序的号码表中二分找到前缀范围，或者在号码Trie中DFS到前缀节点收集子树号码集合。对于每个号码拿到其 <code>lastAppearTime</code>，同样跳过被删除的，然后按时间排序取前5。要注意号码属于联系人的情况，要附上名字输出 61；纯号码则名字字段留空。因为去重规则，实际上这里一个号码只会对应一个结果，无需合并。</li>
+<li><strong>合并姓名和号码结果</strong>：其实题目搜索前缀时要么全字母要么全数字，不需要同时合并不同类型的结果。因此可以根据查询的 <code>str</code> 类型直接调用对应流程，得到结果列表。</li>
+</ul>
+<p><strong>复杂度考虑</strong>：</p>
+<ul>
+<li>Trie插入联系人：每字符一步，姓名最长8字母，5000联系人构建Trie代价很小。</li>
+<li>更新最近时间：哈希映射 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 更新。</li>
+<li>查询：前缀限定极大减少范围。如果前缀很短，比如查询空串或单字母，最坏需要遍历所有联系人或所有号码的lastAppear然后选前5。但联系人上限5000，号码上限5000，取前5可以接受（5000排序一次也就 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="16.182ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 7152.3 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1500,0)"></path></g><g data-mml-node="mi" transform="translate(3318.7,0)"><path data-c="6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path data-c="6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z" transform="translate(278,0)"></path><path data-c="67" d="M329 409Q373 453 429 453Q459 453 472 434T485 396Q485 382 476 371T449 360Q416 360 412 390Q410 404 415 411Q415 412 416 414V415Q388 412 363 393Q355 388 355 386Q355 385 359 381T368 369T379 351T388 325T392 292Q392 230 343 187T222 143Q172 143 123 171Q112 153 112 133Q112 98 138 81Q147 75 155 75T227 73Q311 72 335 67Q396 58 431 26Q470 -13 470 -72Q470 -139 392 -175Q332 -206 250 -206Q167 -206 107 -175Q29 -140 29 -75Q29 -39 50 -15T92 18L103 24Q67 55 67 108Q67 155 96 193Q52 237 52 292Q52 355 102 398T223 442Q274 442 318 416L329 409ZM299 343Q294 371 273 387T221 404Q192 404 171 388T145 343Q142 326 142 292Q142 248 149 227T179 192Q196 182 222 182Q244 182 260 189T283 207T294 227T299 242Q302 258 302 292T299 343ZM403 -75Q403 -50 389 -34T348 -11T299 -2T245 0H218Q151 0 138 -6Q118 -15 107 -34T95 -74Q95 -84 101 -97T122 -127T170 -155T250 -167Q319 -167 361 -139T403 -75Z" transform="translate(778,0)"></path></g><g data-mml-node="mo" transform="translate(4596.7,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mn" transform="translate(4763.3,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(500,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1000,0)"></path><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z" transform="translate(1500,0)"></path></g><g data-mml-node="mo" transform="translate(6763.3,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>）。如果前缀长，一般匹配项更少。考虑到search最多4万次 68 69，平均每次筛选几千项在C++内也可承受。不过理想方案还是Trie节点维持排序好结果，做到查询只需直接读取top5列表。</li>
+<li>删除：删除最多100次 68，影响有限。每次删除联系人需要在Trie中移除一个终端节点（或标记删除），在映射中删除记录。删除号码类似。查询时跳过已删除项目的开销也不大，因为删除项不会很多。</li>
+</ul>
+<p><strong>小结</strong>：这个模型将动态联系人和日志结合，通过<strong>Trie前缀索引和映射时间戳</strong>实现了高效查询。我们借助<strong>时间单调递增</strong>这一append特性，使用一个简单时间戳作为比较关键，避免真正对日志按时间排序每次都全局扫描 70。在实现中，还可以对Trie节点维护附加信息以进一步优化查询，但即使使用直观方法，由于数据规模适中和限定最多返回5条等因素，也能在严格时限内运行。这个模型代表了日志/流式数据处理中<strong>按前缀过滤 + 最近排序</strong>的经典解决方法。</p>
+<p>(注：以上示例略去了一些细节处理，如实际实现中需要处理字符串终止符、删除时更新Trie计数等，但总体思路如上。读者可根据需求进一步优化每一步，例如在Trie节点维护前缀下联系人数量等加速遍历。)</p>
+<h3 id="模型三：搜索引擎自动补全（插入型综合）"><a href="#模型三：搜索引擎自动补全（插入型综合）" class="headerlink" title="模型三：搜索引擎自动补全（插入型综合）"></a>模型三：搜索引擎自动补全（插入型综合）</h3><p>（本节选自一个更复杂的竞赛题，综合考察了前缀树、并查集、顺序统计等多方面，体现有序列表维护问题的集大成。）</p>
+<p><strong>问题场景</strong>：实现搜索引擎的关键词自动补全系统，支持：</p>
+<ul>
+<li><code>search(word, count)</code>：用户搜索了关键词 <code>word</code>，将该关键词的浏览次数增加 <code>count</code>。如果该词是新词则加入词库。<strong>相关词机制</strong>：某些词可以被标记为相关（通过 <code>relate</code> 操作，下述），相关的词其浏览次数在系统中视为<strong>一体</strong> 71 ——即它们构成一个“联通块”，块中每个词的计数相同，等于块内所有词原始计数之和 72。因此当块中任一词浏览数增加时，其它词也同步增加 71。</li>
+<li><code>recommend(prefix)</code>：模拟用户输入，找到当用户逐字键入某前缀 <code>prefix</code> 时，在哪一刻该前缀的推荐列表中首次出现目标词，以及该词当时排名第几 73。具体而言，<strong>推荐列表</strong>定义为：当前输入前缀下，按浏览次数降序，字典序升序选出Top5关键词 73。用户从空前缀开始逐字符输入，每输入一个字符就获得一个推荐列表，当目标词第一次进入推荐Top5时，记录此时输入长度和排名 74。特别地，如果目标词在空前缀的全局Top5就出现，则 <code>mOrder=0</code> 表示无需输入字符即可看到 75。一次recommend查询结束后，需要把该目标词的浏览次数+1（因为用户点击了它） 76。</li>
+<li><code>relate(word1, word2)</code>：将两个关键词所在的相关组合并为一个组（并查集操作）。合并后该组浏览次数为两组原计数之和，组内所有词计数更新为新值 18。保证不会重复合并已在同组的词 77。返回合并后组的总浏览次数。</li>
+<li><code>rank(prefix, k)</code>：查询以 <code>prefix</code> 开头的所有关键词中按照(浏览次数降序，字典序升序)排序的第 <code>k</code> 个词 78。保证此时该前缀下至少有k个词 79。</li>
+</ul>
+<p><strong>需求分析</strong>：可以看到这是一个综合系统：</p>
+<ul>
+<li><strong>需要动态维护搜索词集合</strong>，支持插入新词、计数累加、删除（删除未明确提及，但可以认为不存在显式删除操作，仅有相关合并）。</li>
+<li><strong>顺序统计要求高</strong>：不仅要能按前缀列出Top5，还要支持给定前缀找第k个精确排名的词 80。这比简单的Top K更复杂，因为rank要求随机访问有序序列。</li>
+<li><strong>相关组</strong>：这是个特殊的动态，把多个词的计数绑在一起。意味着我们在排序和推荐时<strong>不能把同组词视作独立项</strong>，因为它们的计数总是相等且同步变化 72。换言之，排序时两个相关词的相对顺序只受字典序影响（因为计数完全相同）。</li>
+<li><strong>高性能需求</strong>：不同词数最多8000，操作数几万级 81。每次search和rank调用都需要很快地完成前缀过滤和排序操作，否则难以支撑上万次调用 82。特别地，recommend每次模拟用户逐字输入，要经过多轮前缀推荐检查，更要高效。</li>
+</ul>
+<p><strong>数据结构与解法</strong>：</p>
+<ol>
+<li><strong>Trie树维护所有关键词</strong>：词长最多7，字符集小写字母。这适合用Trie来组织 83。Trie每个节点代表一个前缀。我们在节点中维护两方面信息：</li>
+<li><strong>计数统计</strong>：该前缀子树下有多少单词，即子树大小，用于支持rank查询第k个。 6 中已述，通过比较要找的排名k和子节点计数决定往哪走。</li>
+<li><strong>Top5列表</strong>：该前缀下按规则排序的前5个词。由于同组词计数相同，我们可以直接用(计数,词)排序。 84 提到一种做法是在Trie节点维护一个小容器（数组/小顶堆）装Top5。这样推荐过程就能在每个输入字符时 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 获得当前Top5并判断目标词是否在其中。</li>
+</ol>
+<p>每次有词计数变化（search或recommend导致的增量，或relate导致整组变化），就需要更新该词所属的所有前缀节点的Top5。由于单词长度≤7，一个词影响至多7个前缀节点，加上空前缀节点共8个，影响不大。可以对每个前缀节点用小顶堆保存Top5：当一个词计数增加时，与该前缀当前Top5最小者比较，决定是否替换进入 85。另一种方法是<strong>哈希表 prefix-&gt;小顶堆</strong>，效果类似。</p>
+<ol>
+<li><p><strong>并查集维护相关组</strong>：为支持relate操作，我们用Union-Find记录每个词所属的组。用数组 <code>parent[wordId]</code> 等表示。同时需维护每个组的总计数。这可以存在并查集的根节点信息里，比如 <code>groupCount[root]</code> 表示root组的计数。初始每个词各自一组，count为自身计数。合并两个组时，新count=两组count和，更新root标记。 18 合并后需要把组内所有词的计数更新为新值——但是没必要真的挨个去改，每次查询时通过find根去拿组计数即可。然而我们的排序在Trie节点Top5中，需要的也是当前计数。因此有两种实现：</p>
+<ol>
+<li><strong>集中存组代表</strong>：每组选择一个代表词来参与排序，其他词不单独出现。这简化排序但失去返回具体词的要求。</li>
+<li><strong>同步更新所有组员计数</strong>：每次组count变更时，把该组内词逐一取出（可以在并查集维护组成员列表或大小有限时遍历Trie）更新它们的计数值，并在Trie的节点Top5中相应调整。这在组不大时可行（题目暗示组最大50左右 86）。维护时可以先拿旧count，计算增加量delta，然后对于组内每个词在Trie路径的每个节点都把计数加delta，并修正Top5。</li>
+</ol>
+<p>鉴于组小和操作少（relate≤50次），采用后者能保证Trie里的数据始终正确反映当前计数。</p>
+</li>
+<li><p><strong>顺序统计支持</strong>：Trie节点的 <code>subtree_size</code> 提供了按字典序选第k个的能力 6。如何用它实现 <code>rank(prefix, k)</code>？步骤如下：</p>
+<ul>
+<li>先用Trie找到前缀节点。如果该前缀本身不是一个关键词或没出现过，也没关系，我们要的是它子树的第k个词。</li>
+<li>从这个节点开始，执行类似<strong>字典序的kth查找</strong>：在当前节点，看每个子分支（按字母顺序）对应的子树大小。<ul>
+<li>先考虑当前节点是否是一个完整单词（即prefix本身就是词）。如果是且把它算作子树第0号词，那么如果k=1直接返回它，否则k减1继续。</li>
+<li>然后按‘a’到‘z’顺序遍历子节点：对于每个存在的子节点，如果其子树大小 <code>sz &gt;= k</code>，说明第k个就在这个子节点子树中，于是下探该节点并继续；如果 <code>sz &lt; k</code>，说明需要跳过整个子树，令 <code>k -= sz</code> 然后继续看下一个节点。</li>
+<li>如此递归下去，直到到达某个节点自身是第k个。 87 的代码片段就是这一逻辑的BST版本，在Trie中实现时类似但要注意前缀处理和空节点跳过。</li>
+</ul>
+</li>
+</ul>
+<p>由于单词长度有限，这个查找过程深度≤7，每层最多试26个子节点，效率很高。</p>
+</li>
+<li><p><strong>推荐过程模拟</strong>： <code>recommend(prefix)</code> 的模拟可以借助我们Trie每个前缀维护的Top5列表。具体：</p>
+<ul>
+<li>从前缀长度1到 <code>|prefix|</code>，逐步取其对应节点的Top5列表，检查目标词是否出现其中。如果出现，记录当时长度和排名。若直到输入完整前缀长度后目标词才出现（或一直没出现，但保证最终会出现 88），则相应返回长度和排名。</li>
+<li>因为我们每次可以 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 获得Top5（数组长度5遍历）并找目标词是否在其中，这循环最长7次，成本可忽略不计。</li>
+<li>完成后别忘了将该词计数+1，因为用户最终点击了它 76。这实际上跟一次 <code>search(word,1)</code> 操作类似，要更新组计数和Trie。</li>
+</ul>
+</li>
+</ol>
+<p><strong>小示例</strong>：假设目前词库有 <code>{"apple":5, "app":3, "apply":2}</code>（计数都是各自，相关组功能此处无关）。那么空前缀Top5按次数排序可能是 <code>["apple","app","apply",...余下不足5可为空]</code> （5,3,2）。如果目标词是<code>"applicant"</code>（假设计数1），它初始不在词库，用户完整输入前缀也不会看到它（不过题目保证目标一定已存在于历史中，这里只是举例）。又如目标词是 <code>"app"</code>，它初始排名第二。用户输入 <code>'a'</code> 时推荐列表可能是 <code>[apple(5), app(3), ...]</code>，此时”app”出现排第二，长度1时就出现了，则结果mOrder=1,mRank=2。系统随后会将”app”计数加1变成4。</p>
+<p><strong>总结</strong>：这个模型几乎囊括了插入型有序维护的所有要素：Trie支撑前缀查询和排序、并查集合并特殊状态、每次更新影响局部Top K列表以及全局排名查询。实现难度较高，但它充分体现了<strong>方法论</strong>：</p>
+<ul>
+<li>根据操作拆分需求：前缀过滤用Trie，rank用子树计数，Top K用小顶堆维护，合并用Union-Find同步。</li>
+<li>巧用限制：词长短、词数有限使Trie可行；相关组不大使直接更新可接受 86；Top5而非TopN显著减少维护成本 73。</li>
+<li>渐进优化：如果某部分操作瓶颈明显，例如更新相关组时遍历太多词，可以考虑牺牲一点精度，比如Top5列表在组合并不精确更新，查询时再纠正。但在给定参数下，我们完全可以严谨维护确保每次查询准确高效。</li>
+</ul>
+<hr>
+<h2 id="常见考点汇总与应试技巧"><a href="#常见考点汇总与应试技巧" class="headerlink" title="常见考点汇总与应试技巧"></a>常见考点汇总与应试技巧</h2><p>通过以上典型模型分析，我们可以总结有序列表维护题中经常出现的<strong>考查点</strong>和解题技巧：</p>
+<ol>
+<li><p><strong>前缀搜索与Trie</strong>：非常高频的考点是利用Trie实现前缀匹配、模糊搜索。这要求选手熟悉Trie节点定义、插入和搜索流程，并能根据需求在节点上维护统计信息。例如<strong>前缀计数</strong>（用于rank） 21、<strong>前缀Top K列表</strong>（用于推荐） 84 等。处理Trie相关问题，务必注意<strong>边界情况</strong>：空前缀表示全体；一个前缀节点本身可能是单词也可能不是，要正确处理计数累加时不要漏掉自身单词。</p>
+</li>
+<li><p><strong>顺序统计树（Order Statistic）</strong>：几乎所有需要第k小/排名的，都在考查顺序统计思想。无论用BST还是Trie，只要维护子树大小，都可以通过<strong>二分思想</strong>在树上逐步缩小范围 89。掌握这套逻辑对于各种变体都适用（如区间第k大、二维字典序等）。实现上要小心<strong>边界和减法</strong>：当跳过左子树后，k要减去左子树大小+1（如果当前节点也是一个元素） 90。</p>
+</li>
+<li><p><strong>多关键字排序</strong>：一些查询需要按照<strong>多重排序规则</strong>选Top K，比如按次数排序再按字母序 73、按时间排序再按ID 91 等。考点在于如何维护这两维信息。常用技巧：</p>
+<ul>
+<li><strong>把两维合成一维键</strong>。例如时间降序、ID升序，可把时间取负或补码与ID组合成一个64位： <code>key = (time_inverted &lt;&lt; 10) | id</code>，比较key等价比较两条件。 92 中实际上通过逻辑判断实现排序，而我们也可用pair在C++中自定义比较函数。</li>
+<li>在数据结构更新时，同时考虑两维。例如自动补全中，用 <code>(cnt, -timestamp)</code> 作为堆的比较，或者对相等cnt再比较lastTime 15。这样堆顶直接就是我们想要的优先对象。</li>
+</ul>
+</li>
+<li><p><strong>避免全量排序</strong>：由于只需Top K，构建完整排序代价高。应采用<strong>堆+k路归并</strong>或<strong>增量扫描</strong>的方法，只处理需要的前几项 33。这一点在考试中很常见——确保你的算法不用每次query都对N个元素排序，而是想办法提前预处理或用数据结构局部排序以应对频繁查询 66 67。</p>
+</li>
+<li><p><strong>利用数据范围优化</strong>：出题人喜欢在限制中埋下解法提示：</p>
+<ul>
+<li>字符串长度小、字符集小：往往预示Trie或位运算处理。如长度≤6可考虑把字符串编码进64位整数比较 93；字符是二进制/小写字母可用位掩码记录集合。</li>
+<li>操作次数分布不均：如某类操作次数极少，可以特殊处理。之前提到通配删除≤10次，可线性处理 28；又如某题 <code>follow</code> 关注用户操作远少于查询，也可用简单结构处理关注而把精力优化查询。</li>
+<li>特殊值：如果输入可能包含极端值（如前缀为空，模式 <code>""</code>），要提前考虑处理，比如我们全局维护一个计数或排序来应对这种全范围查询 46。不要忽略特殊参数 <code>*</code> 在顺序维护题中的影响，它往往需要额外判断但又是评分点。</li>
+</ul>
+</li>
+<li><p><strong>内存和常数优化</strong>：因为此类题数据结构复杂，C++ STL有时不堪重负。比赛中常见<strong>自行实现</strong>简化版本结构：</p>
+<ul>
+<li><strong>静态数组代替指针</strong>：如Trie通常预先分配一个节点数组而不是频繁 <code>new</code>。通过全局数组和下标模拟链表/树，能极大降低开销 11。例如前缀树最多节点数=总字符数，上例输入法Trie节点上限约350k 94，完全可一次性分配数组。</li>
+<li><strong>手写堆/排序</strong>：为了减少STL的不确定性，有人选择手写heap或用数组+手动partial sort等。比如把可能的元素放数组，然后一次性选择前K个，可用 <code>nth_element</code> 或 partition算法。</li>
+<li><strong>减少重复计算</strong>：比如编码字符串时提前算好幂表 93；合并组时只处理必要节点等。良好的实现会将每次操作的耗时优化到常数级，从而支撑10万级调用。</li>
+</ul>
+</li>
+</ol>
+<p><strong>应试技巧</strong>：</p>
+<ul>
+<li><strong>辨识题型</strong>：拿到问题先看操作模式和限制，如果涉及顺序、小范围字符串、多次排名查询，很大概率是有序列表维护题。迅速判断是插入型还是追加型，有助于选择Trie+树还是利用时间特性。</li>
+<li><strong>列出维护量</strong>：把需要动态维护的信息逐条列出，然后想用什么结构能支持对应操作。例如看到要按前缀、按时间排序，那前缀索引和时间索引；要第k小就需要计数。</li>
+<li><strong>先易后难</strong>：可以先实现基础功能，再逐步优化。例如先用Trie实现前缀检索，再考虑加上堆维护top5，不要一开始把所有复杂性混在一起。</li>
+<li><strong>充分利用样例和小数据</strong>：复杂结构易出错，一定用样例验证边界情况，比如：空前缀查询、删除所有元素后的查询、相关组合并极端情况等，确保逻辑正确。</li>
+<li><strong>根据分值和时限调优化</strong>：若题目对性能要求极高（比如 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.357ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 600 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path></g></g></g></svg></mjx-container> 和操作数都很大），几乎肯定需要上面提到的高级技巧。如果数据规模适中，不妨用更直观方法，保证正确更重要。在比赛压力下，能跑通在保证正确基础上做部分优化，往往也能拿下大部分分。</li>
+</ul>
+<hr>
+<h2 id="解题步骤"><a href="#解题步骤" class="headerlink" title="解题步骤"></a>解题步骤</h2><p>遇到有序列表维护题，不要盲目编码。按照以下“四步走”策略进行分析，结合前文提到的模型进行选择。</p>
+<h3 id="Step1-核心模型分类"><a href="#Step1-核心模型分类" class="headerlink" title="Step1: 核心模型分类"></a>Step1: 核心模型分类</h3><ul>
+<li><strong>是字典维护 (Insertion-Type)？</strong><ul>
+<li><strong>特征</strong>：无明显时间属性，依赖内容（字典序、数值）排序，涉及 Rank/Select 或模糊匹配。</li>
+<li><strong>首选结构</strong>：Trie（短字符串）、平衡树（Treap/Splay）。</li>
+</ul>
+</li>
+<li><strong>是日志流 (Append-Type)？</strong><ul>
+<li><strong>特征</strong>：数据按时间追加，查询通常涉及“最新 N 条”或“多条件筛选后排序”。</li>
+<li><strong>首选结构</strong>：倒排索引 + 优先队列（多路归并）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Step2-约束条件审查"><a href="#Step2-约束条件审查" class="headerlink" title="Step2: 约束条件审查"></a>Step2: 约束条件审查</h3><ul>
+<li><strong>字符串长度极短 (<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.312ex;" xmlns="http://www.w3.org/2000/svg" width="3.52ex" height="1.819ex" role="img" focusable="false" viewBox="0 -666 1555.8 804"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2264" d="M674 636Q682 636 688 630T694 615T687 601Q686 600 417 472L151 346L399 228Q687 92 691 87Q694 81 694 76Q694 58 676 56H670L382 192Q92 329 90 331Q83 336 83 348Q84 359 96 365Q104 369 382 500T665 634Q669 636 674 636ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z"></path></g><g data-mml-node="mn" transform="translate(1055.8,0)"><path data-c="36" d="M42 313Q42 476 123 571T303 666Q372 666 402 630T432 550Q432 525 418 510T379 495Q356 495 341 509T326 548Q326 592 373 601Q351 623 311 626Q240 626 194 566Q147 500 147 364L148 360Q153 366 156 373Q197 433 263 433H267Q313 433 348 414Q372 400 396 374T435 317Q456 268 456 210V192Q456 169 451 149Q440 90 387 34T253 -22Q225 -22 199 -14T143 16T92 75T56 172T42 313ZM257 397Q227 397 205 380T171 335T154 278T148 216Q148 133 160 97T198 39Q222 21 251 21Q302 21 329 59Q342 77 347 104T352 209Q352 289 347 316T329 361Q302 397 257 397Z"></path></g></g></g></svg></mjx-container>)？</strong><ul>
+<li><strong>对策</strong>：考虑 <strong>全排列哈希 (Pattern Expansion)</strong>。如模型一所示，预处理所有可能的 prefix + suffix 组合，用空间换时间实现 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.618ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2041 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mn" transform="translate(1152,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(1652,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container> 查询。</li>
+</ul>
+</li>
+<li><strong>标签/属性极少 (<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.312ex;" xmlns="http://www.w3.org/2000/svg" width="3.52ex" height="1.819ex" role="img" focusable="false" viewBox="0 -666 1555.8 804"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2264" d="M674 636Q682 636 688 630T694 615T687 601Q686 600 417 472L151 346L399 228Q687 92 691 87Q694 81 694 76Q694 58 676 56H670L382 192Q92 329 90 331Q83 336 83 348Q84 359 96 365Q104 369 382 500T665 634Q669 636 674 636ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z"></path></g><g data-mml-node="mn" transform="translate(1055.8,0)"><path data-c="35" d="M164 157Q164 133 148 117T109 101H102Q148 22 224 22Q294 22 326 82Q345 115 345 210Q345 313 318 349Q292 382 260 382H254Q176 382 136 314Q132 307 129 306T114 304Q97 304 95 310Q93 314 93 485V614Q93 664 98 664Q100 666 102 666Q103 666 123 658T178 642T253 634Q324 634 389 662Q397 666 402 666Q410 666 410 648V635Q328 538 205 538Q174 538 149 544L139 546V374Q158 388 169 396T205 412T256 420Q337 420 393 355T449 201Q449 109 385 44T229 -22Q148 -22 99 32T50 154Q50 178 61 192T84 210T107 214Q132 214 148 197T164 157Z"></path></g></g></g></svg></mjx-container>)？</strong><ul>
+<li><strong>对策</strong>：使用 <strong>位掩码 (Bitmask)</strong>。将标签集合压缩为整数，利用位运算进行集合的交、并操作。</li>
+</ul>
+</li>
+<li><strong>删除操作很少？</strong><ul>
+<li><strong>对策</strong>：使用 <strong>懒惰删除 (Lazy Deletion)</strong>。只打标记不物理移动，查询时跳过失效元素。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Step3-结构与算法选择"><a href="#Step3-结构与算法选择" class="headerlink" title="Step3: 结构与算法选择"></a>Step3: 结构与算法选择</h3><ul>
+<li><strong>需要 Top-K？</strong><ul>
+<li><strong>方案</strong>：若是追加型，用堆进行多路归并；若是插入型，在 Trie/BST 节点上维护 Top-K 缓存（如模型三）。</li>
+</ul>
+</li>
+<li><strong>需要精确排名 (Rank)？</strong><ul>
+<li><strong>方案</strong>：必须在树结构中维护 <code>subTreeSize</code>。注意处理边界，如跳过左子树时 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.011ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 889 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path></g></g></g></svg></mjx-container> 的减法更新。</li>
+</ul>
+</li>
+<li><strong>需要分页或跳过大量数据？</strong><ul>
+<li><strong>方案</strong>：<strong>分块/跳表 (Block Skipping)</strong>。将有序序列分块，记录每块的有效数量，查询时整块跳过，避免线性扫描。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Step4-优化陷阱"><a href="#Step4-优化陷阱" class="headerlink" title="Step4: 优化陷阱"></a>Step4: 优化陷阱</h3><ul>
+<li><strong>避免 STL 滥用</strong>：在数据量大（&gt;10万）且结构复杂时，<code>std::map</code> 或 <code>std::string</code> 的动态分配可能导致超时。尽量使用静态数组模拟 Trie 或链表。</li>
+<li><strong>哈希编码</strong>：对于定长短串，将其编码为 <code>unsigned long long</code>（Base-26/27）作为 Map 的 Key，效率远高于字符串比较。</li>
+</ul>
+<hr>
+<h2 id="举一反三与训练建议"><a href="#举一反三与训练建议" class="headerlink" title="举一反三与训练建议"></a>举一反三与训练建议</h2><p>掌握有序列表维护题的解法，需要在实践中灵活运用所学的数据结构。为了巩固并拓展以上方法，建议：</p>
+<ul>
+<li><p><strong>练习经典题目</strong>：多做几道不同类型的有序列表维护题，诸如：</p>
+<ul>
+<li><strong>动态字典序</strong>：如通讯录管理、在线单词排序，练习Trie与顺序统计结合。</li>
+<li><strong>模式匹配查询</strong>：如带通配符或正则的单词库，练习前缀+后缀索引或双Trie集合交等思路。</li>
+<li><strong>Top K合并</strong>：如社交平台消息流、搜索热词前N名，练习堆归并技术和懒更新技巧。</li>
+<li><strong>复杂综合</strong>：如本节模型三那样结合多操作的，锻炼综合设计能力。</li>
+</ul>
+<p>通过不同题目，体会何时该用Trie，何时该用BST，何时又可退而用数组+二分等简化手段。在训练中逐渐形成对<strong>操作模式-&gt;数据结构</strong>的直觉映射。</p>
+</li>
+<li><p><strong>动手实现基础结构</strong>：自己编写Trie、Fenwick树、Union-Find等代码，不依赖库，在练习中优化它们的接口和性能。这能在现场节省时间且减少bug。同时试着封装顺序统计功能，比如在Treap节点增加size，并编写 <code>find_by_order</code> 和 <code>order_of_key</code> 函数。</p>
+</li>
+<li><p><strong>设计小测例</strong>：针对易错场景自己造测试，如：</p>
+<ul>
+<li>Trie: 前缀正好是其他词的完整词、所有单词共前缀等。</li>
+<li>删除: 连续删除、多次插入删除同一元素。</li>
+<li>并查集: 合并后连续增加计数，看相关组是否同步。</li>
+<li>堆: 插入很多然后删除少数，看懒删除是否正常工作。</li>
+</ul>
+<p>用自测案例检查程序对这些情况的处理，反复调试直到正确。</p>
+</li>
+<li><p><strong>阅读优秀题解</strong>：参考他人代码和分析，尤其关注他们的数据结构组织方式和细节优化。例如 11 展示了用26棵BST分桶、字符串转ULL排序的巧妙方法， 36 阐述了如何用分块跳页加速时间排序。这些思想甚至可以迁移到别的领域问题中。</p>
+</li>
+<li><p><strong>扩展思维</strong>：思考如果没有某个限制，解法该如何变化。比如通配符不限1个会怎样？标签不限5个又怎样？这样可以了解题目限制的重要性以及一般解法和特化优化的区别。在无特殊限制时，往往退回平衡BST或前缀+集合这样的经典方案，而有限制时就要大胆优化。</p>
+</li>
+</ul>
+<p>通过以上练习，逐步形成解决有序列表维护问题的一套<strong>方法论</strong>：先抽象需求，然后结合约束选取最合适的数据结构，必要时多种结构搭配，最后注意优化查询为主、更新为辅的性能。这样，无论比赛中题目如何出新，只要抓住“有序维护”这一定位，灵活套用这些模型和技巧，就能做到举一反三，沉着应对。祝愿读者通过系统训练，能够在赛场上遇到类似问题时如有神助，快速构思出高效解法！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer"><!-- ===== Comments (NexT custom slot: postBodyEnd) ===== -->
+<style>
+  /* 作用域：仅影响 #comments-app */
+  #comments-app {
+    --c-bg: #fff;
+    --c-text: #222;
+    --c-sub: #6b7280;
+    --c-border: #e5e7eb;
+    --c-accent: #3b82f6;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.05);
+    margin-top: 2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    #comments-app { --c-bg:#111318; --c-text:#e8e8e8; --c-sub:#a5a5a5; --c-border:#30363d;
+      --shadow:0 6px 24px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.35); }
+  }
+  #comments-app, #comments-app * { box-sizing: border-box; }
+
+  /* 外层大卡片 */
+  #comments-app .wrap {
+    max-width: 860px; width: 100%; margin: 0 auto;
+    background: var(--c-bg); border: 1px solid var(--c-border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; overflow: hidden;
+  }
+
+  /* 顶部标题 */
+  #comments-app .title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 2px 0 16px;
+    font-size: clamp(1.06rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--c-text);
+  }
+  #comments-app .title::before{
+    content:""; width:8px; height:20px; border-radius:4px; background: var(--c-accent);
+  }
+
+  /* 内部分区：上下两张卡：列表卡 + 表单卡 */
+  #comments-app .sections { display: grid; gap: 16px; }
+  #comments-app .card {
+    background: color-mix(in srgb, var(--c-bg) 98%, #000 2%);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    #comments-app .card { background: color-mix(in srgb, var(--c-bg) 94%, #fff 6%); }
+  }
+
+  /* 仅列表卡的列表样式 */
+  #comments-app .list { display: grid; gap: 10px; }
+  #comments-app .item {
+    border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 12px 14px; background: rgba(0,0,0,.02);
+  }
+  @media (prefers-color-scheme: dark){ #comments-app .item{ background: rgba(255,255,255,.03);} }
+  #comments-app .meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline;
+    color: var(--c-sub); font-size:.86rem; margin-bottom:6px; }
+  #comments-app .meta .author { color: var(--c-text); font-weight:600; }
+  #comments-app .content { color: var(--c-text); white-space: pre-wrap; line-height:1.7; }
+
+  /* 表单卡：提示条 + 表单 */
+  #comments-app .alert {
+    display: none;
+    padding: 10px 12px; border: 1px solid var(--c-border);
+    border-radius: 12px; background: rgba(107,114,128,.08);
+    color: var(--c-sub); margin-bottom: 12px;
+  }
+  /* 没文字时自动隐藏，杜绝“空白横条” */
+  #comments-app .alert:empty { display: none !important; }
+
+  /* 表单栅格（12栅格） */
+  #comments-app .form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px; align-items: start;
+  }
+  #comments-app .col-6  { grid-column: span 6 / span 6; }
+  #comments-app .col-12 { grid-column: span 12 / span 12; }
+
+  #comments-app input[type="text"],
+  #comments-app textarea {
+    width: 100%;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg); color: var(--c-text);
+    border-radius: 12px; padding: 12px 14px; font-size:.95rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  #comments-app textarea { min-height: 140px; resize: vertical; max-width:100%; line-height:1.6; }
+  #comments-app input:focus, #comments-app textarea:focus {
+    border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+  }
+
+  #comments-app .actions {
+    grid-column: span 12 / span 12;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  #comments-app .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    background: var(--c-accent); color:#fff; border:1px solid transparent;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+    transition: transform .06s, filter .15s;
+  }
+  #comments-app .btn:hover{ filter:brightness(1.05); }
+  #comments-app .btn:active{ transform: translateY(1px); }
+
+  /* 小屏优化：表单单列、按钮全宽 */
+  @media (max-width: 720px){
+    #comments-app .col-6 { grid-column: span 12 / span 12; }
+    #comments-app .btn { width: 100%; }
+  }
+</style>
+
+<div id="comments-app">
+  <div class="wrap">
+    <div class="title">评论</div>
+
+    <div class="sections">
+      <!-- 列表卡 -->
+      <section class="card list-card">
+        <div id="comments-list" class="list">
+          <div class="item"><div class="meta"><span class="author">加载中…</span></div></div>
+        </div>
+      </section>
+
+      <!-- 表单卡 -->
+      <section class="card form-card">
+        <div id="comment-msg" class="alert"></div>
+
+        <form id="comment-form" class="form" novalidate>
+          <input class="col-12" type="hidden" name="post" />
+          <input class="col-6" type="text" name="author" placeholder="昵称（可选）" />
+          <input class="col-6" type="text" name="website" placeholder="网站（可选）" />
+          <textarea class="col-12" name="content" placeholder="写点什么吧…" required></textarea>
+
+          <div class="actions">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB2ZbqHSEcquNbE9"></div>
+            <button type="submit" class="btn">提交</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Turnstile -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+(function () {
+  'use strict';
+  const API_BASE = '/api';
+  const postId = decodeURIComponent(location.pathname.replace(/\/+$/, '/'));
+
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#comments-list');
+  const form   = $('#comment-form');
+  const msg    = $('#comment-msg');
+  if (!form || !listEl || !msg) return;
+
+  form.querySelector('input[name="post"]').value = postId;
+
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+
+  const showMsg = (text) => {
+    msg.textContent = text || '';
+    // :empty 会自动隐藏，这里不强制 display
+    if (!text) return;
+  };
+
+  const itemTpl = (it) => {
+    const t = new Date(it.created_at);
+    const time = isNaN(t) ? '' : t.toLocaleString();
+    const safeAuthor = escapeHTML(it.author || '匿名');
+    const authorHtml = it.website
+      ? `<a href="${escapeHTML(it.website)}" rel="nofollow ugc noopener" target="_blank">${safeAuthor}</a>`
+      : safeAuthor;
+    return `
+      <div class="item">
+        <div class="meta"><span class="author">${authorHtml}</span><span>${escapeHTML(time)}</span></div>
+        <div class="content">${it.content}</div>
+      </div>`;
+  };
+
+  async function loadComments(page = 1) {
+    showMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/comments?post=${encodeURIComponent(postId)}&page=${page}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const list = Array.isArray(data.list) ? data.list : [];
+      listEl.innerHTML = list.length
+        ? list.map(itemTpl).join('')
+        : '<div class="item"><div class="content">还没有评论，来做第一个吧！</div></div>';
+    } catch {
+      showMsg('评论加载失败，请稍后重试。');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    let token = fd.get('cf-turnstile-response');
+    if (!token && window.turnstile && window.turnstile.getResponse) {
+      token = window.turnstile.getResponse();
+    }
+    const payload = {
+      post: fd.get('post'),
+      author: fd.get('author') || '匿名',
+      website: fd.get('website') || '',
+      content: fd.get('content') || '',
+      turnstileToken: token || ''
+    };
+    if (!payload.content.trim()) { showMsg('内容不能为空。'); return; }
+
+    showMsg('提交中…');
+    try {
+      const resp = await fetch(`${API_BASE}/comments`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(()=> ({}));
+
+      if (resp.ok && data.ok) {
+        showMsg(data.status === 'pending' ? '已提交，待审核通过后可见。' : '发表成功！');
+        form.reset();
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+        if (data.status !== 'pending') loadComments();
+      } else {
+        showMsg('提交失败：' + (data.error || resp.status));
+        if (window.turnstile && window.turnstile.reset) window.turnstile.reset();
+      }
+    } catch {
+      showMsg('网络异常，请稍后再试。');
+    }
+  });
+
+  loadComments();
+})();
+</script>
+
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Ziyoeng Zoeng
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://www.wuwangyangxin.com/2025/11/20/%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8%E7%BB%B4%E6%8A%A4%E9%A2%98%E7%9A%84%E5%85%B1%E6%80%A7%E3%80%81%E8%80%83%E7%82%B9%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AD%96%E7%95%A5/" title="有序列表维护题的共性、考点与数据结构策略">https://www.wuwangyangxin.com/2025/11/20/有序列表维护题的共性、考点与数据结构策略/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"><i class="fa fa-tag"></i> 数据结构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/11/09/%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F%E9%A2%98-%E5%8A%A8%E6%80%81%E5%8C%B9%E9%85%8D%E7%B1%BB/" rel="prev" title="系统模拟题-动态匹配类">
+                  <i class="fa fa-angle-left"></i> 系统模拟题-动态匹配类
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ziyoeng Zoeng</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">176k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">10:40</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.0/canvas-nest.umd.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 在 body 背后挂一个画布
+    new CanvasNest(document.body, {
+      color: '120,160,255', // 线颜色（RGB）
+      opacity: 1,         // 透明度 0~1
+      zIndex: -1,           // 置于背景
+      count: 150,             // 点数量
+      dist: 4000,   // 连线距离加大
+      radius: 120,  // 鼠标作用范围扩大
+    })
+  })
+</script>
+
+</body>
+</html>
